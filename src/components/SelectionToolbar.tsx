@@ -12,6 +12,8 @@ export function SelectionToolbar({ onEdit }: { onEdit: (type: string, id: string
   const movePlacement = useWorkspaceStore((s) => s.movePlacement);
   const moveNoteToFridge = useWorkspaceStore((s) => s.moveNoteToFridge);
   const moveNoteToDrawer = useWorkspaceStore((s) => s.moveNoteToDrawer);
+  const moveMagnetToFridge = useWorkspaceStore((s) => s.moveMagnetToFridge);
+  const moveMagnetToDrawer = useWorkspaceStore((s) => s.moveMagnetToDrawer);
   const openShiftDialog = useWorkspaceStore((s) => s.openShiftDialog);
   const copyLesson = useWorkspaceStore((s) => s.copyLesson);
 
@@ -102,6 +104,17 @@ export function SelectionToolbar({ onEdit }: { onEdit: (type: string, id: string
             To fridge
           </button>
           <button type="button" className={styles.button} onClick={() => moveNoteToDrawer(objectId)}>
+            To drawer
+          </button>
+        </>
+      )}
+
+      {magnet && (
+        <>
+          <button type="button" className={styles.button} onClick={() => moveMagnetToFridge(objectId)}>
+            To fridge
+          </button>
+          <button type="button" className={styles.button} onClick={() => moveMagnetToDrawer(objectId)}>
             To drawer
           </button>
         </>
