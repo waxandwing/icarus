@@ -1,0 +1,24 @@
+.switcher {
+  display: inline-flex;
+  background: var(--arc-paper-white);
+  border: 1px solid var(--arc-line);
+  border-radius: var(--arc-radius);
+  padding: 3px;
+  gap: 2px;
+}
+
+.tab {
+  border: none;
+  background: transparent;
+  padding: var(--arc-space-1) var(--arc-space-3);
+  border-radius: calc(var(--arc-radius) - 3px);
+  font-size: var(--arc-text-meta);
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--arc-charcoal);
+}
+
+.tab[aria-selected='true'] {
+  background: var(--arc-ink);
+  color: var(--arc-paper-white);
+}

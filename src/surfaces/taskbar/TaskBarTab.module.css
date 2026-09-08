@@ -1,0 +1,37 @@
+.tab {
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  background: var(--arc-kraft);
+  border: 1px solid var(--arc-line-strong);
+  border-bottom: none;
+  border-radius: var(--arc-radius-lg) var(--arc-radius-lg) 0 0;
+  padding: 8px 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: var(--arc-shadow-soft);
+  z-index: 35;
+  color: var(--arc-ink);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+}
+.tab:hover {
+  padding-bottom: 12px;
+}
+
+.badge {
+  background: var(--arc-terracotta);
+  color: var(--arc-paper-white);
+  border-radius: 999px;
+  font-size: 10px;
+  min-width: 16px;
+  height: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+}

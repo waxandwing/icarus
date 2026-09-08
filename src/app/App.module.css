@@ -1,0 +1,12 @@
+.splash {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--arc-space-3);
+  background: var(--arc-env-bg);
+  color: var(--arc-charcoal);
+  font-family: var(--arc-font-serif);
+  font-size: 18px;
+}

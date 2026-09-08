@@ -1,0 +1,53 @@
+.environment {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  overflow-x: clip;
+  background:
+    radial-gradient(ellipse at 20% -10%, rgba(255, 255, 255, 0.5), transparent 55%),
+    var(--arc-env-bg);
+  display: flex;
+  flex-direction: column;
+}
+
+.skipLink {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 100;
+  background: var(--arc-ink);
+  color: var(--arc-paper-white);
+  padding: var(--arc-space-2) var(--arc-space-4);
+  border-radius: 0 0 var(--arc-radius) 0;
+}
+.skipLink:focus {
+  left: 0;
+}
+
+.stage {
+  flex: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: var(--arc-space-8) var(--arc-space-6) var(--arc-space-16);
+}
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  background: rgba(44, 46, 46, 0.28);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--arc-motion) var(--arc-ease);
+  z-index: 30;
+}
+.scrim[data-visible='true'] {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+@media (max-width: 900px) {
+  .stage {
+    padding: var(--arc-space-4) var(--arc-space-3) var(--arc-space-12);
+  }
+}

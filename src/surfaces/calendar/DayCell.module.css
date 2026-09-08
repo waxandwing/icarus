@@ -1,0 +1,105 @@
+.cell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 108px;
+  padding: 6px;
+  background: var(--arc-paper-white);
+  border: 1px solid var(--arc-line);
+  border-radius: var(--arc-radius-sm);
+  text-align: left;
+}
+
+.cell[data-kind='weekend'],
+.cell[data-kind='no-school'] {
+  background: repeating-linear-gradient(
+    135deg,
+    var(--arc-paper) 0px,
+    var(--arc-paper) 8px,
+    rgba(44, 46, 46, 0.035) 8px,
+    rgba(44, 46, 46, 0.035) 16px
+  );
+}
+
+.cell[data-focused='true'] {
+  box-shadow: inset 0 0 0 2px var(--arc-blue);
+}
+
+.cell[data-today='true'] {
+  border-color: var(--arc-terracotta);
+  border-width: 2px;
+}
+
+.dateRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+.dateNumber {
+  font-weight: 700;
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.cell[data-today='true'] .dateNumber::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--arc-terracotta);
+  display: inline-block;
+}
+
+.dayKindLabel {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--arc-charcoal);
+  opacity: 0.75;
+}
+
+.addButton {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  border-radius: 50%;
+  padding: 1px;
+  opacity: 0;
+  transition: opacity var(--arc-motion-fast) var(--arc-ease);
+}
+.cell:hover .addButton,
+.cell:focus-within .addButton {
+  opacity: 1;
+}
+.addButton:focus-visible {
+  opacity: 1;
+}
+
+.chips {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  overflow: hidden;
+}
+
+.dropTarget {
+  outline: 2px dashed var(--arc-blue);
+  outline-offset: -2px;
+}
+
+.continuityStrip {
+  font-size: 10px;
+  color: var(--arc-charcoal);
+  background: var(--arc-paper);
+  border-radius: 3px;
+  padding: 1px 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

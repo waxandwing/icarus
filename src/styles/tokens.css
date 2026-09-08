@@ -1,0 +1,103 @@
+/**
+ * Arc design tokens — derived from docs/asset-metadata.json and
+ * docs/02_INTERACTION_AND_VISUAL_RULES.md. Keep this the single source of
+ * palette/spacing/radius truth; components should reference these variables
+ * rather than hardcoding values.
+ */
+:root {
+  /* Palette */
+  --arc-paper: #f3ebdd;
+  --arc-paper-white: #fbf8f1;
+  --arc-ink: #2c2e2e;
+  --arc-mustard: #e4b33d;
+  --arc-terracotta: #c96845;
+  --arc-blue: #7c9cad;
+  --arc-sage: #9aaa89;
+  --arc-pink: #c99a9e;
+  --arc-lavender: #aaa0b8;
+  --arc-kraft: #c6a77d;
+  --arc-charcoal: #4a4945;
+  --arc-red: #b5453e;
+
+  /* Environment (outside the calendar/paper) */
+  --arc-env-bg: #e7e0d2;
+  --arc-env-bg-deep: #d9d0bd;
+
+  /* Elevation / lines */
+  --arc-line: rgba(44, 46, 46, 0.14);
+  --arc-line-strong: rgba(44, 46, 46, 0.28);
+  --arc-shadow-soft: 0 1px 2px rgba(44, 46, 46, 0.08), 0 6px 16px rgba(44, 46, 46, 0.08);
+  --arc-shadow-lifted: 0 2px 4px rgba(44, 46, 46, 0.1), 0 12px 28px rgba(44, 46, 46, 0.16);
+
+  /* Spacing scale (4px base) */
+  --arc-space-1: 4px;
+  --arc-space-2: 8px;
+  --arc-space-3: 12px;
+  --arc-space-4: 16px;
+  --arc-space-6: 24px;
+  --arc-space-8: 32px;
+  --arc-space-12: 48px;
+  --arc-space-16: 64px;
+
+  /* Radius */
+  --arc-radius-sm: 4px;
+  --arc-radius: 8px;
+  --arc-radius-lg: 12px;
+  --arc-radius-full: 999px;
+
+  /* Type */
+  --arc-font-sans: 'Nunito', 'Segoe UI Rounded', 'Segoe UI', system-ui, sans-serif;
+  --arc-font-serif: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --arc-font-hand: 'Caveat', cursive;
+  --arc-text-body: 16px;
+  --arc-text-meta: 14px;
+
+  /* Motion */
+  --arc-motion-fast: 120ms;
+  --arc-motion: 220ms;
+  --arc-motion-slow: 360ms;
+  --arc-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+
+  /* Furniture */
+  --arc-furniture-width: min(360px, 88vw);
+  --arc-taskbar-height: min(320px, 62vh);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --arc-motion-fast: 0ms;
+    --arc-motion: 0ms;
+    --arc-motion-slow: 0ms;
+  }
+}
+
+[data-high-contrast='true'] {
+  --arc-line: rgba(44, 46, 46, 0.55);
+  --arc-line-strong: rgba(44, 46, 46, 0.85);
+  --arc-ink: #000000;
+}
+
+.arc-token-mustard {
+  --token-color: var(--arc-mustard);
+}
+.arc-token-terracotta {
+  --token-color: var(--arc-terracotta);
+}
+.arc-token-blue {
+  --token-color: var(--arc-blue);
+}
+.arc-token-sage {
+  --token-color: var(--arc-sage);
+}
+.arc-token-pink {
+  --token-color: var(--arc-pink);
+}
+.arc-token-lavender {
+  --token-color: var(--arc-lavender);
+}
+.arc-token-kraft {
+  --token-color: var(--arc-kraft);
+}
+.arc-token-charcoal {
+  --token-color: var(--arc-charcoal);
+}

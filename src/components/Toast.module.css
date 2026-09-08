@@ -1,0 +1,43 @@
+.toast {
+  position: fixed;
+  top: var(--arc-space-4);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--arc-red);
+  color: var(--arc-paper-white);
+  padding: var(--arc-space-2) var(--arc-space-4);
+  border-radius: var(--arc-radius);
+  box-shadow: var(--arc-shadow-lifted);
+  z-index: 90;
+  font-size: 14px;
+  max-width: min(480px, 92vw);
+}
+.toast[data-tone='info'] {
+  background: var(--arc-ink);
+}
+
+.undoPill {
+  position: fixed;
+  left: var(--arc-space-4);
+  bottom: var(--arc-space-4);
+  background: var(--arc-paper-white);
+  border: 1px solid var(--arc-line-strong);
+  box-shadow: var(--arc-shadow-soft);
+  border-radius: var(--arc-radius-full);
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 40;
+  font-size: 13px;
+}
+
+.undoButton {
+  border: none;
+  background: var(--arc-ink);
+  color: var(--arc-paper-white);
+  border-radius: var(--arc-radius-full);
+  padding: 4px 10px;
+  cursor: pointer;
+  font-weight: 700;
+}

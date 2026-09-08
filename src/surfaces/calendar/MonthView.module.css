@@ -1,0 +1,18 @@
+.grid {
+  display: grid;
+  gap: 6px;
+}
+
+.weekdayHeader {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--arc-charcoal);
+  padding: 0 2px 4px;
+}
+
+.week {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 6px;
+}

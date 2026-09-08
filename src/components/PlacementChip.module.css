@@ -1,0 +1,97 @@
+.chip {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--arc-line);
+  background: var(--arc-paper-white);
+  cursor: pointer;
+  font-family: var(--arc-font-sans);
+  color: var(--arc-ink);
+  padding: 5px 7px;
+  font-size: 13px;
+  line-height: 1.25;
+}
+
+.chip:hover {
+  filter: brightness(0.98);
+}
+
+.chip[data-selected='true'] {
+  box-shadow: 0 0 0 2px var(--arc-ink);
+}
+
+/* --- Lesson: paper card with a folded corner --- */
+.chip[data-type='lesson'] {
+  border-radius: 3px 3px 3px 10px;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+  border-left: 4px solid var(--token-color);
+}
+
+/* --- Note: distinct square-ish sticky, slightly rotated --- */
+.chip[data-type='note'] {
+  border-radius: 2px;
+  transform: rotate(-0.6deg);
+  border-left: 4px dashed var(--token-color);
+  background: color-mix(in srgb, var(--token-color) 14%, var(--arc-paper-white));
+}
+
+/* --- Unit: circular magnet badge --- */
+.chip[data-type='unit'] {
+  border-radius: var(--arc-radius-full);
+  justify-content: center;
+  text-align: center;
+  background: var(--token-color);
+  color: var(--arc-paper-white);
+  border: none;
+  padding: 6px 10px;
+  font-weight: 700;
+  box-shadow: var(--arc-shadow-soft);
+}
+
+/* --- Magnet: small pill --- */
+.chip[data-type='magnet'] {
+  border-radius: var(--arc-radius-full);
+  border: 1.5px solid var(--token-color);
+  background: var(--arc-paper-white);
+}
+
+.title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.chip[data-crossed='true'] .title {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+.importantBadge {
+  flex-shrink: 0;
+  line-height: 0;
+}
+
+.fixedBadge {
+  flex-shrink: 0;
+  font-size: 11px;
+}
+
+.deliveryDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.deliveryDot[data-state='completed'] {
+  background: var(--arc-sage);
+}
+.deliveryDot[data-state='in-progress'] {
+  background: var(--arc-mustard);
+}
+.deliveryDot[data-state='skipped'] {
+  background: var(--arc-terracotta);
+}

@@ -1,0 +1,123 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: var(--arc-space-3);
+}
+
+.field label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--arc-charcoal);
+}
+
+.field input[type='text'],
+.field input[type='date'],
+.field input[type='number'],
+.field textarea,
+.field select {
+  border: 1px solid var(--arc-line-strong);
+  border-radius: var(--arc-radius);
+  padding: 8px 10px;
+  background: var(--arc-paper-white);
+  font-size: 15px;
+}
+
+.field textarea {
+  min-height: 72px;
+  resize: vertical;
+}
+
+.row {
+  display: flex;
+  gap: var(--arc-space-3);
+}
+.row > .field {
+  flex: 1;
+}
+
+.typeTabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: var(--arc-space-4);
+}
+
+.typeTab {
+  flex: 1;
+  border: 1px solid var(--arc-line-strong);
+  background: var(--arc-paper-white);
+  border-radius: var(--arc-radius);
+  padding: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+}
+.typeTab[aria-pressed='true'] {
+  background: var(--arc-ink);
+  color: var(--arc-paper-white);
+  border-color: var(--arc-ink);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--arc-space-2);
+  margin-top: var(--arc-space-4);
+}
+
+.primaryButton {
+  background: var(--arc-ink);
+  color: var(--arc-paper-white);
+  border: none;
+  border-radius: var(--arc-radius);
+  padding: 9px 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.primaryButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.secondaryButton {
+  background: transparent;
+  color: var(--arc-ink);
+  border: 1px solid var(--arc-line-strong);
+  border-radius: var(--arc-radius);
+  padding: 9px 16px;
+  cursor: pointer;
+}
+
+.dangerButton {
+  background: var(--arc-red);
+  color: var(--arc-paper-white);
+  border: none;
+  border-radius: var(--arc-radius);
+  padding: 9px 16px;
+  cursor: pointer;
+}
+
+.errorText {
+  color: var(--arc-red);
+  font-size: 13px;
+  margin-top: -6px;
+  margin-bottom: var(--arc-space-2);
+}
+
+.colorSwatchRow {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.colorSwatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  background: var(--token-color);
+}
+.colorSwatch[aria-pressed='true'] {
+  border-color: var(--arc-ink);
+}

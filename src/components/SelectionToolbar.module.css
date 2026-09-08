@@ -1,0 +1,61 @@
+.bar {
+  position: fixed;
+  left: 50%;
+  bottom: var(--arc-space-6);
+  transform: translateX(-50%);
+  background: var(--arc-ink);
+  color: var(--arc-paper-white);
+  border-radius: var(--arc-radius-lg);
+  box-shadow: var(--arc-shadow-lifted);
+  padding: var(--arc-space-2) var(--arc-space-3);
+  display: flex;
+  align-items: center;
+  gap: var(--arc-space-2);
+  z-index: 50;
+  max-width: min(720px, 94vw);
+  flex-wrap: wrap;
+}
+
+.title {
+  font-weight: 700;
+  padding: 0 var(--arc-space-2);
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.button {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: var(--arc-paper-white);
+  border-radius: var(--arc-radius);
+  padding: 6px 10px;
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.button:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+.button[aria-pressed='true'] {
+  background: var(--arc-mustard);
+  color: var(--arc-ink);
+  border-color: var(--arc-mustard);
+}
+
+.dateInput {
+  border-radius: var(--arc-radius);
+  border: none;
+  padding: 6px 8px;
+  font-size: 13px;
+}
+
+.closeButton {
+  background: transparent;
+  border: none;
+  color: var(--arc-paper-white);
+  cursor: pointer;
+  font-size: 16px;
+  padding: 4px 6px;
+}

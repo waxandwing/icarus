@@ -1,0 +1,68 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--arc-ink);
+  color: var(--arc-paper-white);
+  z-index: 80;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--arc-space-6);
+  text-align: center;
+  gap: var(--arc-space-4);
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 12px;
+  color: var(--arc-mustard);
+}
+
+.title {
+  font-family: var(--arc-font-serif);
+  font-size: 32px;
+  max-width: 640px;
+}
+
+.body {
+  max-width: 560px;
+  color: rgba(251, 248, 241, 0.85);
+  white-space: pre-wrap;
+}
+
+.actions {
+  display: flex;
+  gap: var(--arc-space-3);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.actionButton {
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--arc-paper-white);
+  padding: 10px 18px;
+  border-radius: var(--arc-radius);
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 600;
+}
+.actionButton:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+.actionButton[data-tone='primary'] {
+  background: var(--arc-sage);
+  border-color: var(--arc-sage);
+  color: var(--arc-ink);
+}
+
+.leaveButton {
+  background: transparent;
+  border: none;
+  color: rgba(251, 248, 241, 0.7);
+  cursor: pointer;
+  margin-top: var(--arc-space-2);
+  text-decoration: underline;
+}

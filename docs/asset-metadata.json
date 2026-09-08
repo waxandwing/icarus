@@ -1,0 +1,168 @@
+{
+  "generated": "2026-09-08",
+  "palette": {
+    "paper": "#F3EBDD",
+    "ink": "#2C2E2E",
+    "mustard": "#E4B33D",
+    "terracotta": "#C96845",
+    "blue": "#7C9CAD",
+    "sage": "#9AAA89",
+    "pink": "#C99A9E",
+    "lavender": "#AAA0B8",
+    "kraft": "#C6A77D",
+    "charcoal": "#4A4945",
+    "white": "#FBF8F1",
+    "red": "#B5453E"
+  },
+  "provenance": "Created from scratch for ARC from functional descriptions. No Canva or Figma files were used as source geometry.",
+  "caveat": "AI-assisted original design package; conduct normal trademark and legal review before commercial release.",
+  "assets": [
+    {
+      "name": "ARC-001_arc-mark",
+      "file": "ARC-001_arc-mark.svg",
+      "width": 512,
+      "height": 512,
+      "notes": "Original abstract arc/continuity mark. Add the word ARC as live text in the interface."
+    },
+    {
+      "name": "ARC-002_planner-paper",
+      "file": "ARC-002_planner-paper.svg",
+      "width": 1200,
+      "height": 800,
+      "notes": "Original neutral paper texture. Designed to tile or crop; no Canva source."
+    },
+    {
+      "name": "ARC-003_calendar-shell",
+      "file": "ARC-003_calendar-shell.svg",
+      "width": 1600,
+      "height": 1000,
+      "notes": "Static original book/paper surface only. Render the actual calendar grid and all changing content as live code."
+    },
+    {
+      "name": "ARC-004_settings-tab-closed",
+      "file": "ARC-004_settings-tab-closed.svg",
+      "width": 220,
+      "height": 420,
+      "notes": "Original closed left-edge furniture silhouette. Keep label and controls live."
+    },
+    {
+      "name": "ARC-005_settings-surface-open",
+      "file": "ARC-005_settings-surface-open.svg",
+      "width": 720,
+      "height": 1000,
+      "notes": "Original open Settings furniture surface. All settings text and controls remain live HTML."
+    },
+    {
+      "name": "ARC-006_fridge-tab-closed",
+      "file": "ARC-006_fridge-tab-closed.svg",
+      "width": 220,
+      "height": 420,
+      "notes": "Original closed right-edge Fridge silhouette. Keep label and interactions live."
+    },
+    {
+      "name": "ARC-007_fridge-surface-open",
+      "file": "ARC-007_fridge-surface-open.svg",
+      "width": 720,
+      "height": 1000,
+      "notes": "Original open Fridge furniture surface. Content, fields, and object states remain live."
+    },
+    {
+      "name": "ARC-008_taskbar-tab-closed",
+      "file": "ARC-008_taskbar-tab-closed.svg",
+      "width": 720,
+      "height": 220,
+      "notes": "Original compact bottom-edge Task Bar silhouette. Keep TASKS label live."
+    },
+    {
+      "name": "ARC-009_taskbar-surface-open",
+      "file": "ARC-009_taskbar-surface-open.svg",
+      "width": 1600,
+      "height": 560,
+      "notes": "Original open Task Bar surface. Columns, tasks, checkboxes, and controls remain live."
+    },
+    {
+      "name": "ARC-010_unit-magnet",
+      "file": "ARC-010_unit-magnet.svg",
+      "width": 360,
+      "height": 360,
+      "notes": "Original circular Unit object. Add title and state as live content."
+    },
+    {
+      "name": "ARC-011_lesson-paper",
+      "file": "ARC-011_lesson-paper.svg",
+      "width": 420,
+      "height": 420,
+      "notes": "Original lesson paper silhouette. Dynamic lesson content remains live."
+    },
+    {
+      "name": "ARC-012_note-paper",
+      "file": "ARC-012_note-paper.svg",
+      "width": 420,
+      "height": 420,
+      "notes": "Original Note paper silhouette. Dynamic note content remains live."
+    },
+    {
+      "name": "ARC-013_important-circle",
+      "file": "ARC-013_important-circle.svg",
+      "width": 512,
+      "height": 512,
+      "notes": "Original hand-drawn-style important circle. Importance must also be represented semantically in code."
+    },
+    {
+      "name": "ARC-014_add-mark",
+      "file": "ARC-014_add-mark.svg",
+      "width": 256,
+      "height": 256,
+      "notes": "Original utility add icon."
+    },
+    {
+      "name": "ARC-015_fridge-artwork",
+      "file": "ARC-015_fridge-artwork.svg",
+      "width": 800,
+      "height": 800,
+      "notes": "Original abstract classroom-studio collage for the Fridge. No text, characters, or third-party motifs."
+    },
+    {
+      "name": "ARC-016_settings-texture",
+      "file": "ARC-016_settings-texture.svg",
+      "width": 800,
+      "height": 800,
+      "notes": "Original yellow paper texture."
+    },
+    {
+      "name": "ARC-017_fridge-texture",
+      "file": "ARC-017_fridge-texture.svg",
+      "width": 800,
+      "height": 800,
+      "notes": "Original dusty-blue furniture texture."
+    },
+    {
+      "name": "ARC-018_taskbar-texture",
+      "file": "ARC-018_taskbar-texture.svg",
+      "width": 800,
+      "height": 800,
+      "notes": "Original kraft-paper texture."
+    },
+    {
+      "name": "ARC-019_tab-icons",
+      "file": "ARC-019_tab-icons.svg",
+      "width": 900,
+      "height": 300,
+      "notes": "Original settings, fridge/list, and task/drawer utility icon family."
+    },
+    {
+      "name": "ARC-020_creation-stickers",
+      "file": "ARC-020_creation-stickers.svg",
+      "width": 1000,
+      "height": 420,
+      "notes": "Original optional creation accents. Decorative only; defer until the core calendar is stable."
+    },
+    {
+      "name": "ARC-021_drawer-entry-field",
+      "file": "ARC-021_drawer-entry-field.svg",
+      "width": 1200,
+      "height": 260,
+      "notes": "Visual reference for a live accessible input. Rebuild the final control in HTML/CSS."
+    }
+  ]
+}
