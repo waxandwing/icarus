@@ -1,5 +1,4 @@
 import { ArcMark } from '../../assets/ArcMark';
-import { PaperGrain } from '../../assets/PaperTexture';
 import { SampleDataBanner } from '../../components/SampleDataBanner';
 import { useWorkspaceStore } from '../../state/store';
 import { CalendarNav } from './CalendarNav';
@@ -19,7 +18,6 @@ export function CalendarShell({ onEdit, onCreate }: ViewProps) {
 
   return (
     <section className={styles.shell} aria-label="Calendar">
-      <PaperGrain baseColor="transparent" opacity={0.4} className={styles.grain} />
       <header className={styles.header}>
         <div className={styles.brand}>
           <ArcMark size={30} />

@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { FridgeArtwork } from '../../assets/FridgeArtwork';
 import type { MagnetKind } from '../../domain/types';
 import { getDrawerItems, getFridgeItems } from '../../projections/selectors';
 import { useWorkspaceStore } from '../../state/store';
@@ -71,7 +70,7 @@ export function FridgePanel() {
       {subTab === 'fridge' ? (
         <>
           <div className={styles.artworkRow}>
-            <FridgeArtwork size={90} />
+            <span className="arc-visually-hidden">Pinned paper notes</span>
           </div>
           <div className={styles.grid}>
             {slots.map((item, i) => (

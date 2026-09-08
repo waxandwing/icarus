@@ -4,7 +4,10 @@
   top: 0;
   bottom: 0;
   width: var(--arc-furniture-width);
-  background: var(--arc-paper);
+  background:
+    linear-gradient(rgba(243, 235, 221, 0.32), rgba(243, 235, 221, 0.32)),
+    url('/assets/arc/texture-cream-paper.webp') center / cover,
+    var(--arc-paper);
   border-right: 1px solid var(--arc-line-strong);
   box-shadow: var(--arc-shadow-lifted);
   transform: translateX(-100%);

@@ -4,7 +4,9 @@
   width: 100%;
   overflow-x: clip;
   background:
-    radial-gradient(ellipse at 20% -10%, rgba(255, 255, 255, 0.5), transparent 55%),
+    radial-gradient(ellipse at 20% -10%, rgba(255, 255, 255, 0.4), transparent 55%),
+    linear-gradient(rgba(231, 224, 210, 0.5), rgba(217, 208, 189, 0.5)),
+    url('/assets/arc/texture-wood.webp') center / cover fixed,
     var(--arc-env-bg);
   display: flex;
   flex-direction: column;

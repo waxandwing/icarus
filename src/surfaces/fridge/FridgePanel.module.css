@@ -4,7 +4,10 @@
   top: 0;
   bottom: 0;
   width: var(--arc-furniture-width);
-  background: var(--arc-blue);
+  background:
+    linear-gradient(rgba(124, 156, 173, 0.18), rgba(124, 156, 173, 0.18)),
+    url('/assets/arc/texture-blue-paper.webp') center / cover,
+    var(--arc-blue);
   color: var(--arc-ink);
   border-left: 1px solid var(--arc-line-strong);
   box-shadow: var(--arc-shadow-lifted);
@@ -55,10 +58,10 @@
 }
 
 .artworkRow {
-  display: flex;
-  justify-content: center;
+  height: 92px;
   margin-bottom: var(--arc-space-4);
-  opacity: 0.9;
+  background: url('/assets/arc/fridge-notes-blue.webp') center / contain no-repeat;
+  opacity: 0.46;
 }
 
 .grid {

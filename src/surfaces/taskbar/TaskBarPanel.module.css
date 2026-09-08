@@ -5,7 +5,10 @@
   transform: translateX(-50%) translateY(100%);
   width: min(1000px, 96vw);
   height: var(--arc-taskbar-height);
-  background: var(--arc-kraft);
+  background:
+    linear-gradient(rgba(198, 167, 125, 0.26), rgba(198, 167, 125, 0.26)),
+    url('/assets/arc/texture-mustard-paper.webp') center / cover,
+    var(--arc-kraft);
   border: 1px solid var(--arc-line-strong);
   border-bottom: none;
   border-radius: var(--arc-radius-lg) var(--arc-radius-lg) 0 0;

@@ -1,17 +1,13 @@
 .shell {
   position: relative;
-  width: min(1180px, 100%);
-  background: var(--arc-paper);
-  border-radius: var(--arc-radius-lg);
-  box-shadow: var(--arc-shadow-lifted);
-  border: 1px solid var(--arc-line);
-  overflow: hidden;
-}
-
-.grain {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
+  width: min(1366px, 100%);
+  min-height: 620px;
+  padding: clamp(72px, 8vw, 104px) clamp(72px, 12vw, 172px)
+    clamp(54px, 7vw, 88px);
+  background:
+    url('/assets/arc/calendar-open-planner.webp') center / 100% 100% no-repeat,
+    transparent;
+  filter: drop-shadow(0 16px 24px rgba(44, 46, 46, 0.18));
 }
 
 .header {
@@ -40,6 +36,20 @@
 .body {
   position: relative;
   padding: var(--arc-space-4) var(--arc-space-6) var(--arc-space-6);
+}
+
+@media (max-width: 900px) {
+  .shell {
+    min-height: 0;
+    padding: 0;
+    background:
+      linear-gradient(rgba(251, 248, 241, 0.9), rgba(251, 248, 241, 0.9)),
+      url('/assets/arc/texture-cream-paper.webp') center / cover;
+    border: 1px solid var(--arc-line);
+    border-radius: var(--arc-radius-lg);
+    filter: drop-shadow(0 10px 20px rgba(44, 46, 46, 0.14));
+    overflow: hidden;
+  }
 }
 
 @media (max-width: 720px) {
