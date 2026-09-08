@@ -638,6 +638,12 @@ export function setCalendarDay(
 
 export function updateSettings(draft: D, patch: Partial<WorkspaceDomainState['settings']>): void {
   Object.assign(draft.settings, patch);
+  // Weekend visibility and start-of-week are linked, not independently
+  // chosen (Master Operating Document \u00a73): Week defaults to Monday-Friday;
+  // enabling weekends renders Sunday-Saturday with Sunday first.
+  if (patch.showWeekends !== undefined && patch.weekStartsOn === undefined) {
+    draft.settings.weekStartsOn = patch.showWeekends ? 'sunday' : 'monday';
+  }
   draft.calendar.showWeekends = draft.settings.showWeekends;
   draft.calendar.weekStartsOn = draft.settings.weekStartsOn;
 }

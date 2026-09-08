@@ -50,14 +50,10 @@ export function SettingsPanel() {
             onChange={(e) => updateSettings({ showWeekends: e.target.checked })}
           />
         </label>
-        <label className={styles.toggleRow}>
-          Week starts Sunday
-          <input
-            type="checkbox"
-            checked={settings.weekStartsOn === 'sunday'}
-            onChange={(e) => updateSettings({ weekStartsOn: e.target.checked ? 'sunday' : 'monday' })}
-          />
-        </label>
+        <p style={{ fontSize: 12, color: 'var(--arc-charcoal)', margin: '4px 0 0' }}>
+          Week defaults to Monday\u2013Friday. Turning on weekends shows Sunday through Saturday, Sunday
+          first.
+        </p>
       </div>
 
       <div className={styles.section}>
