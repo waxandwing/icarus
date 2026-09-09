@@ -3,3 +3,4 @@ Date: 2026-09-09
 Status: source frozen pending build evidence
 Do not edit auth/session/roster/pass source unless verification exposes a defect.
 Use the teaching-mode branch head containing this marker as the verification baseline.
+The next mutation to this lineage should be generated build evidence or a defect fix discovered by that evidence.
