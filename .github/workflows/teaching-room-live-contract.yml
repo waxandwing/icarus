@@ -25,6 +25,7 @@ jobs:
         run: |
           set -euo pipefail
           # External runner deliberately verifies the deployed Supabase contract, not a mock.
+          # This same circuit is repeated without backend changes to satisfy the twice-green gate.
           ENDPOINT='https://jnbppgjkzzuquhenaqtq.supabase.co/functions/v1/teaching-session'
 
           JOIN=$(curl --fail-with-body --silent --show-error \
