@@ -59,3 +59,5 @@ The Edge Function remains the authoritative ownership check for session/class/st
 
 ## Current integration batch
 Source changes in this batch are feature-branch-only. `main` is intentionally untouched and PR #1 remains a review boundary rather than a deployment instruction.
+
+No brand/logo/reskin decisions are included in this batch.
