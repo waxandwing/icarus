@@ -73,3 +73,6 @@ The old lockfile was removed because it did not contain the new Supabase depende
 
 ## Resume invariant
 Teacher refresh/re-entry must use the persisted Supabase browser session to obtain a fresh/current access token, then call the server `resume` action. Teaching Mode must not persist a duplicate JWT inside its own state.
+
+## Live test prerequisites
+The authenticated live contract test requires a disposable Supabase Auth teacher user plus a disposable Arc class/student/enrollment owned by that user. Test records must be removed after the run. Production/user roster data must not be used for this proof.
