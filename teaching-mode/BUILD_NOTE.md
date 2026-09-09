@@ -51,3 +51,5 @@ Current source work is complete up to the evidence boundary; the next work item 
 When the build runner is available, start from the current `teaching-mode` head rather than replaying or cherry-picking older auth commits.
 
 This note is intentionally explicit so another production agent cannot silently call the unexecuted build green.
+
+Before execution, confirm `teaching-mode` resolves to the latest integration commit and not the earlier network-only head.
