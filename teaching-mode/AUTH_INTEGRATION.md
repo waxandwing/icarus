@@ -56,3 +56,6 @@ Do not mark the authenticated happy path GREEN from source inspection alone. It 
 The current Supabase project contains no Arc class/student/enrollment/pass seed data. No fake roster was inserted to manufacture a passing UI state.
 
 The Edge Function remains the authoritative ownership check for session/class/student operations; client-side class IDs and student IDs are never trusted on their own.
+
+## Current integration batch
+Source changes in this batch are feature-branch-only. `main` is intentionally untouched and PR #1 remains a review boundary rather than a deployment instruction.
