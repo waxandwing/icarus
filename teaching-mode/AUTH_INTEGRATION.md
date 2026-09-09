@@ -64,3 +64,6 @@ No brand/logo/reskin decisions are included in this batch.
 
 ## Smart Board invariant
 The classroom display continues to authenticate only with room code + opaque channel key. It never receives the teacher JWT, publishable client session, roster, or teacher-private notes.
+
+## Pause invariant
+Pause/blank classroom state remains a literal black screen. Authentication work must not alter that behavior.
