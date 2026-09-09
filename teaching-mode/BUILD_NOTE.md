@@ -25,3 +25,5 @@ Branch head for this integration batch should remain on `teaching-mode`; no prod
 The build gate cannot be inferred from TypeScript source review. Record actual command output before changing YELLOW to GREEN.
 
 Once dependency verification is green, the next executable gate is the real authenticated two-device contract run, followed by B06 twice.
+
+The final reskin remains blocked until those functional gates are green twice.
