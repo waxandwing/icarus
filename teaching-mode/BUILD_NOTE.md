@@ -29,3 +29,5 @@ Once dependency verification is green, the next executable gate is the real auth
 The final reskin remains blocked until those functional gates are green twice.
 
 Do not reintroduce the deleted pre-Supabase lockfile. A new lock must be generated from the updated package manifest.
+
+Green means evidence, not intention.
