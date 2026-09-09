@@ -78,3 +78,6 @@ Teacher refresh/re-entry must use the persisted Supabase browser session to obta
 The authenticated live contract test requires a disposable Supabase Auth teacher user plus a disposable Arc class/student/enrollment owned by that user. Test records must be removed after the run. Production/user roster data must not be used for this proof.
 
 The test must also confirm that a second teacher cannot load the first teacher's roster, mutate the first teacher's session, or return the first teacher's pass event.
+
+## Completion rule
+Authenticated live GREEN #2 must be a repeat against unchanged source/backend. Any auth/session/roster/pass change after a green resets that gate.
