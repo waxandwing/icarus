@@ -67,3 +67,6 @@ The classroom display continues to authenticate only with room code + opaque cha
 
 ## Pause invariant
 Pause/blank classroom state remains a literal black screen. Authentication work must not alter that behavior.
+
+## Dependency note
+The old lockfile was removed because it did not contain the new Supabase dependency. This is intentionally YELLOW until a real npm runner regenerates and verifies it; a fabricated lockfile is not acceptable evidence.
