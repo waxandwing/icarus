@@ -49,3 +49,6 @@ No new login UI is committed. The auth seam remains headless until it can be int
 
 ## Supabase project security note
 The post-schema security advisor reports no roster/Teaching Mode RLS finding. The project-level leaked-password-protection warning remains and is unrelated to this integration; it should be resolved before broad production auth rollout.
+
+## Evidence discipline
+Do not mark the authenticated happy path GREEN from source inspection alone. It becomes GREEN only after a real signed-in teacher token exercises the deployed endpoint end-to-end.
