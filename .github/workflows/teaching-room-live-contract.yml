@@ -2,6 +2,12 @@ name: Teaching Room Live Contract
 
 on:
   workflow_dispatch:
+  push:
+    branches: [teaching-mode]
+    paths:
+      - 'public/teaching-room.html'
+      - 'src/teaching/**'
+      - '.github/workflows/teaching-room-live-contract.yml'
   pull_request:
     branches: [main]
     paths:
