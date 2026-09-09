@@ -17,3 +17,5 @@ npm run lint
 ```
 
 Commit the regenerated `package-lock.json` only after those commands complete successfully.
+
+This branch deliberately does not introduce a new visual login screen. Authentication must enter through the canonical Arc access gate when that surface is integrated.
