@@ -39,3 +39,5 @@ No Vercel, Lovable, or Replit is part of this verification path.
 No visual change should be approved from this auth batch alone.
 
 If a build runner cannot regenerate the lock and execute the commands, stop at YELLOW rather than guessing.
+
+The live auth test is separate from the dependency build test; neither can substitute for the other.
