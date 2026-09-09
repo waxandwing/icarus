@@ -58,4 +58,4 @@ Only after that ref check should the npm runner be trusted as evidence for this 
 
 Branch movement is the final repository action for this source batch.
 
-Expected branch target after movement: this commit's child/final source commit, not any intermediate SHA listed in earlier notes.
+Expected branch target after movement: the final commit produced after this note, then verify via branch read.
