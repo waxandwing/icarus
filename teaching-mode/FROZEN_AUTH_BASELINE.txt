@@ -2,4 +2,4 @@ Teaching Mode auth source baseline
 Date: 2026-09-09
 Status: source frozen pending build evidence
 Do not edit auth/session/roster/pass source unless verification exposes a defect.
-Branch must be moved to this final source lineage before verification.
+Branch must be moved to the commit containing this marker before verification.
