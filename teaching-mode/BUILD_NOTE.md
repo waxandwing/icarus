@@ -19,3 +19,5 @@ npm run lint
 Commit the regenerated `package-lock.json` only after those commands complete successfully.
 
 This branch deliberately does not introduce a new visual login screen. Authentication must enter through the canonical Arc access gate when that surface is integrated.
+
+Branch head for this integration batch should remain on `teaching-mode`; no production deploy and no merge to `main` are authorized by this work.
