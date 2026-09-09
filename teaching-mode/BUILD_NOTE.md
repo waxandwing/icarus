@@ -31,3 +31,5 @@ The final reskin remains blocked until those functional gates are green twice.
 Do not reintroduce the deleted pre-Supabase lockfile. A new lock must be generated from the updated package manifest.
 
 Green means evidence, not intention.
+
+Expected final sequence: dependency build green → authenticated live contract green twice → B06 green twice → reskin.
