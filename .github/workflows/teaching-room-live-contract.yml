@@ -1,0 +1,78 @@
+name: Teaching Room Live Contract
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'public/teaching-room.html'
+      - 'src/teaching/**'
+      - '.github/workflows/teaching-room-live-contract.yml'
+
+jobs:
+  live-room-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Verify deployed display contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          ENDPOINT='https://jnbppgjkzzuquhenaqtq.supabase.co/functions/v1/teaching-session'
+
+          JOIN=$(curl --fail-with-body --silent --show-error \
+            -H 'Content-Type: application/json' \
+            --data '{"action":"join","roomCode":"ARC2TST8"}' \
+            "$ENDPOINT")
+
+          python - "$JOIN" <<'PY'
+          import json,sys
+          data=json.loads(sys.argv[1])
+          s=data['session']
+          blob=json.dumps(data)
+          assert s['room_code']=='ARC2TST8'
+          assert 'teacher_state' not in s
+          assert 'NEVER_EXPOSE_THIS' not in blob
+          assert 'Mia' not in blob
+          assert s['room_projection']['pass']['publicLabel']=='PASS OUT'
+          assert s['room_projection']['layout']['pass']=='bottom-left'
+          assert s['room_projection']['layout']['clock']=='top-right'
+          print('JOIN PRIVACY: PASS')
+          print(s['channel_key'])
+          PY
+
+          CHANNEL=$(python - "$JOIN" <<'PY'
+          import json,sys
+          print(json.loads(sys.argv[1])['session']['channel_key'])
+          PY
+          )
+
+          SYNC=$(curl --fail-with-body --silent --show-error \
+            -H 'Content-Type: application/json' \
+            --data "{\"action\":\"sync\",\"roomCode\":\"ARC2TST8\",\"channelKey\":\"$CHANNEL\"}" \
+            "$ENDPOINT")
+
+          python - "$SYNC" <<'PY'
+          import json,sys
+          data=json.loads(sys.argv[1])
+          blob=json.dumps(data)
+          assert data['session']['room_projection']['releasedStepIndex']==1
+          assert 'teacher_state' not in data['session']
+          assert 'NEVER_EXPOSE_THIS' not in blob
+          assert 'Mia' not in blob
+          print('SYNC PRIVACY: PASS')
+          PY
+
+          HTTP=$(curl --silent --output /tmp/bad-channel.json --write-out '%{http_code}' \
+            -H 'Content-Type: application/json' \
+            --data '{"action":"sync","roomCode":"ARC2TST8","channelKey":"00000000-0000-0000-0000-000000000000"}' \
+            "$ENDPOINT")
+          test "$HTTP" = '404'
+          echo 'STALE CHANNEL REJECTION: PASS'
+
+          HTTP=$(curl --silent --output /tmp/no-auth.json --write-out '%{http_code}' \
+            -H 'Content-Type: application/json' \
+            --data '{"action":"start","lessonTitle":"Unauthorized"}' \
+            "$ENDPOINT")
+          test "$HTTP" = '401'
+          echo 'UNAUTHENTICATED TEACHER START REJECTION: PASS'
