@@ -58,4 +58,4 @@ Only after that ref check should the npm runner be trusted as evidence for this 
 
 Branch movement is the final repository action for this source batch.
 
-Expected branch target after movement: the final commit produced after this note, then verify via branch read.
+After branch movement, stop modifying source until the build evidence is collected unless the build itself exposes a defect.
