@@ -26,12 +26,13 @@ AUTHORITY ORDER — HIGHEST TO LOWEST
 
 
 CODE AUTHORITY
-PRIMARY PRODUCTION REPOSITORY: waxandwing/arc-greenfield
+PRIMARY PRODUCTION REPOSITORY: waxandwing/icarus
 Default branch: main
-Role: Current production codebase and verified Green baseline. Recent production reconciliation, Green baseline, B01 furniture/Fridge completion, and permanent verification-gate commits are present here.
+Role: Current production codebase and active build target. The founder explicitly moved active production authority to this repository on September 9, 2026. All build, QA, monitoring, and production-steward work should target this repository unless the founder explicitly designates another target.
 
 
 SECONDARY / NON-GOVERNING REPOSITORIES
+• waxandwing/arc-greenfield — prior production repository and donor/reference only unless the founder explicitly reactivates it.
 • waxandwing/arc — legacy/historical source unless a specific component is explicitly designated as a donor.
 • waxandwing/arc-instructional-calendar — historical/specialized source unless explicitly designated as a donor.
 Rule: Never treat older behavior from a secondary repository as product authority merely because working code exists there. Donor code may supply implementation logic only after reconciliation against current canonical rules.
@@ -70,13 +71,13 @@ IMPORTANT INBOX WATCH
 
 ARC PRODUCTION + COO STEWARD
 • Read authority in the order defined above.
-• Use waxandwing/arc-greenfield as the primary production repository.
+• Use waxandwing/icarus as the primary production repository.
 • Own milestone selection, execution, handoffs, Green-gate status, production ledger, and conflict escalation.
 • May use historical repos/docs only as donors/evidence, never as automatic authority.
 
 
 ARC QA + DEBUGGING
-• Test the latest available build from waxandwing/arc-greenfield unless Production explicitly identifies another active test target.
+• Test the latest available build from waxandwing/icarus unless Production explicitly identifies another active test target.
 • Write/append reproducible failures to ARC — Bug Fix Log when accessible.
 • Retest patches independently before marking defects resolved.
 • Do not redesign or change canonical requirements.
@@ -97,4 +98,4 @@ CHANGE CONTROL
 Whenever the founder explicitly replaces a governing source, changes the primary repository, approves a new canonical Figma artifact, or establishes a new higher-order product rule, update this map in the same work cycle. Do not accumulate multiple competing “current truth” documents.
 
 
-Last established: September 7, 2026
+Last established: September 9, 2026
