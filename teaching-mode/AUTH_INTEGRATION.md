@@ -1,6 +1,6 @@
 # Arc Teaching Mode — Authentication Integration
 
-Status: IMPLEMENTED CLIENT SEAM
+Status: AUTH + CONTROLLER SEAM IMPLEMENTED
 Date: 2026-09-09
 
 ## Decision
@@ -14,6 +14,21 @@ The public browser configuration uses `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUB
 - `verifyArcUser()` calls Supabase Auth to validate the signed-in user when identity verification is required.
 - `onArcAuthStateChange()` exposes login/logout/token refresh changes to the React shell.
 - `signInArcTeacher()` and `signOutArcTeacher()` provide the minimal password-auth seam without dictating the final visual gate.
+
+## Teaching Controller
+`src/teaching/teachingController.ts` is now the teacher-authority boundary for the UI. It obtains the current Arc access token internally and exposes:
+- start
+- resume
+- update
+- roster
+- start pass
+- return pass
+- active passes
+- end
+
+UI components therefore do not need to carry or manually thread JWTs through event handlers.
+
+Private teacher state contains section/lesson/class context, quick notes, and teacher-only pass identity. Room projection remains a separate sanitized object.
 
 ## Teaching Mode handoff
 The Teaching Controller receives the current access token from this auth layer. The Edge Function independently validates that token with Auth before any teacher-authority action.
