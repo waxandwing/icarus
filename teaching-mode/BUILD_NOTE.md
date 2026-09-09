@@ -43,3 +43,5 @@ If a build runner cannot regenerate the lock and execute the commands, stop at Y
 The live auth test is separate from the dependency build test; neither can substitute for the other.
 
 The second live green must run without backend/source changes after the first green.
+
+Do not lower the gate to make progress appear faster.
