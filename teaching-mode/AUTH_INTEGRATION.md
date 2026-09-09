@@ -87,4 +87,4 @@ After authenticated live GREEN #2, B06 still runs independently at all required 
 ## Next executable action
 Run the package install/build/lint in an environment with npm registry access. Do not continue adding auth architecture while that evidence gate is outstanding.
 
-The feature branch should point at the latest integration commit before that run; verify the branch ref rather than assuming detached commits are live.
+Before the run, the `teaching-mode` branch ref must be advanced to the latest integration commit. Detached commit creation alone is not completion.
