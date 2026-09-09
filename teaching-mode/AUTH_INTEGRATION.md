@@ -41,7 +41,17 @@ The Teaching Controller obtains the current access token from the auth layer. Th
 - secret/service-role key: backend only, never committed to client code
 - Smart Board: no teacher login and no teacher token
 
+## Current gates
+- Auth client source: GREEN
+- Teaching Controller token boundary: GREEN
+- Browser-safe publishable key configuration: GREEN
+- Supabase roster/pass RLS advisor check: GREEN
+- npm lock/build verification after dependency addition: YELLOW, lock must be regenerated on a trusted npm runner
+- Live authenticated teacher happy path: YELLOW, requires a disposable signed-in teacher account
+- B06 rendered/accessibility matrix: pending after the two yellow integration gates above
+
 ## Still required before production merge
-1. Mount the minimal `AuthGate` at the existing Arc access/beta boundary rather than creating a competing product flow.
-2. Run authenticated `start → roster → pass → update → resume → end` against the live Edge Function with a disposable teacher account.
-3. Run the B06 render/accessibility matrix twice.
+1. Regenerate `package-lock.json` with a trusted npm install/build runner and run build + lint.
+2. Mount the minimal `AuthGate` at the existing Arc access/beta boundary rather than creating a competing product flow.
+3. Run authenticated `start → roster → pass → update → resume → end` against the live Edge Function with a disposable teacher account.
+4. Run the B06 render/accessibility matrix twice.
