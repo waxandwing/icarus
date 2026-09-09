@@ -26,6 +26,7 @@ export type RoomProjection = {
 
 export type LiveSession = {
   id: string;
+  class_id?: string | null;
   room_code: string;
   channel_key: string;
   lesson_title?: string;
@@ -34,6 +35,31 @@ export type LiveSession = {
   display_last_seen_at?: string | null;
   room_projection: RoomProjection;
   teacher_state?: Record<string, unknown>;
+};
+
+export type ArcTeachingClass = {
+  id: string;
+  name: string;
+  course_name?: string | null;
+  period_label?: string | null;
+  school_year?: string | null;
+  arc_section_id?: string | null;
+};
+
+export type RosterStudent = {
+  enrollmentId: string;
+  studentId: string;
+  firstName: string;
+  lastName?: string | null;
+  preferredName?: string | null;
+};
+
+export type PassEvent = {
+  id: string;
+  student_id: string;
+  departed_at: string;
+  returned_at: string | null;
+  status: 'out' | 'returned';
 };
 
 const PROJECT_URL = 'https://jnbppgjkzzuquhenaqtq.supabase.co';
@@ -64,17 +90,21 @@ export const liveSessionTransport = {
     lessonTitle: string;
     teacherState: Record<string, unknown>;
     roomProjection: RoomProjection;
+    classId?: string;
+    sectionId?: string;
   }) {
-    const result = await post<{ session: LiveSession }>(
+    const result = await post<{ session: LiveSession; class: ArcTeachingClass | null }>(
       {
         action: 'start',
         lessonTitle: input.lessonTitle,
         teacherState: input.teacherState,
         roomProjection: input.roomProjection,
+        classId: input.classId,
+        sectionId: input.sectionId,
       },
       input.accessToken,
     );
-    return result.session;
+    return result;
   },
 
   async update(input: {
@@ -98,6 +128,37 @@ export const liveSessionTransport = {
   async resume(accessToken: string) {
     const result = await post<{ session: LiveSession | null }>({ action: 'resume' }, accessToken);
     return result.session;
+  },
+
+  async roster(input: { accessToken: string; classId?: string; sectionId?: string }) {
+    return post<{ class: ArcTeachingClass; roster: RosterStudent[] }>(
+      { action: 'roster', classId: input.classId, sectionId: input.sectionId },
+      input.accessToken,
+    );
+  },
+
+  async startPass(input: { accessToken: string; sessionId: string; studentId: string }) {
+    const result = await post<{ pass: PassEvent }>(
+      { action: 'pass_start', sessionId: input.sessionId, studentId: input.studentId },
+      input.accessToken,
+    );
+    return result.pass;
+  },
+
+  async returnPass(input: { accessToken: string; passId: string }) {
+    const result = await post<{ pass: PassEvent }>(
+      { action: 'pass_return', passId: input.passId },
+      input.accessToken,
+    );
+    return result.pass;
+  },
+
+  async activePasses(input: { accessToken: string; classId?: string; sectionId?: string }) {
+    const result = await post<{ passes: PassEvent[] }>(
+      { action: 'active_passes', classId: input.classId, sectionId: input.sectionId },
+      input.accessToken,
+    );
+    return result.passes;
   },
 
   async end(accessToken: string, sessionId: string) {
