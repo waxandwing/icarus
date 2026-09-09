@@ -33,3 +33,5 @@ Do not reintroduce the deleted pre-Supabase lockfile. A new lock must be generat
 Green means evidence, not intention.
 
 Expected final sequence: dependency build green → authenticated live contract green twice → B06 green twice → reskin.
+
+No Vercel, Lovable, or Replit is part of this verification path.
