@@ -21,3 +21,5 @@ Commit the regenerated `package-lock.json` only after those commands complete su
 This branch deliberately does not introduce a new visual login screen. Authentication must enter through the canonical Arc access gate when that surface is integrated.
 
 Branch head for this integration batch should remain on `teaching-mode`; no production deploy and no merge to `main` are authorized by this work.
+
+The build gate cannot be inferred from TypeScript source review. Record actual command output before changing YELLOW to GREEN.
