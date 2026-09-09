@@ -83,3 +83,6 @@ The test must also confirm that a second teacher cannot load the first teacher's
 Authenticated live GREEN #2 must be a repeat against unchanged source/backend. Any auth/session/roster/pass change after a green resets that gate.
 
 After authenticated live GREEN #2, B06 still runs independently at all required viewport, keyboard, focus, zoom, reduced-motion, and classroom-display states. Network correctness does not waive visual/accessibility correctness.
+
+## Next executable action
+Run the package install/build/lint in an environment with npm registry access. Do not continue adding auth architecture while that evidence gate is outstanding.
