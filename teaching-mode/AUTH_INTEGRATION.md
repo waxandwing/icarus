@@ -52,3 +52,5 @@ The post-schema security advisor reports no roster/Teaching Mode RLS finding. Th
 
 ## Evidence discipline
 Do not mark the authenticated happy path GREEN from source inspection alone. It becomes GREEN only after a real signed-in teacher token exercises the deployed endpoint end-to-end.
+
+The current Supabase project contains no Arc class/student/enrollment/pass seed data. No fake roster was inserted to manufacture a passing UI state.
