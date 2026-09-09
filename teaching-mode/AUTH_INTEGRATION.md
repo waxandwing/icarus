@@ -87,4 +87,4 @@ After authenticated live GREEN #2, B06 still runs independently at all required 
 ## Next executable action
 Run the package install/build/lint in an environment with npm registry access. Do not continue adding auth architecture while that evidence gate is outstanding.
 
-The source batch is now frozen pending branch movement and build evidence.
+Move `teaching-mode` to the final source commit, verify it, and treat that SHA as the frozen baseline for dependency verification.
