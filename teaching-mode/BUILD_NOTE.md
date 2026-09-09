@@ -53,3 +53,5 @@ When the build runner is available, start from the current `teaching-mode` head 
 This note is intentionally explicit so another production agent cannot silently call the unexecuted build green.
 
 Before execution, confirm `teaching-mode` resolves to the latest integration commit and not the earlier network-only head.
+
+Only after that ref check should the npm runner be trusted as evidence for this batch.
