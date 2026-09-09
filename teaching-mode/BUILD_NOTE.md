@@ -55,3 +55,5 @@ This note is intentionally explicit so another production agent cannot silently 
 Before execution, confirm `teaching-mode` resolves to the latest integration commit and not the earlier network-only head.
 
 Only after that ref check should the npm runner be trusted as evidence for this batch.
+
+Branch movement is the final repository action for this source batch.
