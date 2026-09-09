@@ -27,3 +27,5 @@ The build gate cannot be inferred from TypeScript source review. Record actual c
 Once dependency verification is green, the next executable gate is the real authenticated two-device contract run, followed by B06 twice.
 
 The final reskin remains blocked until those functional gates are green twice.
+
+Do not reintroduce the deleted pre-Supabase lockfile. A new lock must be generated from the updated package manifest.
