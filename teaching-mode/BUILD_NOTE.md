@@ -49,3 +49,5 @@ Do not lower the gate to make progress appear faster.
 Current source work is complete up to the evidence boundary; the next work item is execution, not more architecture.
 
 When the build runner is available, start from the current `teaching-mode` head rather than replaying or cherry-picking older auth commits.
+
+This note is intentionally explicit so another production agent cannot silently call the unexecuted build green.
