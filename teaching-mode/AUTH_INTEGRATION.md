@@ -46,3 +46,6 @@ No new login UI has been committed. The auth seam remains headless until it can 
 2. Integrate the headless auth seam into the existing Arc access/beta gate once that canonical gate is in scope.
 3. Run authenticated `start → roster → pass → update → resume → end` against the live Edge Function with a disposable teacher account.
 4. Run the B06 render/accessibility matrix twice.
+
+## Supabase project security note
+The post-schema security advisor reports no roster/Teaching Mode RLS finding. The project-level leaked-password-protection warning remains and is unrelated to this integration; it should be resolved before broad production auth rollout.
