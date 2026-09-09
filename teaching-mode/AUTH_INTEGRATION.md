@@ -87,4 +87,4 @@ After authenticated live GREEN #2, B06 still runs independently at all required 
 ## Next executable action
 Run the package install/build/lint in an environment with npm registry access. Do not continue adding auth architecture while that evidence gate is outstanding.
 
-The feature branch must be advanced to the final integration commit before execution. This file intentionally does not claim that has happened until the branch ref is actually moved.
+Repository source batch is ready for branch advancement. Once the ref is moved, verify the branch SHA before running the build evidence gate.
