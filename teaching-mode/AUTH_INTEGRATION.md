@@ -87,4 +87,4 @@ After authenticated live GREEN #2, B06 still runs independently at all required 
 ## Next executable action
 Run the package install/build/lint in an environment with npm registry access. Do not continue adding auth architecture while that evidence gate is outstanding.
 
-Current integration head prepared for that run: `75bc294de5b5bac677ec8877e0aff31081c06407` plus this documentation commit.
+The feature branch should point at the latest integration commit before that run; verify the branch ref rather than assuming detached commits are live.
