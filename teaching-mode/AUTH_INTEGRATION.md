@@ -70,3 +70,6 @@ Pause/blank classroom state remains a literal black screen. Authentication work 
 
 ## Dependency note
 The old lockfile was removed because it did not contain the new Supabase dependency. This is intentionally YELLOW until a real npm runner regenerates and verifies it; a fabricated lockfile is not acceptable evidence.
+
+## Resume invariant
+Teacher refresh/re-entry must use the persisted Supabase browser session to obtain a fresh/current access token, then call the server `resume` action. Teaching Mode must not persist a duplicate JWT inside its own state.
