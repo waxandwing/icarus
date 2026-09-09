@@ -45,3 +45,5 @@ The live auth test is separate from the dependency build test; neither can subst
 The second live green must run without backend/source changes after the first green.
 
 Do not lower the gate to make progress appear faster.
+
+Current source work is complete up to the evidence boundary; the next work item is execution, not more architecture.
