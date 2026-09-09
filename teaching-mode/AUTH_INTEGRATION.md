@@ -1,6 +1,6 @@
 # Arc Teaching Mode — Authentication Integration
 
-Status: AUTH + CONTROLLER SEAM IMPLEMENTED
+Status: HEADLESS AUTH + CONTROLLER SEAM IMPLEMENTED
 Date: 2026-09-09
 
 ## Decision
@@ -13,33 +13,24 @@ The browser-safe Arc project URL and current publishable key are configured in `
 - `getArcAccessToken()` returns the raw access token only for forwarding to the Teaching Session Edge Function.
 - `verifyArcUser()` calls Supabase Auth to validate the signed-in user when identity verification is required.
 - `onArcAuthStateChange()` exposes login/logout/token refresh changes to the React shell.
-- `signInArcTeacher()` and `signOutArcTeacher()` provide the minimal password-auth seam without dictating the final visual gate.
+- `signInArcTeacher()` and `signOutArcTeacher()` provide the auth seam without imposing a new visual gate.
 
 ## Teaching Controller
-`src/teaching/teachingController.ts` is the teacher-authority boundary for the UI. It obtains the current Arc access token internally and exposes:
-- start
-- resume
-- update
-- roster
-- start pass
-- return pass
-- active passes
-- end
+`src/teaching/teachingController.ts` is the teacher-authority boundary for the UI. It obtains the current Arc access token internally and exposes start, resume, update, roster, pass start/return, active passes, and end.
 
 UI components therefore do not need to carry or manually thread JWTs through event handlers.
 
 Private teacher state contains section/lesson/class context, quick notes, and teacher-only pass identity. Room projection remains a separate sanitized object.
-
-## Teaching Mode handoff
-The Teaching Controller obtains the current access token from the auth layer. The Edge Function independently validates that token with Auth before any teacher-authority action.
-
-`getSession()` is not treated as an authorization decision. It is used only to obtain the raw token for transport. Server-side authorization remains in the Edge Function.
 
 ## Security boundary
 - publishable key: browser-safe application identifier
 - user JWT: signed-in teacher identity, short-lived and refreshable
 - secret/service-role key: backend only, never committed to client code
 - Smart Board: no teacher login and no teacher token
+- Edge Function independently validates teacher JWT for teacher-authority actions
+
+## Design-scope rule
+No new login UI has been committed. The auth seam remains headless until it can be integrated into the canonical Arc beta/access gate without redesigning that surface or broadening scope.
 
 ## Current gates
 - Auth client source: GREEN
@@ -52,6 +43,6 @@ The Teaching Controller obtains the current access token from the auth layer. Th
 
 ## Still required before production merge
 1. Regenerate `package-lock.json` with a trusted npm install/build runner and run build + lint.
-2. Mount the minimal `AuthGate` at the existing Arc access/beta boundary rather than creating a competing product flow.
+2. Integrate the headless auth seam into the existing Arc access/beta gate once that canonical gate is in scope.
 3. Run authenticated `start → roster → pass → update → resume → end` against the live Edge Function with a disposable teacher account.
 4. Run the B06 render/accessibility matrix twice.
