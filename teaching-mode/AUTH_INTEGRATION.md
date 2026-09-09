@@ -54,3 +54,5 @@ The post-schema security advisor reports no roster/Teaching Mode RLS finding. Th
 Do not mark the authenticated happy path GREEN from source inspection alone. It becomes GREEN only after a real signed-in teacher token exercises the deployed endpoint end-to-end.
 
 The current Supabase project contains no Arc class/student/enrollment/pass seed data. No fake roster was inserted to manufacture a passing UI state.
+
+The Edge Function remains the authoritative ownership check for session/class/student operations; client-side class IDs and student IDs are never trusted on their own.
