@@ -62,4 +62,4 @@ Source freeze begins after the branch points to the final integration commit.
 
 After moving the ref, do not create another documentation-only source commit; that would immediately change the frozen baseline again.
 
-END OF SOURCE BATCH. MOVE REF NOW.
+Use `teaching-mode/FROZEN_AUTH_BASELINE.txt` to identify the frozen lineage.
