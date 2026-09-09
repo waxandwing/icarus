@@ -30,7 +30,7 @@ Private teacher state contains section/lesson/class context, quick notes, and te
 - Edge Function independently validates teacher JWT for teacher-authority actions
 
 ## Design-scope rule
-No new login UI has been committed. The auth seam remains headless until it can be integrated into the canonical Arc beta/access gate without redesigning that surface or broadening scope.
+No new login UI is committed. The auth seam remains headless until it can be integrated into the canonical Arc beta/access gate without redesigning that surface or broadening scope.
 
 ## Current gates
 - Auth client source: GREEN
