@@ -24,6 +24,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          # External runner deliberately verifies the deployed Supabase contract, not a mock.
           ENDPOINT='https://jnbppgjkzzuquhenaqtq.supabase.co/functions/v1/teaching-session'
 
           JOIN=$(curl --fail-with-body --silent --show-error \
