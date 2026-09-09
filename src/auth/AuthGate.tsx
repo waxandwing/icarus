@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useState } from 'react';
+import { type FormEvent, type ReactNode, useEffect, useState } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import {
   getArcSession,
@@ -7,7 +7,7 @@ import {
   signOutArcTeacher,
 } from './arcAuth';
 
-export function AuthGate({ children }: { children: React.ReactNode }) {
+export function AuthGate({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [ready, setReady] = useState(false);
   const [email, setEmail] = useState('');
@@ -36,7 +36,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  async function submit(event: FormEvent) {
+  async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setBusy(true);
     setError('');
