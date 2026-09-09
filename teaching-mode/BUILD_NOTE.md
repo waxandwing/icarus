@@ -23,3 +23,5 @@ This branch deliberately does not introduce a new visual login screen. Authentic
 Branch head for this integration batch should remain on `teaching-mode`; no production deploy and no merge to `main` are authorized by this work.
 
 The build gate cannot be inferred from TypeScript source review. Record actual command output before changing YELLOW to GREEN.
+
+Once dependency verification is green, the next executable gate is the real authenticated two-device contract run, followed by B06 twice.
