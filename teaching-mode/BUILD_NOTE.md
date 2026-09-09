@@ -35,3 +35,5 @@ Green means evidence, not intention.
 Expected final sequence: dependency build green → authenticated live contract green twice → B06 green twice → reskin.
 
 No Vercel, Lovable, or Replit is part of this verification path.
+
+No visual change should be approved from this auth batch alone.
