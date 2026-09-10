@@ -28,18 +28,48 @@ function getDb() {
   return dbPromise;
 }
 
-/**
- * Versioned migration layer. Bump CURRENT_SCHEMA_VERSION in domain/seed.ts and
- * add a branch here whenever the persisted shape changes, so existing local
- * workspaces upgrade in place instead of silently losing data.
- */
-function migrate(raw: PersistedWorkspace): PersistedWorkspace {
-  const domain = { ...raw.domain };
+function migrateDomain(rawDomain: WorkspaceDomainState): WorkspaceDomainState {
+  const domain: WorkspaceDomainState = {
+    ...rawDomain,
+    calendar: { ...rawDomain.calendar, days: { ...rawDomain.calendar.days } },
+    notes: { ...rawDomain.notes },
+  };
+
   if (domain.isSampleWorkspace === undefined) domain.isSampleWorkspace = false;
-  if (!domain.schemaVersion || domain.schemaVersion < CURRENT_SCHEMA_VERSION) {
-    domain.schemaVersion = CURRENT_SCHEMA_VERSION;
+
+  const startingVersion = domain.schemaVersion || 1;
+  if (startingVersion < 2) {
+    // v2 introduces optional Task date association and the expanded school-day
+    // vocabulary (testing / special schedule). Existing v1 records are already
+    // semantically valid, so migration preserves every object and placement and
+    // advances only the explicit schema contract.
+    domain.schemaVersion = 2;
   }
-  return { ...raw, domain };
+
+  if (domain.schemaVersion < CURRENT_SCHEMA_VERSION) {
+    throw new Error(`Arc: missing migration from schema ${domain.schemaVersion} to ${CURRENT_SCHEMA_VERSION}.`);
+  }
+
+  return domain;
+}
+
+/**
+ * Versioned migration layer. Every persisted-shape change gets an explicit
+ * schema branch so existing teacher work upgrades in place instead of being
+ * reset or silently reinterpreted. Undo snapshots migrate with the live domain
+ * so Undo can never restore an obsolete schema after reload.
+ */
+export function migratePersisted(raw: PersistedWorkspace): PersistedWorkspace {
+  return {
+    ...raw,
+    domain: migrateDomain(raw.domain),
+    undo: raw.undo
+      ? {
+          ...raw.undo,
+          snapshot: migrateDomain(raw.undo.snapshot),
+        }
+      : null,
+  };
 }
 
 export async function loadPersisted(): Promise<PersistedWorkspace | null> {
@@ -47,7 +77,7 @@ export async function loadPersisted(): Promise<PersistedWorkspace | null> {
     const db = await getDb();
     const raw = (await db.get(STORE, KEY)) as PersistedWorkspace | undefined;
     if (!raw) return null;
-    return migrate(raw);
+    return migratePersisted(raw);
   } catch (err) {
     console.error('Arc: failed to load persisted workspace, starting fresh.', err);
     return null;

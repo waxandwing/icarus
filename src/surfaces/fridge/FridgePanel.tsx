@@ -13,8 +13,7 @@ const MAGNET_KINDS: { id: MagnetKind; label: string }[] = [
 ];
 
 export function FridgePanel() {
-  const openPanel = useWorkspaceStore((s) => s.ui.openPanel);
-  const isOpen = openPanel === 'fridge';
+  const isOpen = useWorkspaceStore((s) => s.ui.openPanels.fridge);
   const domain = useWorkspaceStore((s) => s.domain);
   const openFurniture = useWorkspaceStore((s) => s.openFurniture);
   const select = useWorkspaceStore((s) => s.select);
@@ -41,7 +40,12 @@ export function FridgePanel() {
       aria-hidden={!isOpen}
       aria-label="Fridge"
     >
-      <button type="button" className={styles.closeButton} onClick={() => openFurniture(null)} aria-label="Close fridge">
+      <button
+        type="button"
+        className={styles.closeButton}
+        onClick={() => openFurniture('fridge', false)}
+        aria-label="Close fridge"
+      >
         {'\u2715'}
       </button>
       <h2 className={styles.heading}>Fridge</h2>

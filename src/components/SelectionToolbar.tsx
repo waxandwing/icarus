@@ -1,9 +1,11 @@
 import { addSchoolDays } from '../calendar/dates';
 import { useWorkspaceStore } from '../state/store';
+import { getAvailableActions } from './selectionActions';
 import styles from './SelectionToolbar.module.css';
 
 export function SelectionToolbar({ onEdit }: { onEdit: (type: string, id: string) => void }) {
   const selection = useWorkspaceStore((s) => s.ui.selection);
+  const view = useWorkspaceStore((s) => s.ui.view);
   const domain = useWorkspaceStore((s) => s.domain);
   const select = useWorkspaceStore((s) => s.select);
   const markImportant = useWorkspaceStore((s) => s.markImportant);
@@ -32,27 +34,39 @@ export function SelectionToolbar({ onEdit }: { onEdit: (type: string, id: string
   );
   const important = 'important' in obj ? obj.important : false;
   const crossedOut = 'crossedOut' in obj ? obj.crossedOut : false;
+  const actions = new Set(
+    getAvailableActions({
+      selection,
+      view,
+      hasPlacement: Boolean(placement),
+      placementFixed: Boolean(placement?.fixed),
+      hasSection: Boolean(lesson?.sectionId),
+    }),
+  );
 
   return (
     <div className={styles.bar} role="toolbar" aria-label={`${objectType} actions`}>
       <span className={styles.title}>{obj.title}</span>
 
-      <button type="button" className={styles.button} onClick={() => onEdit(objectType, objectId)}>
-        Edit
-      </button>
+      {actions.has('edit') && (
+        <button type="button" className={styles.button} onClick={() => onEdit(objectType, objectId)}>
+          Edit
+        </button>
+      )}
 
-      {(unit || lesson || note) && (
+      {actions.has('circle') && (
         <button
           type="button"
           className={styles.button}
           aria-pressed={important}
+          aria-label={important ? `Remove red circle from ${obj.title}` : `Circle ${obj.title} in red`}
           onClick={() => markImportant(objectType as 'unit' | 'lesson' | 'note', objectId, !important)}
         >
-          {important ? 'Important \u2713' : 'Mark important'}
+          {important ? 'Uncircle' : 'Circle in red'}
         </button>
       )}
 
-      {(lesson || note) && (
+      {actions.has('cross-out') && (
         <button
           type="button"
           className={styles.button}
@@ -63,19 +77,26 @@ export function SelectionToolbar({ onEdit }: { onEdit: (type: string, id: string
         </button>
       )}
 
-      {placement && !placement.fixed && (
-        <label className={styles.button} style={{ display: 'inline-flex', gap: 6, alignItems: 'center' }}>
-          Move to
+      {actions.has('move') && placement && (
+        <label className={styles.button}>
+          <span>Move to</span>
           <input
             type="date"
             className={styles.dateInput}
             defaultValue={placement.date}
+            aria-label={`Move ${obj.title} to date`}
             onChange={(e) => e.target.value && movePlacement(placement.id, e.target.value)}
           />
         </label>
       )}
 
-      {lesson && placement && (
+      {unit && view === 'week' && placement && (
+        <span className={styles.hint} aria-label="Unit movement is available in Month">
+          Move in Month
+        </span>
+      )}
+
+      {actions.has('copy-next-day') && lesson && placement && (
         <button
           type="button"
           className={styles.button}
@@ -88,39 +109,38 @@ export function SelectionToolbar({ onEdit }: { onEdit: (type: string, id: string
         </button>
       )}
 
-      {lesson?.sectionId && (
+      {actions.has('shift-section') && lesson?.sectionId && placement && (
         <button
           type="button"
           className={styles.button}
-          onClick={() => placement && openShiftDialog(lesson.sectionId!, placement.date)}
+          onClick={() => openShiftDialog(lesson.sectionId!, placement.date)}
         >
           Shift section from here
         </button>
       )}
 
-      {note && (
-        <>
-          <button type="button" className={styles.button} onClick={() => moveNoteToFridge(objectId)}>
-            To fridge
-          </button>
-          <button type="button" className={styles.button} onClick={() => moveNoteToDrawer(objectId)}>
-            To drawer
-          </button>
-        </>
+      {actions.has('to-fridge') && note && (
+        <button type="button" className={styles.button} onClick={() => moveNoteToFridge(objectId)}>
+          To fridge
+        </button>
+      )}
+      {actions.has('to-drawer') && note && (
+        <button type="button" className={styles.button} onClick={() => moveNoteToDrawer(objectId)}>
+          To drawer
+        </button>
+      )}
+      {actions.has('to-fridge') && magnet && (
+        <button type="button" className={styles.button} onClick={() => moveMagnetToFridge(objectId)}>
+          To fridge
+        </button>
+      )}
+      {actions.has('to-drawer') && magnet && (
+        <button type="button" className={styles.button} onClick={() => moveMagnetToDrawer(objectId)}>
+          To drawer
+        </button>
       )}
 
-      {magnet && (
-        <>
-          <button type="button" className={styles.button} onClick={() => moveMagnetToFridge(objectId)}>
-            To fridge
-          </button>
-          <button type="button" className={styles.button} onClick={() => moveMagnetToDrawer(objectId)}>
-            To drawer
-          </button>
-        </>
-      )}
-
-      {placement && (
+      {actions.has('unplace') && placement && (
         <button type="button" className={styles.button} onClick={() => unplace(placement.id)}>
           Unplace
         </button>

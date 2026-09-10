@@ -1,48 +1,89 @@
+.wrap {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--arc-space-4);
+  min-width: 0;
+}
+
+.period {
+  min-width: 0;
+}
+
+.title {
+  font-family: var(--arc-font-serif);
+  font-size: clamp(24px, 2.2vw, 34px);
+  line-height: 1;
+  letter-spacing: -0.015em;
+  color: var(--arc-ink);
+}
+
+.subtitle {
+  margin-top: 6px;
+  font-size: 12px;
+  line-height: 1.25;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--arc-charcoal);
+}
+
 .nav {
   display: flex;
   align-items: center;
-  gap: var(--arc-space-2);
-}
-
-.label {
-  font-family: var(--arc-font-serif);
-  font-size: 17px;
-  min-width: 190px;
-  text-align: center;
+  gap: 6px;
+  flex: 0 0 auto;
 }
 
 .iconButton {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: var(--arc-radius-full);
-  border: 1px solid var(--arc-line);
-  background: var(--arc-paper-white);
+  width: 30px;
+  height: 30px;
+  border: 1px solid transparent;
+  background: transparent;
   cursor: pointer;
   color: var(--arc-ink);
-  transition: background var(--arc-motion-fast) var(--arc-ease);
+  transition:
+    background var(--arc-motion-fast) var(--arc-ease),
+    border-color var(--arc-motion-fast) var(--arc-ease);
 }
-.iconButton:hover {
-  background: var(--arc-paper);
+.iconButton:hover,
+.iconButton:focus-visible {
+  background: rgba(255, 255, 255, 0.52);
+  border-color: var(--arc-line);
+  outline: none;
 }
 
 .todayButton {
-  border: 1px solid var(--arc-line);
-  background: var(--arc-paper-white);
-  border-radius: var(--arc-radius);
-  padding: var(--arc-space-1) var(--arc-space-3);
+  border: 0;
+  background: transparent;
+  padding: 6px 9px;
   cursor: pointer;
-  font-size: var(--arc-text-meta);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--arc-charcoal);
 }
-.todayButton:hover {
-  background: var(--arc-paper);
+.todayButton:hover,
+.todayButton:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  outline: none;
 }
 
-@media (max-width: 560px) {
-  .label {
-    min-width: 0;
-    font-size: 15px;
+@media (max-width: 720px) {
+  .wrap {
+    align-items: center;
+    width: 100%;
+  }
+
+  .title {
+    font-size: 24px;
+  }
+
+  .subtitle {
+    font-size: 10px;
   }
 }

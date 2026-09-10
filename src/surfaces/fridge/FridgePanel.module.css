@@ -12,13 +12,20 @@
   border-left: 1px solid var(--arc-line-strong);
   box-shadow: var(--arc-shadow-lifted);
   transform: translateX(100%);
-  transition: transform var(--arc-motion-slow) var(--arc-ease);
+  transition:
+    transform var(--arc-motion-slow) var(--arc-ease),
+    visibility 0s linear var(--arc-motion-slow);
   z-index: 36;
   overflow-y: auto;
   padding: var(--arc-space-6) var(--arc-space-5);
+  visibility: hidden;
+  pointer-events: none;
 }
 .panel[data-open='true'] {
   transform: translateX(0);
+  visibility: visible;
+  pointer-events: auto;
+  transition-delay: 0s;
 }
 
 .heading {

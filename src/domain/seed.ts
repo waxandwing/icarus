@@ -3,7 +3,7 @@ import { addCalendarDays } from '../calendar/dates';
 import * as cmd from './commands';
 import type { WorkspaceDomainState } from './types';
 
-const CURRENT_SCHEMA_VERSION = 1;
+const CURRENT_SCHEMA_VERSION = 2;
 
 function emptyState(): WorkspaceDomainState {
   return {
@@ -45,7 +45,7 @@ function noSchoolRange(state: WorkspaceDomainState, from: string, to: string, la
   }
 }
 
-/** Builds the calendar exceptions and a small demo teaching plan so a first-run workspace isn't empty. */
+/** Builds the calendar exceptions and a realistic sample teacher week. */
 export function createInitialState(): WorkspaceDomainState {
   return produce(emptyState(), (draft) => {
     noSchoolRange(draft, '2026-09-07', '2026-09-07', 'Labor Day');
@@ -65,78 +65,128 @@ export function createInitialState(): WorkspaceDomainState {
     draft.calendar.days['2027-06-11'] = {
       date: '2027-06-11',
       kind: 'early-release',
-      label: 'Last Day \u2014 Early Release',
+      label: 'Last Day · Early Release',
       confidence: 'confirmed',
     };
 
-    const course = cmd.createCourse(draft, { name: 'AP Biology', colorToken: 'sage' });
-    const section = cmd.createSection(draft, { courseId: course.id, name: 'Period 2' });
-
-    const unit1 = cmd.createUnit(draft, {
-      courseId: course.id,
-      title: 'Unit 1 \u00b7 Cell Structure',
-      colorToken: 'blue',
+    const apah = cmd.createCourse(draft, { name: 'AP Art History', colorToken: 'mustard' });
+    const apahSection = cmd.createSection(draft, { courseId: apah.id, name: 'Period 2' });
+    const prehistory = cmd.createUnit(draft, {
+      courseId: apah.id,
+      title: 'Prehistory',
+      colorToken: 'mustard',
       startDate: '2026-09-08',
-      endDate: '2026-09-25',
+      endDate: '2026-09-18',
     });
-    cmd.createUnit(draft, {
-      courseId: course.id,
-      title: 'Unit 2 \u00b7 Genetics',
-      colorToken: 'terracotta',
-      startDate: '2026-09-28',
-      endDate: '2026-10-16',
-    });
-
-    const l1 = cmd.createLesson(draft, {
-      courseId: course.id,
-      unitId: unit1.id,
-      sectionId: section.id,
-      title: 'Organelles walk-through',
-      body: 'Diagram the organelles and their function. Bell-ringer: name three organelles.',
+    const apahLesson1 = cmd.createLesson(draft, {
+      courseId: apah.id,
+      unitId: prehistory.id,
+      sectionId: apahSection.id,
+      title: 'Origins + context',
+      body: 'Close looking, context, and the first global prehistory objects.',
       date: '2026-09-08',
     });
-    cmd.setDelivery(draft, { sectionId: section.id, lessonId: l1.id, state: 'completed' });
-
+    cmd.setDelivery(draft, { sectionId: apahSection.id, lessonId: apahLesson1.id, state: 'completed' });
     cmd.createLesson(draft, {
-      courseId: course.id,
-      unitId: unit1.id,
-      sectionId: section.id,
-      title: 'Membrane transport lab',
-      body: 'Egg osmosis demo \u2014 set up before period starts.',
+      courseId: apah.id,
+      unitId: prehistory.id,
+      sectionId: apahSection.id,
+      title: 'Cave conjecture',
       date: '2026-09-10',
     });
 
+    const art2d = cmd.createCourse(draft, { name: '2D Art 1', colorToken: 'blue' });
+    const art2dSection = cmd.createSection(draft, { courseId: art2d.id, name: 'Period 4' });
+    const sketchbook = cmd.createUnit(draft, {
+      courseId: art2d.id,
+      title: 'Sketchbook Launch',
+      colorToken: 'blue',
+      startDate: '2026-09-08',
+      endDate: '2026-09-17',
+    });
     cmd.createLesson(draft, {
-      courseId: course.id,
-      unitId: unit1.id,
-      sectionId: section.id,
-      title: 'Cell structure quiz',
-      date: '2026-09-15',
+      courseId: art2d.id,
+      unitId: sketchbook.id,
+      sectionId: art2dSection.id,
+      title: 'Monoprint covers',
+      body: 'Glossy board, marker transfer, spray, burnish.',
+      date: '2026-09-08',
+    });
+    cmd.createLesson(draft, {
+      courseId: art2d.id,
+      unitId: sketchbook.id,
+      sectionId: art2dSection.id,
+      title: 'Collage harvest',
+      date: '2026-09-09',
+    });
+    cmd.createLesson(draft, {
+      courseId: art2d.id,
+      unitId: sketchbook.id,
+      sectionId: art2dSection.id,
+      title: 'Assemble + refine',
+      date: '2026-09-11',
+    });
+
+    const art3d = cmd.createCourse(draft, { name: '3D Art 1', colorToken: 'sage' });
+    const art3dSection = cmd.createSection(draft, { courseId: art3d.id, name: 'Period 6' });
+    const attachment = cmd.createUnit(draft, {
+      courseId: art3d.id,
+      title: 'Secure Attachment',
+      colorToken: 'sage',
+      startDate: '2026-09-08',
+      endDate: '2026-09-16',
+    });
+    cmd.createLesson(draft, {
+      courseId: art3d.id,
+      unitId: attachment.id,
+      sectionId: art3dSection.id,
+      title: 'Paper methods',
+      date: '2026-09-08',
+    });
+    cmd.createLesson(draft, {
+      courseId: art3d.id,
+      unitId: attachment.id,
+      sectionId: art3dSection.id,
+      title: 'Cardboard methods',
+      date: '2026-09-09',
+    });
+    cmd.createLesson(draft, {
+      courseId: art3d.id,
+      unitId: attachment.id,
+      sectionId: art3dSection.id,
+      title: 'Fan-test build',
+      date: '2026-09-11',
     });
 
     cmd.createNote(draft, {
-      title: 'Print lab safety sheets',
-      body: 'Need 32 copies for the osmosis lab.',
+      title: 'Print AP image set',
+      body: 'Need a class set before Period 2.',
       location: 'taskbar',
       taskColumn: 'must',
     });
     cmd.createNote(draft, {
-      title: 'Email sub plan template to Ortiz',
+      title: 'Refill glue guns',
       location: 'taskbar',
       taskColumn: 'should',
     });
     cmd.createNote(draft, {
-      title: 'Reorder microscope slides',
-      location: 'fridge',
+      title: 'Photograph sketchbook covers',
+      location: 'taskbar',
+      taskColumn: 'could',
+    });
+    cmd.createNote(draft, {
+      title: 'Make copies during 2nd',
+      location: 'calendar',
+      date: '2026-09-09',
     });
 
     cmd.createMagnet(draft, {
       magnetKind: 'idea',
-      title: 'Try a Socratic seminar for genetics review',
+      title: 'Try the new critique stem cards',
     });
     cmd.createMagnet(draft, {
       magnetKind: 'resource',
-      title: 'PBS cell video (9 min)',
+      title: 'Smarthistory · Prehistory overview',
     });
     cmd.createMagnet(draft, {
       magnetKind: 'reminder',
@@ -144,8 +194,6 @@ export function createInitialState(): WorkspaceDomainState {
     });
 
     draft.history = [];
-    // Marked explicitly so the UI can tell the teacher this is example content
-    // rather than presenting it as their real plan (Canonical Product Spec \u00a72).
     draft.isSampleWorkspace = true;
   });
 }

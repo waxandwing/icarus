@@ -11,11 +11,11 @@ import { SettingsPanel } from '../surfaces/settings/SettingsPanel';
 import { SettingsTab } from '../surfaces/settings/SettingsTab';
 import { TaskBarPanel } from '../surfaces/taskbar/TaskBarPanel';
 import { TaskBarTab } from '../surfaces/taskbar/TaskBarTab';
-import { useWorkspaceStore } from '../state/store';
+import { useWorkspaceStore, type FurniturePanel } from '../state/store';
 import { useEffect, useState } from 'react';
 import styles from './AppFrame.module.css';
 
-const TAB_IDS: Record<string, string> = {
+const TAB_IDS: Partial<Record<FurniturePanel, string>> = {
   settings: 'arc-settings-tab',
   fridge: 'arc-fridge-tab',
   taskbar: 'arc-taskbar-tab',
@@ -26,21 +26,24 @@ const TAB_IDS: Record<string, string> = {
  * and the exterior-edge furniture. It owns no calendar domain state itself.
  */
 export function AppFrame() {
-  const openPanel = useWorkspaceStore((s) => s.ui.openPanel);
+  const openPanels = useWorkspaceStore((s) => s.ui.openPanels);
+  const anyFurnitureOpen = Object.values(openPanels).some(Boolean);
   const [editingId, setEditingId] = useState<{ type: string; id: string } | null>(null);
   const [creatingFor, setCreatingFor] = useState<string | null>(null);
 
-  // Escape closes open edge furniture before clearing general object selection
-  // (Desktop Interaction Blueprint \u00a721), and focus returns to the pull-tab that
-  // opened the drawer rather than being lost.
+  // Escape closes all open edge furniture before clearing object selection.
+  // Focus returns to one of the tabs that opened the furniture rather than being lost.
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       if (e.key !== 'Escape') return;
       const state = useWorkspaceStore.getState();
-      if (state.ui.openPanel) {
-        const tabId = TAB_IDS[state.ui.openPanel];
-        state.openFurniture(null);
-        if (tabId) requestAnimationFrame(() => document.getElementById(tabId)?.focus());
+      const open = (Object.keys(state.ui.openPanels) as FurniturePanel[]).filter(
+        (panel) => state.ui.openPanels[panel],
+      );
+      if (open.length > 0) {
+        const focusTarget = open.map((panel) => TAB_IDS[panel]).find(Boolean);
+        state.closeAllFurniture();
+        if (focusTarget) requestAnimationFrame(() => document.getElementById(focusTarget)?.focus());
       } else if (state.ui.selection) {
         state.select(null);
       }
@@ -61,8 +64,8 @@ export function AppFrame() {
 
       <div
         className={styles.scrim}
-        data-visible={openPanel !== null}
-        onClick={() => useWorkspaceStore.getState().openFurniture(null)}
+        data-visible={anyFurnitureOpen}
+        onClick={() => useWorkspaceStore.getState().closeAllFurniture()}
         aria-hidden="true"
       />
 
@@ -71,7 +74,10 @@ export function AppFrame() {
       <TaskBarPanel />
 
       <main className={styles.stage} id="arc-calendar-shell">
-        <CalendarShell onEdit={(type, id) => setEditingId({ type, id })} onCreate={(date) => setCreatingFor(date)} />
+        <CalendarShell
+          onEdit={(type, id) => setEditingId({ type, id })}
+          onCreate={(date) => setCreatingFor(date)}
+        />
       </main>
 
       <SelectionToolbar onEdit={(type, id) => setEditingId({ type, id })} />

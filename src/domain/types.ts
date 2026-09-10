@@ -8,7 +8,13 @@
 
 export type ISODate = string; // "YYYY-MM-DD"
 
-export type DayKind = 'instructional' | 'no-school' | 'early-release' | 'weekend';
+export type DayKind =
+  | 'instructional'
+  | 'no-school'
+  | 'early-release'
+  | 'testing'
+  | 'special-schedule'
+  | 'weekend';
 
 export type Confidence = 'confirmed' | 'tentative';
 
@@ -82,6 +88,8 @@ export interface Note {
   crossedOut: boolean;
   location: NoteLocation;
   taskColumn?: TaskColumn;
+  /** Optional date association for a Task. It remains a Task Bar Note and is not converted into a calendar Note. */
+  associatedDate?: ISODate;
   fridgeSlot?: number;
   createdAt: number;
 }
@@ -118,7 +126,7 @@ export type DeliveryState = 'not-started' | 'in-progress' | 'completed' | 'skipp
 
 export interface DeliveryRecord {
   state: DeliveryState;
-  /** Present when Stop here was used \u2014 required per the Master Operating Document. */
+  /** Present when Stop here was used — required per the Master Operating Document. */
   resumeNote?: string;
   /** The date the lesson was actually taught, distinct from its planned placement date. */
   actualDate?: ISODate;
@@ -170,7 +178,7 @@ export interface WorkspaceDomainState {
   /**
    * True while the workspace still contains the generated example plan.
    * Arc must never present demo content as if it were the teacher's real
-   * data (Canonical Product Spec \u00a72), so the UI surfaces this plainly and
+   * data (Canonical Product Spec §2), so the UI surfaces this plainly and
    * offers an explicit action to clear it.
    */
   isSampleWorkspace: boolean;

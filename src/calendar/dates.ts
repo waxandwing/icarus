@@ -40,7 +40,8 @@ export function dayLabel(calendar: SchoolCalendar, iso: ISODate): string | undef
 }
 
 export function isInstructionalDay(calendar: SchoolCalendar, iso: ISODate): boolean {
-  return dayKind(calendar, iso) === 'instructional' || dayKind(calendar, iso) === 'early-release';
+  const kind = dayKind(calendar, iso);
+  return kind === 'instructional' || kind === 'early-release' || kind === 'testing' || kind === 'special-schedule';
 }
 
 export function isToday(iso: ISODate): boolean {
@@ -100,8 +101,9 @@ export function addCalendarDays(iso: ISODate, amount: number): ISODate {
 }
 
 /**
- * Steps forward or backward across school days only (skipping weekends and
- * confirmed no-school days), the unit disruption shifts are measured in.
+ * Steps forward or backward across instructional school days only. Weekend and
+ * no-school days are skipped. Early release, testing, and special schedules
+ * still count because teaching occurs on those dates.
  */
 export function addSchoolDays(calendar: SchoolCalendar, iso: ISODate, amount: number): ISODate {
   let cursor = iso;

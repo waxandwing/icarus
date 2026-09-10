@@ -12,11 +12,12 @@
   align-items: center;
   gap: var(--arc-space-2);
   z-index: 50;
-  max-width: min(720px, 94vw);
+  max-width: min(760px, 94vw);
   flex-wrap: wrap;
 }
 
 .title {
+  font-family: var(--arc-font-serif);
   font-weight: 700;
   padding: 0 var(--arc-space-2);
   max-width: 220px;
@@ -26,8 +27,8 @@
 }
 
 .button {
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.22);
   color: var(--arc-paper-white);
   border-radius: var(--arc-radius);
   padding: 6px 10px;
@@ -35,20 +36,44 @@
   cursor: pointer;
   white-space: nowrap;
 }
-.button:hover {
-  background: rgba(255, 255, 255, 0.22);
+
+label.button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
+
+.button:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.button:focus-visible,
+.closeButton:focus-visible,
+.dateInput:focus-visible {
+  outline: 2px solid var(--arc-paper-white);
+  outline-offset: 2px;
+}
+
 .button[aria-pressed='true'] {
   background: var(--arc-mustard);
   color: var(--arc-ink);
   border-color: var(--arc-mustard);
 }
 
-.dateInput {
-  border-radius: var(--arc-radius);
-  border: none;
+.hint {
   padding: 6px 8px;
-  font-size: 13px;
+  font-size: 12px;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.74);
+  white-space: nowrap;
+}
+
+.dateInput {
+  min-width: 126px;
+  border-radius: 2px;
+  border: none;
+  padding: 4px 6px;
+  font-size: 12px;
 }
 
 .closeButton {
@@ -58,4 +83,29 @@
   cursor: pointer;
   font-size: 16px;
   padding: 4px 6px;
+}
+
+@media (max-width: 700px) {
+  .bar {
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    transform: none;
+    max-width: none;
+  }
+
+  .title {
+    max-width: 150px;
+  }
+}
+
+@media (forced-colors: active) {
+  .bar {
+    border: 1px solid CanvasText;
+  }
+
+  .button,
+  .dateInput {
+    border: 1px solid ButtonText;
+  }
 }
