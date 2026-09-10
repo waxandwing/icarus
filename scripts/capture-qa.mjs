@@ -59,6 +59,17 @@ async function openFurniture(page) {
   await page.waitForTimeout(650);
 }
 
+async function verifyDateSelection(page) {
+  const dateButton = page.locator('button[data-today="true"]');
+  await dateButton.click();
+  await page.getByRole('toolbar', { name: /Actions for/i }).getByRole('button', { name: 'Add to this day' }).waitFor();
+  if ((await dateButton.getAttribute('aria-pressed')) !== 'true') {
+    throw new Error('Selected calendar date did not expose aria-pressed=true.');
+  }
+  await capture(page, `${out}/week-1440-date-selected.png`);
+  await page.keyboard.press('Escape');
+}
+
 async function captureDesktop() {
   const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
   const page = await context.newPage();
@@ -66,6 +77,8 @@ async function captureDesktop() {
   await assertClosedFurnitureHidden(page);
   const before = await page.locator('#arc-calendar-surface').boundingBox();
   await capture(page, `${out}/week-1440-closed.png`);
+
+  await verifyDateSelection(page);
 
   await openFurniture(page);
   await assertOpenFurnitureVisible(page);
