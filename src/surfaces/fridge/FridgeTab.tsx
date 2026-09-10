@@ -4,10 +4,9 @@ import { useWorkspaceStore } from '../../state/store';
 import styles from './FridgeTab.module.css';
 
 export function FridgeTab() {
-  const openPanel = useWorkspaceStore((s) => s.ui.openPanel);
+  const isOpen = useWorkspaceStore((s) => s.ui.openPanels.fridge);
   const toggleFurniture = useWorkspaceStore((s) => s.toggleFurniture);
   const count = useWorkspaceStore((s) => getFridgeItems(s.domain).length);
-  const isOpen = openPanel === 'fridge';
 
   return (
     <button
