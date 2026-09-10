@@ -10,10 +10,6 @@ export function App() {
   const reducedMotionSetting = useWorkspaceStore((s) => s.domain.settings.reducedMotion);
 
   useEffect(() => {
-    void useWorkspaceStore.getState().init();
-  }, []);
-
-  useEffect(() => {
     document.documentElement.setAttribute('data-high-contrast', String(highContrast));
     document.documentElement.setAttribute('data-reduced-motion', String(reducedMotionSetting));
   }, [highContrast, reducedMotionSetting]);
