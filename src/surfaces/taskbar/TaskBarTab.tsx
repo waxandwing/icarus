@@ -3,7 +3,7 @@ import { useWorkspaceStore } from '../../state/store';
 import styles from './TaskBarTab.module.css';
 
 export function TaskBarTab() {
-  const openPanel = useWorkspaceStore((s) => s.ui.openPanel);
+  const isOpen = useWorkspaceStore((s) => s.ui.openPanels.taskbar);
   const toggleFurniture = useWorkspaceStore((s) => s.toggleFurniture);
   const count = useWorkspaceStore(
     (s) =>
@@ -11,7 +11,6 @@ export function TaskBarTab() {
       s.domain.taskbar.columns.should.length +
       s.domain.taskbar.columns.could.length,
   );
-  const isOpen = openPanel === 'taskbar';
 
   return (
     <button
