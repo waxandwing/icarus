@@ -32,9 +32,6 @@ let evidence = [];
 for (const [width,height] of sizes) {
   const page = await browser.newPage({ viewport: { width, height } });
   await page.route('**/functions/v1/teaching-session', async route => {
-    const req = route.request();
-    let body = {};
-    try { body = req.postDataJSON(); } catch {}
     const session = {
       id:'audit-session', room_code:'GOLD42', channel_key:'audit-key', expires_at:new Date(Date.now()+3600000).toISOString(),
       room_projection: projection,
