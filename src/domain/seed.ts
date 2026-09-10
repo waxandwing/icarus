@@ -3,7 +3,7 @@ import { addCalendarDays } from '../calendar/dates';
 import * as cmd from './commands';
 import type { WorkspaceDomainState } from './types';
 
-const CURRENT_SCHEMA_VERSION = 1;
+const CURRENT_SCHEMA_VERSION = 2;
 
 function emptyState(): WorkspaceDomainState {
   return {
