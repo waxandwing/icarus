@@ -119,7 +119,11 @@ async function probeRemote(userId: string): Promise<PersistedWorkspace | null> {
   if (remoteCache !== undefined) return remoteCache;
   const raw = await loadRemoteWorkspace(userId);
   assertActiveAccount(userId);
-  remoteCache = unwrapCloudPayload(raw);
+  const parsed = unwrapCloudPayload(raw);
+  if (raw !== null && parsed === null) {
+    throw new Error('Arc found saved cloud data in an unknown format and refused to overwrite it.');
+  }
+  remoteCache = parsed;
   remoteBaselineKnown = true;
   return remoteCache;
 }
