@@ -31,3 +31,18 @@ jobs:
         run: npm run test
       - name: Production build
         run: npm run build
+      - name: Locate Chromium
+        shell: bash
+        run: |
+          CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+      - name: B08 hostile account circuit
+        run: node tests/b08-browser.cdp.mjs
+      - name: Retain rendered B08 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: b08-rendered-evidence
+          path: artifacts/
+          if-no-files-found: ignore
