@@ -4,9 +4,9 @@
   width: 100%;
   overflow-x: clip;
   background:
-    radial-gradient(ellipse at 20% -10%, rgba(255, 255, 255, 0.4), transparent 55%),
-    linear-gradient(rgba(231, 224, 210, 0.5), rgba(217, 208, 189, 0.5)),
-    url('/assets/arc/texture-wood.webp') center / cover fixed,
+    radial-gradient(circle at 18% 10%, rgba(255, 255, 255, 0.92), transparent 36%),
+    linear-gradient(rgba(250, 247, 239, 0.93), rgba(244, 239, 229, 0.93)),
+    url('/assets/arc/texture-cream-paper.webp') center / cover fixed,
     var(--arc-env-bg);
   display: flex;
   flex-direction: column;
@@ -31,13 +31,13 @@
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding: var(--arc-space-8) var(--arc-space-6) var(--arc-space-16);
+  padding: clamp(24px, 4vw, 56px) clamp(16px, 3vw, 40px) clamp(84px, 10vw, 132px);
 }
 
 .scrim {
   position: fixed;
   inset: 0;
-  background: rgba(44, 46, 46, 0.28);
+  background: rgba(44, 46, 46, 0.14);
   opacity: 0;
   pointer-events: none;
   transition: opacity var(--arc-motion) var(--arc-ease);
