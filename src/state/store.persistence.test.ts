@@ -13,8 +13,11 @@ afterEach(() => {
 
 describe('B08 workspace persistence envelope', () => {
   it('rehydrates domain, Undo, view, anchor date, and furniture from one persisted record', async () => {
-    const domain = createInitialState();
-    domain.settings.highContrast = true;
+    const seed = createInitialState();
+    const domain = {
+      ...seed,
+      settings: { ...seed.settings, highContrast: true },
+    };
     const undo = { label: 'Prior change', snapshot: createInitialState() };
     const loadPersisted = vi.fn(async () => ({
       domain,
