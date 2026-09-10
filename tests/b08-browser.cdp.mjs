@@ -85,6 +85,9 @@ const chrome = spawn(
     '--no-sandbox',
     '--disable-gpu',
     '--disable-dev-shm-usage',
+    '--no-first-run',
+    '--no-default-browser-check',
+    '--remote-allow-origins=*',
     `--remote-debugging-port=${debugPort}`,
     '--remote-debugging-address=127.0.0.1',
     '--user-data-dir=/tmp/arc-b08-chrome',
@@ -92,7 +95,10 @@ const chrome = spawn(
   ],
   { stdio: ['ignore', 'ignore', 'pipe'] },
 );
-chrome.stderr.on('data', () => {});
+chrome.stderr.on('data', (data) => process.stderr.write(data));
+chrome.on('exit', (code, signal) => {
+  if (code && code !== 0) console.error(`Chromium exited early: code=${code} signal=${signal ?? 'none'}`);
+});
 
 async function openPage() {
   await waitFor(baseUrl);
