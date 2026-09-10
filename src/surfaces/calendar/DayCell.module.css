@@ -26,6 +26,11 @@
   box-shadow: inset 0 0 0 2px var(--arc-blue);
 }
 
+.cell[data-selected='true'] {
+  box-shadow: inset 0 0 0 2px rgba(103, 83, 41, 0.48);
+  background-color: rgba(190, 148, 62, 0.06);
+}
+
 .cell[data-today='true'] {
   border-color: var(--arc-terracotta);
   border-width: 2px;
@@ -102,4 +107,11 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+@media (forced-colors: active) {
+  .cell[data-selected='true'] {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
 }
