@@ -5,11 +5,16 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "node scripts/prepare-teaching-fonts.mjs && tsc -b && vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "audit:teaching-render": "node scripts/teaching-mode-render-audit.mjs",
+    "audit:teaching-teacher-render": "node scripts/teaching-mode-teacher-render-audit.mjs"
   },
   "dependencies": {
+    "@fontsource/inter": "5.3.0",
+    "@fontsource/league-spartan": "5.3.0",
+    "@supabase/supabase-js": "2.107.0",
     "date-fns": "^4.4.0",
     "idb": "^8.0.3",
     "immer": "^11.1.18",
@@ -18,13 +23,14 @@
     "zustand": "^5.0.15"
   },
   "devDependencies": {
+    "@playwright/test": "^1.55.0",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",
     "@testing-library/user-event": "^14.6.7",
     "@types/node": "^24.13.3",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
-    "@vitejs/plugin-react": "^6.1.0",
+    "@vitejs/plugin-react": "^6.1.1",
     "jsdom": "^29.1.1",
     "oxlint": "^1.79.0",
     "typescript": "~6.0.2",

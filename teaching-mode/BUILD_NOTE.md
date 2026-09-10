@@ -1,0 +1,65 @@
+# Dependency note
+
+`@supabase/supabase-js` is pinned in `package.json` at `2.107.0`.
+
+The previous npm lockfile predated this dependency. It was removed rather than leaving a stale dependency graph that could falsely imply a reproducible build.
+
+## Required before merge
+Run a trusted npm install/build runner, regenerate `package-lock.json`, commit it, then run build + lint + the Teaching Mode regression suite. Until that happens, the dependency/build gate is YELLOW even though the source integration is complete.
+
+Do not merge this branch to `main` while this gate is yellow.
+
+## Exact commands for the trusted runner
+```sh
+npm install
+npm run build
+npm run lint
+```
+
+Commit the regenerated `package-lock.json` only after those commands complete successfully.
+
+This branch deliberately does not introduce a new visual login screen. Authentication must enter through the canonical Arc access gate when that surface is integrated.
+
+Branch head for this integration batch should remain on `teaching-mode`; no production deploy and no merge to `main` are authorized by this work.
+
+The build gate cannot be inferred from TypeScript source review. Record actual command output before changing YELLOW to GREEN.
+
+Once dependency verification is green, the next executable gate is the real authenticated two-device contract run, followed by B06 twice.
+
+The final reskin remains blocked until those functional gates are green twice.
+
+Do not reintroduce the deleted pre-Supabase lockfile. A new lock must be generated from the updated package manifest.
+
+Green means evidence, not intention.
+
+Expected final sequence: dependency build green → authenticated live contract green twice → B06 green twice → reskin.
+
+No Vercel, Lovable, or Replit is part of this verification path.
+
+No visual change should be approved from this auth batch alone.
+
+If a build runner cannot regenerate the lock and execute the commands, stop at YELLOW rather than guessing.
+
+The live auth test is separate from the dependency build test; neither can substitute for the other.
+
+The second live green must run without backend/source changes after the first green.
+
+Do not lower the gate to make progress appear faster.
+
+Current source work is complete up to the evidence boundary; the next work item is execution, not more architecture.
+
+When the build runner is available, start from the current `teaching-mode` head rather than replaying or cherry-picking older auth commits.
+
+This note is intentionally explicit so another production agent cannot silently call the unexecuted build green.
+
+Before execution, confirm `teaching-mode` resolves to the latest integration commit and not the earlier network-only head.
+
+Only after that ref check should the npm runner be trusted as evidence for this batch.
+
+Branch movement is the final repository action for this source batch.
+
+Source freeze begins after the branch points to the final integration commit.
+
+After moving the ref, do not create another documentation-only source commit; that would immediately change the frozen baseline again.
+
+Use `teaching-mode/FROZEN_AUTH_BASELINE.txt` to identify the frozen lineage.

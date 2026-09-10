@@ -1,0 +1,44 @@
+name: Teaching Mode Gold Gate
+
+on:
+  push:
+    branches: [teaching-mode]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package.json
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Lint
+        run: npm run lint
+      - name: Build
+        run: npm run build
+      - name: Teaching Mode contract audit
+        run: node scripts/teaching-mode-gold-contract.mjs
+      - name: Start production preview
+        run: npm run preview -- --host 127.0.0.1 --port 4173 > /tmp/arc-preview.log 2>&1 &
+      - name: Constitutional typography load audit
+        run: node scripts/teaching-mode-font-audit.mjs
+      - name: Student classroom display render audit
+        run: npm run audit:teaching-render
+      - name: Teacher controller render and interaction audit
+        run: npm run audit:teaching-teacher-render
+      - name: Upload Gold render evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: teaching-mode-gold-render-evidence
+          path: audit-output/teaching-mode
+          if-no-files-found: error
