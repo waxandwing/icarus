@@ -171,7 +171,7 @@ export function WeekView({ onCreate }: ViewProps) {
                       className={`arc-token-${unit.colorToken} ${styles.unitSpan}`}
                       style={{ gridColumn: `${columns.start} / span ${columns.span}` }}
                       aria-pressed={selected}
-                      aria-label={`Unit: ${unit.title}. Select to edit. Unit movement is available in Month and Quarter.`}
+                      aria-label={`Unit: ${unit.title}. Select to edit. Unit movement is available in Month.`}
                       onClick={() => select(selected ? null : { objectType: 'unit', objectId: unit.id })}
                     >
                       <span>{unit.title}</span>
