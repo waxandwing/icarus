@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { getAvailableActions } from './selectionActions';
 
 function actions(
-  objectType: 'unit' | 'lesson' | 'note' | 'magnet',
+  objectType: 'unit' | 'lesson' | 'note' | 'magnet' | 'date',
   overrides: Partial<Parameters<typeof getAvailableActions>[0]> = {},
 ) {
   return getAvailableActions({
@@ -16,6 +16,10 @@ function actions(
 }
 
 describe('contextual calendar action law', () => {
+  it('keeps date selection non-mutating until the teacher chooses an action', () => {
+    expect(actions('date', { hasPlacement: false })).toEqual(['add']);
+  });
+
   it('keeps Units calm and immovable in ordinary Week', () => {
     expect(actions('unit')).toEqual(['edit', 'circle']);
   });
