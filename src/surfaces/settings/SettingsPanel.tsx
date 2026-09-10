@@ -53,8 +53,7 @@ export function SettingsPanel() {
           />
         </label>
         <p style={{ fontSize: 12, color: 'var(--arc-charcoal)', margin: '4px 0 0' }}>
-          Week defaults to Monday\u2013Friday. Turning on weekends shows Sunday through Saturday, Sunday
-          first.
+          Week defaults to Monday-Friday. Turning on weekends shows Sunday through Saturday, Sunday first.
         </p>
       </div>
 
@@ -105,7 +104,7 @@ export function SettingsPanel() {
                 >
                   <input
                     type="text"
-                    placeholder="Add a section\u2026"
+                    placeholder="Add a section..."
                     value={newSectionName[course.id] ?? ''}
                     onChange={(e) => setNewSectionName((s) => ({ ...s, [course.id]: e.target.value }))}
                     style={{ flex: 1, fontSize: 13, padding: '4px 8px', borderRadius: 6, border: '1px solid var(--arc-line-strong)' }}
@@ -130,7 +129,7 @@ export function SettingsPanel() {
         >
           <input
             type="text"
-            placeholder="New course name\u2026"
+            placeholder="New course name..."
             value={newCourseName}
             onChange={(e) => setNewCourseName(e.target.value)}
             style={{ flex: 1, fontSize: 14, padding: '6px 8px', borderRadius: 6, border: '1px solid var(--arc-line-strong)' }}
