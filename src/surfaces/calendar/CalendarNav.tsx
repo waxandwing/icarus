@@ -33,6 +33,8 @@ export function CalendarNav() {
   function go(direction: -1 | 1) {
     if (view === 'month') {
       const d = fromISODate(anchor);
+      // Move from the first day so Jan 31 → next month cannot overflow into March.
+      d.setDate(1);
       d.setMonth(d.getMonth() + direction);
       setAnchor(toISODate(d));
       return;
