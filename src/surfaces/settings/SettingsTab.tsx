@@ -3,9 +3,8 @@ import { useWorkspaceStore } from '../../state/store';
 import styles from './SettingsTab.module.css';
 
 export function SettingsTab() {
-  const openPanel = useWorkspaceStore((s) => s.ui.openPanel);
+  const isOpen = useWorkspaceStore((s) => s.ui.openPanels.settings);
   const toggleFurniture = useWorkspaceStore((s) => s.toggleFurniture);
-  const isOpen = openPanel === 'settings';
 
   return (
     <button
