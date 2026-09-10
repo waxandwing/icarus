@@ -1,8 +1,8 @@
 import { FormEvent, useEffect, useRef, useState } from 'react';
 import styles from './EntryFlow.module.css';
 
-type Stage = 'entry' | 'access' | 'setup';
-type AccessMode = 'email' | 'beta';
+type Stage = 'entry' | 'setup';
+type AccessMode = 'beta' | 'email';
 
 type SetupData = {
   name: string;
@@ -59,7 +59,7 @@ export function EntryFlow({ onComplete }: { onComplete: () => void }) {
       });
       const result = await response.json().catch(() => ({ ok: false }));
       if (!response.ok || !result.ok) {
-        setError(result.error || 'Beta access could not be verified.');
+        setError(result.error || 'That password did not open Arc.');
         return;
       }
       advanceAccess();
@@ -88,40 +88,15 @@ export function EntryFlow({ onComplete }: { onComplete: () => void }) {
   };
 
   if (stage === 'entry') {
-    return <OpeningAnimation onChoose={(next) => { setMode(next); setStage('access'); }} />;
-  }
-
-  if (stage === 'access') {
     return (
-      <main className={styles.paperStage}>
-        <section className={styles.accessCard} aria-labelledby="access-title">
-          <div className={styles.brandColumn}>
-            <div className={styles.brandMark} aria-hidden="true">arc</div>
-            <p className={styles.eyebrow}>PRIVATE BETA</p>
-            <h1 id="access-title">Come on in.</h1>
-            <p className={styles.lede}>Arc keeps the plan intact when the day does not.</p>
-          </div>
-          <div className={styles.formColumn}>
-            <div className={styles.modeSwitch} role="group" aria-label="Access method">
-              <button type="button" className={mode === 'beta' ? styles.modeActive : ''} aria-pressed={mode === 'beta'} onClick={() => { setMode('beta'); setError(''); }}>Beta password</button>
-              <button type="button" className={mode === 'email' ? styles.modeActive : ''} aria-pressed={mode === 'email'} onClick={() => { setMode('email'); setError(''); }}>Email</button>
-            </div>
-            {mode === 'beta' ? (
-              <form onSubmit={submitBeta} className={styles.form}>
-                <label htmlFor="beta-password">Beta password<input id="beta-password" name="password" type="password" autoComplete="current-password" autoFocus /></label>
-                <button className={styles.primary} type="submit" disabled={checkingAccess}>{checkingAccess ? 'Checking…' : 'Continue'}</button>
-              </form>
-            ) : (
-              <form onSubmit={submitEmail} className={styles.form}>
-                <label htmlFor="access-email">Email<input id="access-email" name="email" type="email" autoComplete="email" autoFocus /></label>
-                <button className={styles.primary} type="submit">Continue</button>
-              </form>
-            )}
-            {error && <p className={styles.error} role="alert">{error}</p>}
-            <button type="button" className={styles.textButton} onClick={() => setStage('entry')}>Back</button>
-          </div>
-        </section>
-      </main>
+      <OpeningGate
+        mode={mode}
+        setMode={setMode}
+        error={error}
+        checkingAccess={checkingAccess}
+        onBetaSubmit={submitBeta}
+        onEmailSubmit={submitEmail}
+      />
     );
   }
 
@@ -152,7 +127,16 @@ export function EntryFlow({ onComplete }: { onComplete: () => void }) {
   );
 }
 
-function OpeningAnimation({ onChoose }: { onChoose: (mode: AccessMode) => void }) {
+type OpeningGateProps = {
+  mode: AccessMode;
+  setMode: (mode: AccessMode) => void;
+  error: string;
+  checkingAccess: boolean;
+  onBetaSubmit: (e: FormEvent<HTMLFormElement>) => void;
+  onEmailSubmit: (e: FormEvent<HTMLFormElement>) => void;
+};
+
+function OpeningGate({ mode, setMode, error, checkingAccess, onBetaSubmit, onEmailSubmit }: OpeningGateProps) {
   const video = useRef<HTMLVideoElement>(null);
   const [ready, setReady] = useState(false);
 
@@ -161,54 +145,21 @@ function OpeningAnimation({ onChoose }: { onChoose: (mode: AccessMode) => void }
     if (!el) return;
 
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches || document.documentElement.getAttribute('data-reduced-motion') === 'true';
-    let frame = 0;
-    let failed = false;
+    const failOpen = () => setReady(true);
+    const finishOpen = () => setReady(true);
 
-    const sync = () => {
-      const t = el.currentTime || 0;
-      const p = reduced || failed ? 1 : Math.max(0, Math.min(1, (t - 3.28) / (6.65 - 3.28)));
-      const ease = p * p * p * (p * (p * 6 - 15) + 10);
-      el.style.setProperty('--reel-scale', String(1.10 + (.68 - 1.10) * ease));
-      el.style.setProperty('--reel-trim', String(-.401 * ease));
-      setReady(reduced || failed || t >= 7.08);
-    };
-
-    const tick = () => {
-      sync();
-      if (!el.paused && !el.ended) frame = requestAnimationFrame(tick);
-    };
-    const onPlay = () => {
-      cancelAnimationFrame(frame);
-      tick();
-    };
-    const failOpen = () => {
-      failed = true;
-      setReady(true);
-      sync();
-    };
-
-    el.addEventListener('play', onPlay);
-    el.addEventListener('timeupdate', sync);
-    el.addEventListener('seeking', sync);
-    el.addEventListener('seeked', sync);
-    el.addEventListener('ratechange', sync);
+    el.addEventListener('ended', finishOpen);
     el.addEventListener('error', failOpen);
 
     if (reduced) {
       el.pause();
       setReady(true);
-      sync();
     } else {
       el.play().catch(failOpen);
     }
 
     return () => {
-      cancelAnimationFrame(frame);
-      el.removeEventListener('play', onPlay);
-      el.removeEventListener('timeupdate', sync);
-      el.removeEventListener('seeking', sync);
-      el.removeEventListener('seeked', sync);
-      el.removeEventListener('ratechange', sync);
+      el.removeEventListener('ended', finishOpen);
       el.removeEventListener('error', failOpen);
     };
   }, []);
@@ -216,21 +167,46 @@ function OpeningAnimation({ onChoose }: { onChoose: (mode: AccessMode) => void }
   return (
     <main className={styles.entryStage} aria-labelledby="entry-title">
       <section className={`${styles.entryContent} ${ready ? styles.ready : ''}`}>
-        <div className={styles.reelWrap} role="img" aria-label="Arc logo animation resolving from a busy teacher planning week">
-          <video ref={video} className={styles.reel} muted playsInline preload="auto" poster="/arc-motion-final-transparent.png" aria-hidden="true">
+        <div className={styles.reelWrap} role="img" aria-label="Teacher planning notes gather, become geometric pieces, and construct the Arc mark">
+          <video ref={video} className={styles.reel} muted playsInline preload="auto" aria-hidden="true">
             <source src="/Arc_Motion_Transparent.webm" type="video/webm" />
           </video>
-          <img className={styles.reelFallback} src="/arc-motion-final-transparent.png" alt="" />
+          <img className={styles.reelFallback} src="/assets/arc/arc-mark-stacked.webp" alt="" />
         </div>
-        <div className={styles.entryCopy} aria-hidden={!ready}>
-          <p className={styles.eyebrow}>PLAN THE WAY YOU THINK.</p>
-          <h1 id="entry-title">Making it make sense.</h1>
-          <p className={styles.intro}>A teacher planner built for what actually happens.</p>
-          <nav className={styles.actions} aria-label="Beta access options">
-            <button className={styles.primary} onClick={() => onChoose('email')}>Sign up with email</button>
-            <button className={styles.secondary} onClick={() => onChoose('beta')}>Log in with beta password</button>
-          </nav>
-        </div>
+
+        <section className={styles.gateShelf} aria-label="Arc private beta access" aria-hidden={!ready}>
+          <div className={styles.gateHeading}>
+            <span className={styles.gateKicker}>PRIVATE BETA</span>
+            <h1 id="entry-title">Come on in.</h1>
+          </div>
+
+          <div className={styles.accessSwitch} role="group" aria-label="Access method">
+            <button type="button" className={mode === 'beta' ? styles.accessActive : ''} aria-pressed={mode === 'beta'} onClick={() => setMode('beta')}>Beta password</button>
+            <button type="button" className={mode === 'email' ? styles.accessActive : ''} aria-pressed={mode === 'email'} onClick={() => setMode('email')}>Email</button>
+          </div>
+
+          {mode === 'beta' ? (
+            <form onSubmit={onBetaSubmit} className={styles.gateForm}>
+              <label htmlFor="beta-password">Beta password</label>
+              <div className={styles.gateControlRow}>
+                <input id="beta-password" name="password" type="password" autoComplete="current-password" autoFocus={ready} aria-describedby={error ? 'access-error' : undefined} />
+                <button className={styles.gateSubmit} type="submit" disabled={checkingAccess}>{checkingAccess ? 'Checking…' : 'Open Arc'}</button>
+              </div>
+            </form>
+          ) : (
+            <form onSubmit={onEmailSubmit} className={styles.gateForm}>
+              <label htmlFor="access-email">Email</label>
+              <div className={styles.gateControlRow}>
+                <input id="access-email" name="email" type="email" autoComplete="email" autoFocus={ready} aria-describedby={error ? 'access-error' : undefined} />
+                <button className={styles.gateSubmit} type="submit">Continue</button>
+              </div>
+            </form>
+          )}
+
+          <div className={styles.gateMeta}>
+            {error ? <p id="access-error" className={styles.error} role="alert">{error}</p> : <p>Built for plans that change.</p>}
+          </div>
+        </section>
       </section>
     </main>
   );
