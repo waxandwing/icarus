@@ -6,7 +6,7 @@ const out = path.resolve('audit-output/teaching-mode');
 fs.mkdirSync(out, { recursive: true });
 
 const sizes = [
-  [390,844], [768,1024], [1024,768], [1280,720], [1366,768], [1600,900], [1920,1080],
+  [390,844], [640,360], [768,1024], [1024,768], [1280,720], [1366,768], [1600,900], [1920,1080],
 ];
 
 let projection = {
@@ -29,6 +29,10 @@ const browser = await chromium.launch({ headless: true });
 let failures = [];
 let evidence = [];
 
+function intersects(a,b) {
+  return a && b && !(a.x+a.width<=b.x || b.x+b.width<=a.x || a.y+a.height<=b.y || b.y+b.height<=a.y);
+}
+
 for (const [width,height] of sizes) {
   const page = await browser.newPage({ viewport: { width, height } });
   await page.route('**/functions/v1/teaching-session', async route => {
@@ -50,19 +54,20 @@ for (const [width,height] of sizes) {
       iw: innerWidth,
       ih: innerHeight,
       titleRect: document.querySelector('#title')?.getBoundingClientRect().toJSON(),
+      bodyRect: document.querySelector('#body')?.getBoundingClientRect().toJSON(),
       timerRect: document.querySelector('#timer:not([hidden])')?.getBoundingClientRect().toJSON() || null,
       clockRect: document.querySelector('#clock:not([hidden])')?.getBoundingClientRect().toJSON() || null,
       passRect: document.querySelector('#pass')?.getBoundingClientRect().toJSON(),
+      progressRect: document.querySelector('#progress')?.getBoundingClientRect().toJSON(),
     }));
     const overflow = result.sw > result.iw + 1 || result.sh > result.ih + 1;
     if (overflow) failures.push(`${width}x${height} ${label}: document overflow ${result.sw}x${result.sh}`);
-    const rects = [result.titleRect,result.timerRect,result.clockRect,result.passRect].filter(Boolean);
+    const rects = [result.titleRect,result.bodyRect,result.timerRect,result.clockRect,result.passRect,result.progressRect].filter(Boolean);
     for (const r of rects) if (r.x < -1 || r.y < -1 || r.x+r.width > result.iw+1 || r.y+r.height > result.ih+1) failures.push(`${width}x${height} ${label}: critical element clipped`);
-    if (result.timerRect && result.clockRect) {
-      const a=result.timerRect,b=result.clockRect;
-      const collide=!(a.x+a.width<=b.x||b.x+b.width<=a.x||a.y+a.height<=b.y||b.y+b.height<=a.y);
-      if (collide) failures.push(`${width}x${height} ${label}: timer/clock collision`);
-    }
+    if (intersects(result.timerRect,result.clockRect)) failures.push(`${width}x${height} ${label}: timer/clock collision`);
+    if (intersects(result.timerRect,result.titleRect) || intersects(result.timerRect,result.bodyRect)) failures.push(`${width}x${height} ${label}: timer/content collision`);
+    if (intersects(result.passRect,result.titleRect) || intersects(result.passRect,result.bodyRect)) failures.push(`${width}x${height} ${label}: pass/content collision`);
+    if (intersects(result.progressRect,result.timerRect) || intersects(result.progressRect,result.clockRect)) failures.push(`${width}x${height} ${label}: progress/status collision`);
   };
 
   await assertLayout('live');
@@ -114,7 +119,7 @@ const report = {
   states:['live','held','paused','blank','reduced-motion'],
   evidence,
   failures,
-  note:'Teacher-facing rendered Gold audit remains a separate required gate and is not satisfied by this script.'
+  note:'640x360 is the 1280x720 200%-zoom reflow equivalent. Teacher-facing rendered Gold audit remains a separate required gate.'
 };
 fs.writeFileSync(path.join(out,'render-audit.json'),JSON.stringify(report,null,2));
 console.log(JSON.stringify(report,null,2));
