@@ -1,41 +1,39 @@
 .shell {
   position: relative;
-  width: min(1366px, 100%);
-  min-height: 620px;
-  padding: clamp(72px, 8vw, 104px) clamp(72px, 12vw, 172px)
-    clamp(54px, 7vw, 88px);
-  background:
-    url('/assets/arc/calendar-open-planner.webp') center / 100% 100% no-repeat,
-    transparent;
-  filter: drop-shadow(0 16px 24px rgba(44, 46, 46, 0.18));
+  width: min(1180px, 100%);
+  min-height: 720px;
+  padding: clamp(74px, 7.4vw, 96px) clamp(82px, 9.5vw, 126px) clamp(64px, 6vw, 82px);
+  background: url('/assets/arc/calendar-open-planner.webp') center / 100% 100% no-repeat;
+  filter: drop-shadow(0 18px 24px rgba(44, 46, 46, 0.13));
 }
 
 .header {
   position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--arc-space-4);
-  padding: var(--arc-space-4) var(--arc-space-6) var(--arc-space-3);
-  border-bottom: 1px solid var(--arc-line);
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: end;
+  gap: clamp(18px, 2vw, 28px);
+  padding: 4px 18px 14px;
+  border-bottom: 1px solid rgba(65, 61, 55, 0.2);
 }
 
 .brand {
   display: flex;
   align-items: center;
-  gap: var(--arc-space-2);
+  gap: 8px;
+  align-self: start;
+  padding-top: 1px;
 }
 
 .brandName {
   font-family: var(--arc-font-serif);
-  font-size: 20px;
-  letter-spacing: 0.02em;
+  font-size: 18px;
+  letter-spacing: 0.01em;
 }
 
 .body {
   position: relative;
-  padding: var(--arc-space-4) var(--arc-space-6) var(--arc-space-6);
+  padding: 14px 18px 24px;
 }
 
 @media (max-width: 900px) {
@@ -43,19 +41,36 @@
     min-height: 0;
     padding: 0;
     background:
-      linear-gradient(rgba(251, 248, 241, 0.9), rgba(251, 248, 241, 0.9)),
+      linear-gradient(rgba(251, 248, 241, 0.94), rgba(251, 248, 241, 0.94)),
       url('/assets/arc/texture-cream-paper.webp') center / cover;
     border: 1px solid var(--arc-line);
     border-radius: var(--arc-radius-lg);
-    filter: drop-shadow(0 10px 20px rgba(44, 46, 46, 0.14));
+    filter: drop-shadow(0 10px 20px rgba(44, 46, 46, 0.11));
     overflow: hidden;
+  }
+
+  .header {
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    padding: 18px 16px 12px;
+  }
+
+  .header > :last-child {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+
+  .body {
+    padding: 12px 16px 20px;
   }
 }
 
-@media (max-width: 720px) {
-  .header,
-  .body {
-    padding-left: var(--arc-space-3);
-    padding-right: var(--arc-space-3);
+@media (max-width: 560px) {
+  .header {
+    grid-template-columns: 1fr;
+  }
+
+  .brand {
+    display: none;
   }
 }
