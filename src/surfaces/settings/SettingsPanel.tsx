@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { PaletteToken } from '../../domain/types';
 import { getSectionsForCourse } from '../../projections/selectors';
 import { useWorkspaceStore } from '../../state/store';
+import { signOutLocally } from '../../auth/supabase';
 import formStyles from '../../components/Form.module.css';
 import styles from './SettingsPanel.module.css';
 
@@ -17,6 +18,7 @@ export function SettingsPanel() {
   const createSection = useWorkspaceStore((s) => s.createSection);
   const setCalendarDay = useWorkspaceStore((s) => s.setCalendarDay);
   const resetWorkspace = useWorkspaceStore((s) => s.resetWorkspace);
+  const [signingOut, setSigningOut] = useState(false);
 
   const [newCourseName, setNewCourseName] = useState('');
   const [newSectionName, setNewSectionName] = useState<Record<string, string>>({});
@@ -173,6 +175,24 @@ export function SettingsPanel() {
             Set day
           </button>
         </form>
+      </div>
+
+      <div className={styles.section}>
+        <div className={styles.sectionTitle}>Account</div>
+        <button
+          type="button"
+          className={formStyles.secondaryButton}
+          disabled={signingOut}
+          onClick={() => {
+            setSigningOut(true);
+            void signOutLocally().catch((error) => {
+              console.error('Arc: sign out failed.', error);
+              setSigningOut(false);
+            });
+          }}
+        >
+          {signingOut ? 'Signing out\u2026' : 'Sign out'}
+        </button>
       </div>
 
       <div className={styles.dangerZone}>
