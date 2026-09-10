@@ -1,9 +1,7 @@
 name: Arc Interface Capture Audit
 
+# AUDIT ONLY. Manual trigger only. No deployment step or deployment permission.
 on:
-  pull_request:
-    branches:
-      - main
   workflow_dispatch:
 
 permissions:
@@ -11,7 +9,6 @@ permissions:
 
 jobs:
   capture:
-    if: github.head_ref == 'audit/gold-interface-capture' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
