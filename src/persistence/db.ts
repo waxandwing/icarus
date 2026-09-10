@@ -10,9 +10,16 @@ const LEGACY_KEY = 'current';
 const ACCOUNT_KEY_PREFIX = 'account:';
 const LEGACY_DECLINED_PREFIX = 'legacy-declined:';
 
+export interface PersistedWorkspaceUi {
+  view: 'day' | 'week' | 'month';
+  anchorDate: string;
+  openPanel: 'settings' | 'fridge' | 'taskbar' | 'drawer' | null;
+}
+
 export interface PersistedWorkspace {
   domain: WorkspaceDomainState;
   undo: { label: string; snapshot: WorkspaceDomainState } | null;
+  workspaceUi?: PersistedWorkspaceUi;
   savedAt: number;
 }
 
