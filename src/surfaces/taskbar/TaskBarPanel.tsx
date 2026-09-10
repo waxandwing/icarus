@@ -93,8 +93,7 @@ function Column({ id, label }: { id: TaskColumn; label: string }) {
 }
 
 export function TaskBarPanel() {
-  const openPanel = useWorkspaceStore((s) => s.ui.openPanel);
-  const isOpen = openPanel === 'taskbar';
+  const isOpen = useWorkspaceStore((s) => s.ui.openPanels.taskbar);
   const openFurniture = useWorkspaceStore((s) => s.openFurniture);
 
   return (
@@ -107,7 +106,12 @@ export function TaskBarPanel() {
     >
       <div className={styles.headerRow}>
         <h2 className={styles.heading}>Task Bar</h2>
-        <button type="button" className={styles.closeButton} onClick={() => openFurniture(null)} aria-label="Close task bar">
+        <button
+          type="button"
+          className={styles.closeButton}
+          onClick={() => openFurniture('taskbar', false)}
+          aria-label="Close task bar"
+        >
           {'\u2715'}
         </button>
       </div>
