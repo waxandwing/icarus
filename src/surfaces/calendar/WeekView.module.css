@@ -50,6 +50,11 @@
   background: rgba(190, 148, 62, 0.045);
 }
 
+.dateHeader[data-selected='true'] {
+  background: rgba(190, 148, 62, 0.09);
+  box-shadow: inset 0 -2px 0 rgba(103, 83, 41, 0.48);
+}
+
 .dateHeader[data-today='true'] .dayNumber {
   text-decoration: underline;
   text-decoration-thickness: 1px;
@@ -297,6 +302,11 @@
   .dayColumn[data-kind='no-school'],
   .dayColumn[data-kind='early-release'] {
     border-top: 2px dashed CanvasText;
+  }
+
+  .dateHeader[data-selected='true'] {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
   }
 
   .unitSpan,
