@@ -32,3 +32,25 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      - name: Install visual QA browser
+        run: |
+          npm install --no-save @playwright/test@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Capture rendered QA states
+        run: |
+          npm run preview -- --host 127.0.0.1 > /tmp/arc-preview.log 2>&1 &
+          for i in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:43217 > /dev/null; then break; fi
+            sleep 1
+          done
+          node scripts/capture-qa.mjs
+
+      - name: Upload rendered QA states
+        uses: actions/upload-artifact@v4
+        with:
+          name: arc-rendered-qa
+          path: artifacts/visual-qa/*.png
+          if-no-files-found: error
+          retention-days: 7
