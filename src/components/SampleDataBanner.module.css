@@ -2,35 +2,50 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--arc-space-3);
-  background: var(--arc-mustard);
-  color: var(--arc-ink);
-  border-radius: var(--arc-radius);
-  padding: 10px 14px;
-  margin: 0 var(--arc-space-4) var(--arc-space-3);
-  font-size: 13px;
+  gap: 10px;
+  background: rgba(205, 159, 50, 0.14);
+  color: var(--arc-charcoal);
+  border-top: 1px solid rgba(122, 94, 35, 0.16);
+  border-bottom: 1px solid rgba(122, 94, 35, 0.16);
+  padding: 6px 18px;
+  margin: 0 18px 8px;
+  font-size: 11px;
+  line-height: 1.25;
   flex-wrap: wrap;
 }
 
 .actions {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   flex-shrink: 0;
 }
 
 .button {
-  border: 1px solid var(--arc-ink);
+  border: 0;
+  border-bottom: 1px solid currentColor;
   background: transparent;
-  color: var(--arc-ink);
-  border-radius: 6px;
-  padding: 4px 10px;
-  font-size: 12px;
+  color: var(--arc-charcoal);
+  border-radius: 0;
+  padding: 2px 1px;
+  font-size: 10px;
   font-weight: 700;
   cursor: pointer;
   white-space: nowrap;
 }
 
 .button[data-tone='primary'] {
-  background: var(--arc-ink);
-  color: var(--arc-paper-white);
+  background: transparent;
+  color: var(--arc-ink);
+}
+
+.button:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+@media (max-width: 560px) {
+  .banner {
+    margin: 0 14px 8px;
+    padding: 7px 0;
+  }
 }
