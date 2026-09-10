@@ -38,7 +38,7 @@ jobs:
           test -n "$CHROME_BIN"
           echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
       - name: B08 hostile account and reload circuit
-        run: node tests/b08-browser-v3.cdp.mjs
+        run: node tests/b08-browser-v4.cdp.mjs
       - name: Retain rendered B08 evidence
         if: always()
         uses: actions/upload-artifact@v4
