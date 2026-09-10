@@ -64,12 +64,12 @@ async function captureDesktop() {
   const page = await context.newPage();
   await page.goto(base, { waitUntil: 'networkidle' });
   await assertClosedFurnitureHidden(page);
-  const before = await page.locator('#arc-calendar-shell').boundingBox();
+  const before = await page.locator('#arc-calendar-surface').boundingBox();
   await capture(page, `${out}/week-1440-closed.png`);
 
   await openFurniture(page);
   await assertOpenFurnitureVisible(page);
-  const after = await page.locator('#arc-calendar-shell').boundingBox();
+  const after = await page.locator('#arc-calendar-surface').boundingBox();
   assertSameBox(before, after, '1440 desktop');
   await capture(page, `${out}/week-1440-all-open.png`);
 
@@ -81,11 +81,11 @@ async function captureMedium() {
   const page = await context.newPage();
   await page.goto(base, { waitUntil: 'networkidle' });
   await assertClosedFurnitureHidden(page);
-  const before = await page.locator('#arc-calendar-shell').boundingBox();
+  const before = await page.locator('#arc-calendar-surface').boundingBox();
   await capture(page, `${out}/week-1280-closed.png`);
   await openFurniture(page);
   await assertOpenFurnitureVisible(page);
-  const after = await page.locator('#arc-calendar-shell').boundingBox();
+  const after = await page.locator('#arc-calendar-surface').boundingBox();
   assertSameBox(before, after, '1280 desktop');
   await capture(page, `${out}/week-1280-all-open.png`);
   await context.close();
