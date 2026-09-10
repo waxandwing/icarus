@@ -8,8 +8,7 @@ import styles from './SettingsPanel.module.css';
 const COLOR_OPTIONS: PaletteToken[] = ['sage', 'blue', 'terracotta', 'mustard', 'pink', 'lavender', 'kraft'];
 
 export function SettingsPanel() {
-  const openPanel = useWorkspaceStore((s) => s.ui.openPanel);
-  const isOpen = openPanel === 'settings';
+  const isOpen = useWorkspaceStore((s) => s.ui.openPanels.settings);
   const domain = useWorkspaceStore((s) => s.domain);
   const openFurniture = useWorkspaceStore((s) => s.openFurniture);
   const updateSettings = useWorkspaceStore((s) => s.updateSettings);
@@ -35,7 +34,12 @@ export function SettingsPanel() {
       aria-hidden={!isOpen}
       aria-label="Settings"
     >
-      <button type="button" className={styles.closeButton} onClick={() => openFurniture(null)} aria-label="Close settings">
+      <button
+        type="button"
+        className={styles.closeButton}
+        onClick={() => openFurniture('settings', false)}
+        aria-label="Close settings"
+      >
         {'\u2715'}
       </button>
       <h2 className={styles.heading}>Settings</h2>
