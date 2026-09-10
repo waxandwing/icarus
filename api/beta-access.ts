@@ -8,6 +8,8 @@ function sameSecret(a: string, b: string) {
 }
 
 export default function handler(req: any, res: any) {
+  res.setHeader('Cache-Control', 'no-store');
+
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
     return res.status(405).json({ ok: false });
@@ -15,14 +17,13 @@ export default function handler(req: any, res: any) {
 
   const expected = process.env.ARC_BETA_PASSWORD;
   if (!expected) {
-    return res.status(503).json({ ok: false, error: 'Beta access is not configured.' });
+    return res.status(503).json({ ok: false, error: 'Beta access is temporarily unavailable.' });
   }
 
   const supplied = typeof req.body?.password === 'string' ? req.body.password : '';
-  if (!sameSecret(supplied, expected)) {
-    return res.status(401).json({ ok: false, error: 'That beta password does not match.' });
+  if (!supplied || supplied.length > 256 || !sameSecret(supplied, expected)) {
+    return res.status(401).json({ ok: false, error: 'Access could not be verified.' });
   }
 
-  res.setHeader('Cache-Control', 'no-store');
   return res.status(200).json({ ok: true });
 }
