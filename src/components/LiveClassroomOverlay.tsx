@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { getArcAccessToken } from '../auth/arcAuth';
 import { liveSessionTransport, type LiveSession, type PassEvent, type RoomMode, type RoomProjection, type RosterStudent } from '../teaching/liveSessionTransport';
 import { useWorkspaceStore } from '../state/store';
@@ -16,6 +16,8 @@ function initialProjection(title: string, body: string): RoomProjection {
     layout: { pass: 'bottom-left', clock: 'top-right', progress: 'top' },
   };
 }
+
+type PendingUpdate = { projection: RoomProjection; note: string };
 
 function LiveClassroomContent({ sectionId, lessonId }: { sectionId: string; lessonId: string }) {
   const domain = useWorkspaceStore((s) => s.domain);
@@ -35,9 +37,24 @@ function LiveClassroomContent({ sectionId, lessonId }: { sectionId: string; less
   const [showEnd, setShowEnd] = useState(false);
   const [showRoster, setShowRoster] = useState(false);
 
+  const sessionRef = useRef<LiveSession | null>(null);
+  const pendingRef = useRef<PendingUpdate | null>(null);
+  const updateInFlightRef = useRef(false);
+  const retryTimerRef = useRef<number | null>(null);
+  const mountedRef = useRef(true);
+
   const roomUrl = useMemo(() => `${window.location.origin}/teaching-room.html`, []);
   const currentState = domain.delivery[sectionId]?.[lessonId]?.state ?? 'not-started';
   const alreadyFinal = currentState === 'completed' || currentState === 'skipped';
+
+  useEffect(() => {
+    sessionRef.current = session;
+  }, [session]);
+
+  useEffect(() => () => {
+    mountedRef.current = false;
+    if (retryTimerRef.current !== null) window.clearTimeout(retryTimerRef.current);
+  }, []);
 
   useEffect(() => {
     if (!lesson || alreadyFinal) return;
@@ -46,18 +63,32 @@ function LiveClassroomContent({ sectionId, lessonId }: { sectionId: string; less
       try {
         const accessToken = await getArcAccessToken();
         if (!accessToken) throw new Error('Sign in to Arc before starting Table.');
-        const roomProjection = initialProjection(lesson.title, lesson.body || '');
-        const result = await liveSessionTransport.start({
-          accessToken,
-          sectionId,
-          lessonTitle: lesson.title,
-          teacherState: { sectionId, lessonId, quickNote: '', passStudentId: null, passStudentName: null },
-          roomProjection,
-        });
-        if (cancelled) return;
-        setSession(result.session);
-        setProjection(result.session.room_projection);
-        setStatus('Room ready');
+
+        const resumable = await liveSessionTransport.resume(accessToken).catch(() => null);
+        const resumableTeacherState = resumable?.teacher_state as { sectionId?: string; lessonId?: string; quickNote?: string } | undefined;
+        if (resumable && resumableTeacherState?.sectionId === sectionId && resumableTeacherState?.lessonId === lessonId) {
+          if (cancelled) return;
+          sessionRef.current = resumable;
+          setSession(resumable);
+          setProjection(resumable.room_projection);
+          setQuickNote(resumableTeacherState.quickNote || '');
+          setStatus('Room recovered');
+        } else {
+          const roomProjection = initialProjection(lesson.title, lesson.body || '');
+          const result = await liveSessionTransport.start({
+            accessToken,
+            sectionId,
+            lessonTitle: lesson.title,
+            teacherState: { sectionId, lessonId, quickNote: '', passStudentId: null, passStudentName: null },
+            roomProjection,
+          });
+          if (cancelled) return;
+          sessionRef.current = result.session;
+          setSession(result.session);
+          setProjection(result.session.room_projection);
+          setStatus('Room ready');
+        }
+
         try {
           const [{ roster: loadedRoster }, activePasses] = await Promise.all([
             liveSessionTransport.roster({ accessToken, sectionId }),
@@ -73,25 +104,49 @@ function LiveClassroomContent({ sectionId, lessonId }: { sectionId: string; less
     return () => { cancelled = true; };
   }, [alreadyFinal, lesson, lessonId, sectionId]);
 
-  async function push(next: RoomProjection, note = quickNote) {
-    if (!session) return;
-    setProjection(next);
+  async function flushPending() {
+    if (updateInFlightRef.current || !pendingRef.current || !sessionRef.current) return;
+    updateInFlightRef.current = true;
+    const pending = pendingRef.current;
+    const activeSession = sessionRef.current;
     try {
       const accessToken = await getArcAccessToken();
       if (!accessToken) throw new Error('Arc session expired.');
       const updated = await liveSessionTransport.update({
         accessToken,
-        sessionId: session.id,
-        teacherState: { sectionId, lessonId, quickNote: note, passStudentId: null, passStudentName: null },
-        roomProjection: next,
+        sessionId: activeSession.id,
+        teacherState: { sectionId, lessonId, quickNote: pending.note, passStudentId: null, passStudentName: null },
+        roomProjection: pending.projection,
       });
+      if (!mountedRef.current) return;
+      sessionRef.current = updated;
       setSession(updated);
+      if (pendingRef.current === pending) pendingRef.current = null;
       setStatus('Display synced');
       setError('');
     } catch (e) {
+      if (!mountedRef.current) return;
       setError(e instanceof Error ? e.message : 'Display update failed.');
       setStatus('Reconnecting');
+      if (retryTimerRef.current === null) {
+        retryTimerRef.current = window.setTimeout(() => {
+          retryTimerRef.current = null;
+          void flushPending();
+        }, 1500);
+      }
+    } finally {
+      updateInFlightRef.current = false;
+      if (mountedRef.current && pendingRef.current && pendingRef.current !== pending && retryTimerRef.current === null) {
+        void flushPending();
+      }
     }
+  }
+
+  async function push(next: RoomProjection, note = quickNote) {
+    if (!sessionRef.current) return;
+    setProjection(next);
+    pendingRef.current = { projection: next, note };
+    await flushPending();
   }
 
   function setMode(roomMode: RoomMode) {
@@ -111,11 +166,11 @@ function LiveClassroomContent({ sectionId, lessonId }: { sectionId: string; less
   }
 
   async function sendStudent(student: RosterStudent) {
-    if (!session || !projection) return;
+    if (!sessionRef.current || !projection) return;
     try {
       const accessToken = await getArcAccessToken();
       if (!accessToken) throw new Error('Arc session expired.');
-      const pass = await liveSessionTransport.startPass({ accessToken, sessionId: session.id, studentId: student.studentId });
+      const pass = await liveSessionTransport.startPass({ accessToken, sessionId: sessionRef.current.id, studentId: student.studentId });
       setPasses((p) => [...p, pass]);
       await push({ ...projection, pass: { active: true, publicLabel: 'PASS OUT', startedAt: pass.departed_at } });
     } catch (e) { setError(e instanceof Error ? e.message : 'Could not start pass.'); }
@@ -135,9 +190,9 @@ function LiveClassroomContent({ sectionId, lessonId }: { sectionId: string; less
 
   async function endClass(outcome: 'completed' | 'in-progress') {
     try {
-      if (session) {
+      if (sessionRef.current) {
         const accessToken = await getArcAccessToken();
-        if (accessToken) await liveSessionTransport.end(accessToken, session.id);
+        if (accessToken) await liveSessionTransport.end(accessToken, sessionRef.current.id);
       }
       const result = setDelivery(sectionId, lessonId, outcome, outcome === 'in-progress' ? quickNote : undefined);
       if (result.ok) closeLiveClassroom();
