@@ -62,6 +62,19 @@ export interface Unit {
   createdAt: number;
 }
 
+/**
+ * One configurable piece of a Lesson plan. The same canonical field can be
+ * shown in the teacher planner, projected into Table, both, or neither. Array
+ * order is the teacher's chosen order; there is no duplicate Table lesson.
+ */
+export interface LessonField {
+  id: string;
+  label: string;
+  content: string;
+  plannerVisible: boolean;
+  tableVisible: boolean;
+}
+
 export interface Lesson {
   id: string;
   kind: 'lesson';
@@ -69,7 +82,9 @@ export interface Lesson {
   unitId?: string;
   sectionId?: string; // absent = shared across all Sections of the Course
   title: string;
+  /** Freeform teacher notes retained independently from structured planning fields. */
   body?: string;
+  fields: LessonField[];
   important: boolean;
   crossedOut: boolean;
   visibility: Visibility;
