@@ -3,6 +3,7 @@ import { ArcMark } from '../assets/ArcMark';
 import { useWorkspaceStore } from '../state/store';
 import { AppFrame } from './AppFrame';
 import { EntryFlow } from './EntryFlow';
+import { applyStoredSetupToWorkspace } from './applySetupProfile';
 import styles from './App.module.css';
 
 export function App() {
@@ -20,8 +21,13 @@ export function App() {
     document.documentElement.setAttribute('data-reduced-motion', String(reducedMotionSetting));
   }, [highContrast, reducedMotionSetting]);
 
+  const completeEntry = () => {
+    applyStoredSetupToWorkspace();
+    setEntryComplete(true);
+  };
+
   if (!entryComplete) {
-    return <EntryFlow onComplete={() => setEntryComplete(true)} />;
+    return <EntryFlow onComplete={completeEntry} />;
   }
 
   if (!ready) {
