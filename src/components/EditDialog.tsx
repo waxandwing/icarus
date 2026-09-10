@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { formatFriendly } from '../calendar/dates';
-import type { PaletteToken } from '../domain/types';
+import type { LessonField, PaletteToken } from '../domain/types';
 import { useWorkspaceStore } from '../state/store';
 import formStyles from './Form.module.css';
+import { LessonFieldsEditor } from './LessonFieldsEditor';
 import { Modal } from './Modal';
 
 const COLOR_OPTIONS: PaletteToken[] = [
@@ -41,6 +42,7 @@ export function EditDialog({
 
   const [title, setTitle] = useState(unit?.title ?? lesson?.title ?? note?.title ?? magnet?.title ?? '');
   const [body, setBody] = useState(lesson?.body ?? note?.body ?? magnet?.body ?? '');
+  const [fields, setFields] = useState<LessonField[]>(() => lesson?.fields.map((field) => ({ ...field })) ?? []);
   const [colorToken, setColorToken] = useState<PaletteToken>(unit?.colorToken ?? 'blue');
   const [error, setError] = useState<string | null>(null);
 
@@ -53,7 +55,7 @@ export function EditDialog({
   function handleSave() {
     let result;
     if (unit) result = editUnit(objectId, { title, colorToken });
-    else if (lesson) result = editLesson(objectId, { title, body });
+    else if (lesson) result = editLesson(objectId, { title, body, fields });
     else if (note) result = editNote(objectId, { title, body });
     else if (magnet) result = editMagnet(objectId, { title, body });
     if (result && !result.ok) setError(result.error ?? 'Could not save.');
@@ -88,6 +90,8 @@ export function EditDialog({
         </div>
       )}
 
+      {lesson && <LessonFieldsEditor fields={fields} onChange={setFields} />}
+
       {unit && (
         <div className={formStyles.field}>
           <label>Color</label>
@@ -110,7 +114,7 @@ export function EditDialog({
         <div style={{ fontSize: 13, color: 'var(--arc-charcoal)', marginBottom: 12 }}>
           <p style={{ margin: '0 0 6px' }}>
             Placed on {formatFriendly(placement.date)}
-            {placement.endDate ? ` \u2013 ${formatFriendly(placement.endDate)}` : ''}
+            {placement.endDate ? ` – ${formatFriendly(placement.endDate)}` : ''}
           </p>
           <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
             <input
@@ -118,7 +122,7 @@ export function EditDialog({
               checked={placement.fixed}
               onChange={(e) => setPlacementFixed(placement.id, e.target.checked)}
             />
-            Fixed date \u2014 won&apos;t move during a disruption shift
+            Fixed date — won&apos;t move during a disruption shift
           </label>
         </div>
       )}
