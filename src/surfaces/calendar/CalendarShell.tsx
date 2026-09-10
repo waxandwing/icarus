@@ -17,7 +17,7 @@ export function CalendarShell({ onEdit, onCreate }: ViewProps) {
   const view = useWorkspaceStore((s) => s.ui.view);
 
   return (
-    <section className={styles.shell} aria-label="Calendar">
+    <section id="arc-calendar-surface" className={styles.shell} aria-label="Calendar">
       <header className={styles.header}>
         <button type="button" className={styles.brand} aria-label="Arc home">
           <ArcMark size={42} />
