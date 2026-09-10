@@ -29,8 +29,10 @@ jobs:
         run: node scripts/teaching-mode-gold-contract.mjs
       - name: Start production preview
         run: npm run preview -- --host 127.0.0.1 --port 4173 > /tmp/arc-preview.log 2>&1 &
-      - name: Classroom display render audit
+      - name: Student classroom display render audit
         run: npm run audit:teaching-render
+      - name: Teacher controller render and interaction audit
+        run: npm run audit:teaching-teacher-render
       - name: Upload Gold render evidence
         if: always()
         uses: actions/upload-artifact@v4
