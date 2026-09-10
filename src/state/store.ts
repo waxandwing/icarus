@@ -157,8 +157,13 @@ let persistTimer: ReturnType<typeof setTimeout> | null = null;
 function schedulePersist(get: () => WorkspaceStore) {
   if (persistTimer) clearTimeout(persistTimer);
   persistTimer = setTimeout(() => {
-    const { domain, undo } = get();
-    void savePersisted({ domain, undo, savedAt: Date.now() });
+    const { domain, undo, ui } = get();
+    void savePersisted({
+      domain,
+      undo,
+      workspaceUi: { view: ui.view, anchorDate: ui.anchorDate, openPanel: ui.openPanel },
+      savedAt: Date.now(),
+    });
   }, 250);
 }
 
@@ -204,34 +209,45 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
       init: async () => {
         const persisted = await loadPersisted();
         set((state) => {
-          if (persisted) {
-            state.domain = persisted.domain;
-            state.undo = persisted.undo;
+          state.domain = persisted.domain;
+          state.undo = persisted.undo;
+          if (persisted.workspaceUi) {
+            state.ui.view = persisted.workspaceUi.view;
+            state.ui.anchorDate = persisted.workspaceUi.anchorDate;
+            state.ui.openPanel = persisted.workspaceUi.openPanel;
           }
           state.ui.ready = true;
         });
       },
 
-      setView: (view) =>
+      setView: (view) => {
         set((state) => {
           state.ui.view = view;
-        }),
-      setAnchorDate: (date) =>
+        });
+        schedulePersist(get);
+      },
+      setAnchorDate: (date) => {
         set((state) => {
           state.ui.anchorDate = date;
-        }),
+        });
+        schedulePersist(get);
+      },
       select: (ref) =>
         set((state) => {
           state.ui.selection = ref;
         }),
-      openFurniture: (panel) =>
+      openFurniture: (panel) => {
         set((state) => {
           state.ui.openPanel = panel;
-        }),
-      toggleFurniture: (panel) =>
+        });
+        schedulePersist(get);
+      },
+      toggleFurniture: (panel) => {
         set((state) => {
           state.ui.openPanel = state.ui.openPanel === panel ? null : panel;
-        }),
+        });
+        schedulePersist(get);
+      },
       dismissToast: () =>
         set((state) => {
           state.ui.toast = null;
