@@ -2,8 +2,8 @@
   position: relative;
   width: min(1180px, 100%);
   min-height: 720px;
-  padding: clamp(108px, 8.6vw, 126px) clamp(82px, 9.5vw, 126px) clamp(64px, 6vw, 82px);
-  background: url('/assets/arc/calendar-open-planner.webp') center / 148% 148% no-repeat;
+  padding: clamp(68px, 5.2vw, 76px) clamp(72px, 5.6vw, 82px) clamp(64px, 6vw, 82px);
+  background: url('/assets/arc/calendar-open-planner.webp') center / 142% 135% no-repeat;
   filter: drop-shadow(0 18px 24px rgba(44, 46, 46, 0.13));
 }
 
