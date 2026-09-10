@@ -47,6 +47,12 @@ function legacyDeclinedKey(userId: string) {
   return `${LEGACY_DECLINED_PREFIX}${userId}`;
 }
 
+function assertActiveAccount(userId: string) {
+  if (activeAccountId !== userId) {
+    throw new Error('Arc account changed while saved state was being verified. The stale result was discarded.');
+  }
+}
+
 function freshWorkspace(): PersistedWorkspace {
   return { domain: createInitialState(), undo: null, savedAt: Date.now() };
 }
@@ -97,54 +103,67 @@ export function setPersistenceAccount(userId: string | null): void {
 async function readLocalForAccount(userId: string): Promise<PersistedWorkspace | null> {
   const db = await getDb();
   const raw = (await db.get(STORE, accountKey(userId))) as PersistedWorkspace | undefined;
+  assertActiveAccount(userId);
   return raw ? migrate(raw) : null;
 }
 
 async function writeLocalForAccount(userId: string, workspace: PersistedWorkspace): Promise<void> {
   const db = await getDb();
+  assertActiveAccount(userId);
   await db.put(STORE, workspace, accountKey(userId));
+  assertActiveAccount(userId);
 }
 
 async function probeRemote(userId: string): Promise<PersistedWorkspace | null> {
+  assertActiveAccount(userId);
   if (remoteCache !== undefined) return remoteCache;
   const raw = await loadRemoteWorkspace(userId);
+  assertActiveAccount(userId);
   remoteCache = unwrapCloudPayload(raw);
   remoteBaselineKnown = true;
   return remoteCache;
 }
 
 export async function shouldOfferLegacyMigration(userId: string): Promise<boolean> {
+  assertActiveAccount(userId);
   const db = await getDb();
   const declined = await db.get(STORE, legacyDeclinedKey(userId));
+  assertActiveAccount(userId);
   if (declined === true) return false;
   const local = await readLocalForAccount(userId);
   if (local) return false;
   const remote = await probeRemote(userId);
   if (remote) return false;
   const legacy = (await db.get(STORE, LEGACY_KEY)) as PersistedWorkspace | undefined;
+  assertActiveAccount(userId);
   return !!legacy && isPersistedWorkspace(legacy);
 }
 
 export async function claimLegacyWorkspace(userId: string): Promise<void> {
-  if (activeAccountId !== userId) throw new Error('Arc account changed during local-work import.');
+  assertActiveAccount(userId);
   const db = await getDb();
   const legacy = (await db.get(STORE, LEGACY_KEY)) as PersistedWorkspace | undefined;
+  assertActiveAccount(userId);
   if (!legacy || !isPersistedWorkspace(legacy)) return;
-  const migrated = migrate(legacy);
-  await writeLocalForAccount(userId, migrated);
   if (!remoteBaselineKnown) await probeRemote(userId);
+  assertActiveAccount(userId);
   if (remoteCache) {
     throw new Error('Arc found existing cloud work for this account and did not overwrite it.');
   }
+  const migrated = migrate(legacy);
+  await writeLocalForAccount(userId, migrated);
   await saveRemoteWorkspace(userId, wrapCloudPayload(migrated));
+  assertActiveAccount(userId);
   remoteCache = migrated;
   await db.delete(STORE, LEGACY_KEY);
   await db.delete(STORE, legacyDeclinedKey(userId));
 }
 
 export async function declineLegacyWorkspace(userId: string): Promise<void> {
+  assertActiveAccount(userId);
   const db = await getDb();
   await db.put(STORE, true, legacyDeclinedKey(userId));
+  assertActiveAccount(userId);
 }
 
 export async function loadPersisted(): Promise<PersistedWorkspace> {
@@ -159,20 +178,24 @@ export async function loadPersisted(): Promise<PersistedWorkspace> {
   try {
     remote = await probeRemote(userId);
   } catch (err) {
+    assertActiveAccount(userId);
     if (local) {
       console.error('Arc: cloud workspace is temporarily unavailable; using this account’s local copy.', err);
       return local;
     }
     throw new Error('Arc cannot verify this account’s saved workspace right now. Your cloud data was not overwritten.');
   }
+  assertActiveAccount(userId);
 
   if (local && remote) {
     if (local.savedAt > remote.savedAt) {
       await saveRemoteWorkspace(userId, wrapCloudPayload(local));
+      assertActiveAccount(userId);
       remoteCache = local;
       return local;
     }
     if (remote.savedAt > local.savedAt) await writeLocalForAccount(userId, remote);
+    assertActiveAccount(userId);
     return remote;
   }
 
@@ -183,6 +206,7 @@ export async function loadPersisted(): Promise<PersistedWorkspace> {
 
   if (local) {
     await saveRemoteWorkspace(userId, wrapCloudPayload(local));
+    assertActiveAccount(userId);
     remoteCache = local;
     return local;
   }
@@ -200,15 +224,17 @@ export async function savePersisted(data: PersistedWorkspace): Promise<void> {
   try {
     await writeLocalForAccount(userId, data);
   } catch (err) {
-    console.error('Arc: failed to persist this account’s local workspace.', err);
+    if (activeAccountId === userId) console.error('Arc: failed to persist this account’s local workspace.', err);
     return;
   }
 
-  if (!remoteBaselineKnown) return;
+  if (!remoteBaselineKnown || activeAccountId !== userId) return;
   try {
     await saveRemoteWorkspace(userId, wrapCloudPayload(data));
+    assertActiveAccount(userId);
     remoteCache = data;
   } catch (err) {
+    if (activeAccountId !== userId) return;
     remoteBaselineKnown = false;
     remoteCache = undefined;
     console.error('Arc: local save succeeded but cloud sync failed. Cloud overwrite is paused until the account is rehydrated.', err);
@@ -220,8 +246,9 @@ export async function clearPersisted(): Promise<void> {
   if (!userId) return;
   try {
     const db = await getDb();
+    assertActiveAccount(userId);
     await db.delete(STORE, accountKey(userId));
   } catch (err) {
-    console.error('Arc: failed to clear this account’s local workspace.', err);
+    if (activeAccountId === userId) console.error('Arc: failed to clear this account’s local workspace.', err);
   }
 }
