@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import type { PaletteToken } from '../../domain/types';
+import type { DayKind, PaletteToken } from '../../domain/types';
 import { getSectionsForCourse } from '../../projections/selectors';
 import { useWorkspaceStore } from '../../state/store';
 import formStyles from '../../components/Form.module.css';
 import styles from './SettingsPanel.module.css';
 
 const COLOR_OPTIONS: PaletteToken[] = ['sage', 'blue', 'terracotta', 'mustard', 'pink', 'lavender', 'kraft'];
+
+type EditableDayKind = Exclude<DayKind, 'weekend'>;
 
 export function SettingsPanel() {
   const isOpen = useWorkspaceStore((s) => s.ui.openPanels.settings);
@@ -20,7 +22,7 @@ export function SettingsPanel() {
   const [newCourseName, setNewCourseName] = useState('');
   const [newSectionName, setNewSectionName] = useState<Record<string, string>>({});
   const [overrideDate, setOverrideDate] = useState('');
-  const [overrideKind, setOverrideKind] = useState<'no-school' | 'early-release' | 'instructional'>('no-school');
+  const [overrideKind, setOverrideKind] = useState<EditableDayKind>('no-school');
   const [overrideLabel, setOverrideLabel] = useState('');
 
   const { settings } = domain;
@@ -55,8 +57,7 @@ export function SettingsPanel() {
           />
         </label>
         <p style={{ fontSize: 12, color: 'var(--arc-charcoal)', margin: '4px 0 0' }}>
-          Week defaults to Monday\u2013Friday. Turning on weekends shows Sunday through Saturday, Sunday
-          first.
+          Week defaults to Monday–Friday. Turning on weekends shows Sunday through Saturday, Sunday first.
         </p>
       </div>
 
@@ -107,7 +108,7 @@ export function SettingsPanel() {
                 >
                   <input
                     type="text"
-                    placeholder="Add a section\u2026"
+                    placeholder="Add a section…"
                     value={newSectionName[course.id] ?? ''}
                     onChange={(e) => setNewSectionName((s) => ({ ...s, [course.id]: e.target.value }))}
                     style={{ flex: 1, fontSize: 13, padding: '4px 8px', borderRadius: 6, border: '1px solid var(--arc-line-strong)' }}
@@ -132,7 +133,7 @@ export function SettingsPanel() {
         >
           <input
             type="text"
-            placeholder="New course name\u2026"
+            placeholder="New course name…"
             value={newCourseName}
             onChange={(e) => setNewCourseName(e.target.value)}
             style={{ flex: 1, fontSize: 14, padding: '6px 8px', borderRadius: 6, border: '1px solid var(--arc-line-strong)' }}
@@ -146,7 +147,7 @@ export function SettingsPanel() {
       <div className={styles.section}>
         <div className={styles.sectionTitle}>Confirmed school calendar</div>
         <p style={{ fontSize: 13, color: 'var(--arc-charcoal)', marginTop: 0 }}>
-          Mark a specific date as no-school, early release, or back to instructional.
+          Mark a date as no school, early release, testing, special schedule, or instructional.
         </p>
         <form
           onSubmit={(e) => {
@@ -163,9 +164,11 @@ export function SettingsPanel() {
           </div>
           <div className={formStyles.field}>
             <label htmlFor="override-kind">Type</label>
-            <select id="override-kind" value={overrideKind} onChange={(e) => setOverrideKind(e.target.value as typeof overrideKind)}>
+            <select id="override-kind" value={overrideKind} onChange={(e) => setOverrideKind(e.target.value as EditableDayKind)}>
               <option value="no-school">No school</option>
               <option value="early-release">Early release</option>
+              <option value="testing">Testing</option>
+              <option value="special-schedule">Special schedule</option>
               <option value="instructional">Instructional</option>
             </select>
           </div>
