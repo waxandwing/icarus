@@ -40,9 +40,11 @@ export function AuthGate({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null);
   const [legacyDecision, setLegacyDecision] = useState(false);
   const sequence = useRef(0);
+  const currentUserId = useRef<string | null>(null);
 
   async function hydrateSession(nextSession: ArcSession | null) {
     const run = ++sequence.current;
+    currentUserId.current = nextSession?.user.id ?? null;
     setError(null);
     setBooting(true);
     setLegacyDecision(false);
@@ -79,7 +81,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let active = true;
-    let unsubscribe = () => undefined;
+    let unsubscribe: () => void = () => {};
 
     void (async () => {
       try {
@@ -88,7 +90,9 @@ export function AuthGate({ children }: { children: ReactNode }) {
         await hydrateSession(initial);
         if (!active) return;
         unsubscribe = subscribeToAuth((event, nextSession) => {
-          if (event === 'TOKEN_REFRESHED' && nextSession?.user.id === session?.user.id) return;
+          const nextUserId = nextSession?.user.id ?? null;
+          if (event === 'TOKEN_REFRESHED' && nextUserId === currentUserId.current) return;
+          if (event === 'SIGNED_IN' && nextUserId === currentUserId.current) return;
           void hydrateSession(nextSession);
         });
       } catch (err) {
@@ -116,7 +120,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
     setError(null);
     try {
       const nextSession = await signInWithPassword(email, password);
-      await hydrateSession(nextSession);
+      if (currentUserId.current !== nextSession.user.id) await hydrateSession(nextSession);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Arc could not sign in.');
     } finally {
@@ -129,7 +133,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
     setError(null);
     try {
       await signOutLocally();
-      await hydrateSession(null);
+      if (currentUserId.current !== null) await hydrateSession(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Arc could not sign out safely.');
     } finally {
