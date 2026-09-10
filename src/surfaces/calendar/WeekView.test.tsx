@@ -24,14 +24,14 @@ describe('Week planning projection', () => {
   it('renders classes as rows with a selectable but non-draggable Unit span', () => {
     render(<WeekView onEdit={() => undefined} onCreate={() => undefined} />);
 
-    expect(screen.getByRole('row', { name: /AP Biology, Period 2/i })).toBeTruthy();
-    const unit = screen.getByRole('button', { name: /Unit: Unit 1 · Cell Structure/i });
+    expect(screen.getByRole('row', { name: /AP Art History, Period 2/i })).toBeTruthy();
+    const unit = screen.getByRole('button', { name: /Unit: Prehistory/i });
     expect(unit.getAttribute('draggable')).not.toBe('true');
   });
 
   it('keeps Lessons draggable in Week', () => {
     render(<WeekView onEdit={() => undefined} onCreate={() => undefined} />);
-    const lesson = screen.getByRole('button', { name: 'Membrane transport lab' });
+    const lesson = screen.getByRole('button', { name: 'Cave conjecture' });
     expect(lesson.getAttribute('draggable')).toBe('true');
   });
 
