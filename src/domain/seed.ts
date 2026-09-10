@@ -3,7 +3,7 @@ import { addCalendarDays } from '../calendar/dates';
 import * as cmd from './commands';
 import type { WorkspaceDomainState } from './types';
 
-const CURRENT_SCHEMA_VERSION = 2;
+export const CURRENT_SCHEMA_VERSION = 3;
 
 function emptyState(): WorkspaceDomainState {
   return {
@@ -78,21 +78,38 @@ export function createInitialState(): WorkspaceDomainState {
       startDate: '2026-09-08',
       endDate: '2026-09-18',
     });
-    const apahLesson1 = cmd.createLesson(draft, {
-      courseId: apah.id,
-      unitId: prehistory.id,
-      sectionId: apahSection.id,
-      title: 'Origins + context',
-      body: 'Close looking, context, and the first global prehistory objects.',
-      date: '2026-09-08',
-    });
-    cmd.setDelivery(draft, { sectionId: apahSection.id, lessonId: apahLesson1.id, state: 'completed' });
     cmd.createLesson(draft, {
       courseId: apah.id,
       unitId: prehistory.id,
       sectionId: apahSection.id,
       title: 'Cave conjecture',
+      body: 'Close looking and evidence-based claims.',
+      date: '2026-09-08',
+      fields: [
+        { label: 'Bell Ringer', content: 'What can an image prove?', plannerVisible: true, tableVisible: true },
+        { label: 'Mini Lesson', content: 'Evidence vs. inference', plannerVisible: true, tableVisible: true },
+      ],
+    });
+    cmd.createLesson(draft, {
+      courseId: apah.id,
+      unitId: prehistory.id,
+      sectionId: apahSection.id,
+      title: 'Apollo 11 stones',
+      date: '2026-09-09',
+    });
+    cmd.createLesson(draft, {
+      courseId: apah.id,
+      unitId: prehistory.id,
+      sectionId: apahSection.id,
+      title: 'Great Hall of the Bulls',
       date: '2026-09-10',
+    });
+    cmd.createLesson(draft, {
+      courseId: apah.id,
+      unitId: prehistory.id,
+      sectionId: apahSection.id,
+      title: 'Camelid sacrum',
+      date: '2026-09-11',
     });
 
     const art2d = cmd.createCourse(draft, { name: '2D Art 1', colorToken: 'blue' });
@@ -102,29 +119,32 @@ export function createInitialState(): WorkspaceDomainState {
       title: 'Sketchbook Launch',
       colorToken: 'blue',
       startDate: '2026-09-08',
-      endDate: '2026-09-17',
+      endDate: '2026-09-15',
     });
     cmd.createLesson(draft, {
       courseId: art2d.id,
       unitId: sketchbook.id,
       sectionId: art2dSection.id,
-      title: 'Monoprint covers',
-      body: 'Glossy board, marker transfer, spray, burnish.',
+      title: 'Daily Doodle + covers',
       date: '2026-09-08',
+      fields: [
+        { label: 'Materials', content: 'Journals, markers, spray bottles', plannerVisible: true, tableVisible: true },
+        { label: 'Clean Up', content: 'Return journals and wipe tables', plannerVisible: true, tableVisible: true },
+      ],
     });
     cmd.createLesson(draft, {
       courseId: art2d.id,
       unitId: sketchbook.id,
       sectionId: art2dSection.id,
-      title: 'Collage harvest',
+      title: 'Monoprint stations',
       date: '2026-09-09',
     });
     cmd.createLesson(draft, {
       courseId: art2d.id,
       unitId: sketchbook.id,
       sectionId: art2dSection.id,
-      title: 'Assemble + refine',
-      date: '2026-09-11',
+      title: 'Collage harvesting',
+      date: '2026-09-10',
     });
 
     const art3d = cmd.createCourse(draft, { name: '3D Art 1', colorToken: 'sage' });
@@ -134,68 +154,34 @@ export function createInitialState(): WorkspaceDomainState {
       title: 'Secure Attachment',
       colorToken: 'sage',
       startDate: '2026-09-08',
-      endDate: '2026-09-16',
+      endDate: '2026-09-18',
     });
     cmd.createLesson(draft, {
       courseId: art3d.id,
       unitId: attachment.id,
       sectionId: art3dSection.id,
-      title: 'Paper methods',
+      title: 'Paper attachment lab',
       date: '2026-09-08',
+      fields: [
+        { label: 'Materials', content: 'Paper, scissors, tape', plannerVisible: true, tableVisible: true },
+        { label: 'Safety', content: 'Cut away from hands and bodies', plannerVisible: true, tableVisible: true },
+      ],
     });
     cmd.createLesson(draft, {
       courseId: art3d.id,
       unitId: attachment.id,
       sectionId: art3dSection.id,
-      title: 'Cardboard methods',
+      title: 'Cardboard attachment lab',
       date: '2026-09-09',
     });
     cmd.createLesson(draft, {
       courseId: art3d.id,
       unitId: attachment.id,
       sectionId: art3dSection.id,
-      title: 'Fan-test build',
-      date: '2026-09-11',
+      title: 'Fan test challenge',
+      date: '2026-09-10',
     });
 
-    cmd.createNote(draft, {
-      title: 'Print AP image set',
-      body: 'Need a class set before Period 2.',
-      location: 'taskbar',
-      taskColumn: 'must',
-    });
-    cmd.createNote(draft, {
-      title: 'Refill glue guns',
-      location: 'taskbar',
-      taskColumn: 'should',
-    });
-    cmd.createNote(draft, {
-      title: 'Photograph sketchbook covers',
-      location: 'taskbar',
-      taskColumn: 'could',
-    });
-    cmd.createNote(draft, {
-      title: 'Make copies during 2nd',
-      location: 'calendar',
-      date: '2026-09-09',
-    });
-
-    cmd.createMagnet(draft, {
-      magnetKind: 'idea',
-      title: 'Try the new critique stem cards',
-    });
-    cmd.createMagnet(draft, {
-      magnetKind: 'resource',
-      title: 'Smarthistory · Prehistory overview',
-    });
-    cmd.createMagnet(draft, {
-      magnetKind: 'reminder',
-      title: 'Parent night is the 24th',
-    });
-
-    draft.history = [];
     draft.isSampleWorkspace = true;
   });
 }
-
-export { CURRENT_SCHEMA_VERSION };
