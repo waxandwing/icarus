@@ -9,18 +9,28 @@ import styles from './DayView.module.css';
 export function DayView({ onCreate }: ViewProps) {
   const anchor = useWorkspaceStore((s) => s.ui.anchorDate);
   const domain = useWorkspaceStore((s) => s.domain);
+  const selection = useWorkspaceStore((s) => s.ui.selection);
+  const select = useWorkspaceStore((s) => s.select);
   const openLiveClassroom = useWorkspaceStore((s) => s.openLiveClassroom);
   const openShiftDialog = useWorkspaceStore((s) => s.openShiftDialog);
 
   const kind = dayKind(domain.calendar, anchor);
   const label = dayLabel(domain.calendar, anchor);
+  const dateSelected = selection?.objectType === 'date' && selection.objectId === anchor;
   const continuing = getContinuingUnits(domain, anchor);
   const placements = getPlacementsForDate(domain, anchor).filter(
     (p) => p.objectType !== 'unit' || p.isRangeStart,
   );
 
   return (
-    <div className={styles.wrap}>
+    <div
+      className={styles.wrap}
+      data-selected={dateSelected}
+      onClick={(e) => {
+        if ((e.target as HTMLElement).closest('button')) return;
+        select(dateSelected ? null : { objectType: 'date', objectId: anchor });
+      }}
+    >
       {continuing.length > 0 && (
         <div className={styles.continuity}>
           <h3>Continuing from before</h3>
