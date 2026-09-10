@@ -26,6 +26,14 @@ describe('calendar temporal navigation', () => {
     expect(screen.getByText('Sep 7 – Sep 11')).toBeTruthy();
   });
 
+  it('keeps a cross-month Week titled by the selected anchor date', () => {
+    reset('week', '2026-09-01');
+    render(<CalendarNav />);
+
+    expect(screen.getByText('September 2026')).toBeTruthy();
+    expect(screen.getByText('Aug 31 – Sep 4')).toBeTruthy();
+  });
+
   it('moves Month from a long-month final day into the immediate next month', () => {
     reset('month', '2027-01-31');
     render(<CalendarNav />);
