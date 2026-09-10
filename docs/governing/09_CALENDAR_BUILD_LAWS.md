@@ -12,7 +12,9 @@ Keep what teachers love about paper planning. Remove what makes paper planning e
 
 ## Canonical-state law
 
-Day, Week, Month, Quarter, and Year are projections of one canonical planning state. They are not independent calendars and must not create duplicate instructional truth.
+Day, Week, Month, and Year are projections of one canonical planning state. They are not independent calendars and must not create duplicate instructional truth.
+
+Semester is removed. Quarter is not a standalone interface. Quarter boundaries, colors, and grading-period structure remain metadata that may appear inside Month and Year.
 
 ## Arc and Table
 
@@ -44,9 +46,9 @@ Week is a teaching-sequence view: class or section rows by visible dates. Unit r
 
 Units are informative and selectable in ordinary Week but are not directly rescheduled by dragging there.
 
-## Month and Quarter projection
+## Month projection
 
-Month and Quarter are the primary Unit placement and pacing surfaces.
+Month is the primary Unit placement and pacing surface.
 
 Dropping a new or imported Unit establishes its start date, then Arc asks for its instructional-day duration. Weekends and no-school dates are skipped by default. Arc previews the resulting date range before the placement is committed.
 
@@ -92,7 +94,7 @@ Red means the teacher deliberately marked this as worth noticing. It must also h
 
 ## Year view
 
-Year is an instructional-year map, not a dashboard. It shows compact months, quarter colors, major non-instructional states, current position, and appropriate Unit or pacing information.
+Year is an instructional-year map, not a dashboard. It shows compact months, quarter metadata, major non-instructional states, current position, and appropriate Unit or pacing information.
 
 Teachers may cross out elapsed days one at a time. Crosses use subtly varied hand-drawn marks to preserve the physical planner behavior. The crossed-out layer can be hidden without changing calendar data.
 
