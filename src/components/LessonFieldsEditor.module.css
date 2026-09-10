@@ -1,0 +1,173 @@
+.section {
+  margin: 4px 0 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--arc-line);
+}
+
+.headingRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 10px;
+}
+
+.heading {
+  margin: 0 0 3px;
+  font-family: var(--arc-font-serif);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.help {
+  max-width: 520px;
+  margin: 0;
+  color: var(--arc-charcoal);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.addButton,
+.presetButton,
+.orderActions button {
+  border: 1px solid var(--arc-line-strong);
+  background: var(--arc-paper-white);
+  color: var(--arc-ink);
+  cursor: pointer;
+  font: inherit;
+}
+
+.addButton {
+  flex: 0 0 auto;
+  padding: 7px 10px;
+  border-radius: var(--arc-radius-sm);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.presets {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 0 4px;
+}
+
+.presetLabel {
+  margin-right: 3px;
+  color: var(--arc-charcoal);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.presetButton {
+  padding: 5px 8px;
+  border-radius: var(--arc-radius-sm);
+  font-size: 12px;
+}
+
+.list {
+  display: grid;
+  gap: 8px;
+}
+
+.fieldCard {
+  padding: 10px;
+  border: 1px solid var(--arc-line);
+  background: rgba(251, 248, 241, 0.72);
+  box-shadow: 0 1px 2px rgba(45, 42, 37, 0.05);
+}
+
+.fieldTopline {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.labelInput,
+.contentInput {
+  width: 100%;
+  border: 1px solid var(--arc-line);
+  background: var(--arc-paper-white);
+  color: var(--arc-ink);
+  font: inherit;
+}
+
+.labelInput {
+  min-width: 0;
+  padding: 7px 8px;
+  font-weight: 700;
+}
+
+.contentInput {
+  min-height: 58px;
+  margin-top: 7px;
+  padding: 8px;
+  resize: vertical;
+  line-height: 1.35;
+}
+
+.orderActions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 3px;
+}
+
+.orderActions button {
+  width: 29px;
+  height: 29px;
+  padding: 0;
+  border-radius: var(--arc-radius-sm);
+}
+
+.orderActions button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.visibilityRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 8px;
+  color: var(--arc-charcoal);
+  font-size: 12px;
+}
+
+.visibilityRow label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.addButton:focus-visible,
+.presetButton:focus-visible,
+.orderActions button:focus-visible,
+.labelInput:focus-visible,
+.contentInput:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+@media (max-width: 620px) {
+  .headingRow {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .addButton {
+    align-self: flex-start;
+  }
+}
+
+@media (forced-colors: active) {
+  .fieldCard,
+  .addButton,
+  .presetButton,
+  .orderActions button,
+  .labelInput,
+  .contentInput {
+    border: 1px solid CanvasText;
+  }
+}
