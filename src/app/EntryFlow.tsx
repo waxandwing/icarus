@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type FormEvent } from 'react';
 import styles from './EntryFlow.module.css';
 
 type Stage = 'entry' | 'setup';
+type AccessMode = 'beta' | 'interest';
 
 type SetupData = {
   name: string;
@@ -15,6 +16,8 @@ type SetupData = {
   google: boolean;
 };
 
+type InterestState = 'idle' | 'submitting' | 'success' | 'duplicate' | 'error';
+
 const defaultSetup: SetupData = {
   name: '',
   role: 'Teacher',
@@ -27,12 +30,36 @@ const defaultSetup: SetupData = {
   google: false,
 };
 
+function modeFromPath(): AccessMode {
+  return window.location.pathname.startsWith('/interest') ? 'interest' : 'beta';
+}
+
 export function EntryFlow({ onComplete }: { onComplete: () => void }) {
   const [stage, setStage] = useState<Stage>('entry');
+  const [mode, setMode] = useState<AccessMode>(() => modeFromPath());
   const [setupStep, setSetupStep] = useState(0);
   const [setup, setSetup] = useState(defaultSetup);
   const [error, setError] = useState('');
   const [checkingAccess, setCheckingAccess] = useState(false);
+  const [interestState, setInterestState] = useState<InterestState>('idle');
+
+  useEffect(() => {
+    const onPopState = () => {
+      setMode(modeFromPath());
+      setError('');
+      setInterestState('idle');
+    };
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, []);
+
+  const chooseMode = (next: AccessMode) => {
+    if (next === mode) return;
+    setMode(next);
+    setError('');
+    setInterestState('idle');
+    window.history.pushState({}, '', next === 'beta' ? '/beta' : '/interest');
+  };
 
   const submitBeta = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -55,11 +82,54 @@ export function EntryFlow({ onComplete }: { onComplete: () => void }) {
         setError('That password did not open Arc.');
         return;
       }
+      window.history.replaceState({}, '', '/');
       setStage('setup');
     } catch {
       setError('Arc could not check the password. Try again.');
     } finally {
       setCheckingAccess(false);
+    }
+  };
+
+  const submitInterest = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const data = new FormData(e.currentTarget);
+    const email = String(data.get('email') || '').trim();
+    const name = String(data.get('name') || '').trim();
+    const role = String(data.get('role') || '').trim();
+    const website = String(data.get('website') || '').trim();
+
+    if (website) return;
+    if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
+      setInterestState('error');
+      setError('Enter a valid email address.');
+      return;
+    }
+
+    setInterestState('submitting');
+    setError('');
+    try {
+      const response = await fetch('/api/interest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, name, role, website }),
+      });
+      const result = await response.json().catch(() => ({ ok: false }));
+      if (response.status === 409 || result.duplicate) {
+        setInterestState('duplicate');
+        e.currentTarget.reset();
+        return;
+      }
+      if (!response.ok || !result.ok) {
+        setInterestState('error');
+        setError('We could not add you right now. Try again.');
+        return;
+      }
+      setInterestState('success');
+      e.currentTarget.reset();
+    } catch {
+      setInterestState('error');
+      setError('We could not add you right now. Try again.');
     }
   };
 
@@ -70,7 +140,17 @@ export function EntryFlow({ onComplete }: { onComplete: () => void }) {
   };
 
   if (stage === 'entry') {
-    return <OpeningGate error={error} checkingAccess={checkingAccess} onSubmit={submitBeta} />;
+    return (
+      <OpeningGate
+        mode={mode}
+        onChooseMode={chooseMode}
+        error={error}
+        checkingAccess={checkingAccess}
+        interestState={interestState}
+        onBetaSubmit={submitBeta}
+        onInterestSubmit={submitInterest}
+      />
+    );
   }
 
   const steps = [
@@ -101,12 +181,16 @@ export function EntryFlow({ onComplete }: { onComplete: () => void }) {
 }
 
 type OpeningGateProps = {
+  mode: AccessMode;
+  onChooseMode: (mode: AccessMode) => void;
   error: string;
   checkingAccess: boolean;
-  onSubmit: (e: FormEvent<HTMLFormElement>) => void;
+  interestState: InterestState;
+  onBetaSubmit: (e: FormEvent<HTMLFormElement>) => void;
+  onInterestSubmit: (e: FormEvent<HTMLFormElement>) => void;
 };
 
-function OpeningGate({ error, checkingAccess, onSubmit }: OpeningGateProps) {
+function OpeningGate({ mode, onChooseMode, error, checkingAccess, interestState, onBetaSubmit, onInterestSubmit }: OpeningGateProps) {
   const video = useRef<HTMLVideoElement>(null);
   const [ready, setReady] = useState(false);
   const [mediaFallback, setMediaFallback] = useState(false);
@@ -152,36 +236,79 @@ function OpeningGate({ error, checkingAccess, onSubmit }: OpeningGateProps) {
         </div>
 
         {ready && (
-          <section className={styles.gateShelf} aria-label="Arc private beta access">
+          <section className={styles.gateShelf} aria-label="Arc entry options">
+            <img className={styles.gateAsset} src="/assets/arc/pattern-arc-geometric.webp" alt="" aria-hidden="true" />
             <div className={styles.gateHeading}>
-              <span className={styles.gateKicker}>PRIVATE BETA</span>
+              <span className={styles.gateKicker}>ARC</span>
               <h1 id="entry-title">Come on in.</h1>
             </div>
 
-            <form onSubmit={onSubmit} className={styles.gateForm}>
-              <label htmlFor="beta-password">Beta password</label>
-              <div className={styles.gateControlRow}>
-                <input
-                  id="beta-password"
-                  name="password"
-                  type="password"
-                  maxLength={256}
-                  autoComplete="current-password"
-                  autoFocus
-                  aria-invalid={Boolean(error)}
-                  aria-describedby={error ? 'access-error' : 'access-note'}
-                />
-                <button className={styles.gateSubmit} type="submit" disabled={checkingAccess}>
-                  {checkingAccess ? 'Checking…' : 'Open Arc'}
-                </button>
-              </div>
-            </form>
-
-            <div className={styles.gateMeta} aria-live="polite">
-              {error
-                ? <p id="access-error" className={styles.error} role="alert">{error}</p>
-                : <p id="access-note">Built for plans that change.</p>}
+            <div className={styles.choiceTabs} role="tablist" aria-label="Choose Arc access">
+              <button type="button" role="tab" aria-selected={mode === 'beta'} className={mode === 'beta' ? styles.choiceActive : styles.choiceTab} onClick={() => onChooseMode('beta')}>Beta tester</button>
+              <button type="button" role="tab" aria-selected={mode === 'interest'} className={mode === 'interest' ? styles.choiceActive : styles.choiceTab} onClick={() => onChooseMode('interest')}>Interested in Arc</button>
             </div>
+
+            {mode === 'beta' ? (
+              <form onSubmit={onBetaSubmit} className={styles.gateForm} aria-label="Beta tester login">
+                <div className={styles.branchIntro}>
+                  <strong>Beta access</strong>
+                  <span>Use the shared tester password to open Arc.</span>
+                </div>
+                <label htmlFor="beta-password">Beta password</label>
+                <div className={styles.gateControlRow}>
+                  <input
+                    id="beta-password"
+                    name="password"
+                    type="password"
+                    maxLength={256}
+                    autoComplete="current-password"
+                    autoFocus
+                    aria-invalid={Boolean(error)}
+                    aria-describedby={error ? 'access-error' : 'access-note'}
+                  />
+                  <button className={styles.gateSubmit} type="submit" disabled={checkingAccess}>
+                    {checkingAccess ? 'Checking…' : 'Open Arc'}
+                  </button>
+                </div>
+                <div className={styles.gateMeta} aria-live="polite">
+                  {error
+                    ? <p id="access-error" className={styles.error} role="alert">{error}</p>
+                    : <p id="access-note">Private beta. Planning stays teacher-first.</p>}
+                </div>
+              </form>
+            ) : (
+              <form onSubmit={onInterestSubmit} className={styles.gateForm} aria-label="Arc interest form" noValidate>
+                <div className={styles.branchIntro}>
+                  <strong>Keep me posted.</strong>
+                  <span>Leave your email and we’ll let you know when Arc opens more widely.</span>
+                </div>
+                <label htmlFor="interest-email">Email</label>
+                <input id="interest-email" name="email" type="email" autoComplete="email" maxLength={254} required aria-invalid={interestState === 'error'} />
+                <div className={styles.interestDetails}>
+                  <label htmlFor="interest-name">Name <span>(optional)</span></label>
+                  <input id="interest-name" name="name" type="text" autoComplete="name" maxLength={120} />
+                  <label htmlFor="interest-role">What best describes you? <span>(optional)</span></label>
+                  <select id="interest-role" name="role" defaultValue="">
+                    <option value="">Choose one</option>
+                    <option>Classroom teacher</option>
+                    <option>Department chair / instructional lead</option>
+                    <option>School or district leader</option>
+                    <option>Education creator / consultant</option>
+                    <option>Other</option>
+                  </select>
+                </div>
+                <div className={styles.honeypot} aria-hidden="true"><label htmlFor="interest-website">Website</label><input id="interest-website" name="website" tabIndex={-1} autoComplete="off" /></div>
+                <button className={styles.gateSubmitWide} type="submit" disabled={interestState === 'submitting'}>
+                  {interestState === 'submitting' ? 'Adding you…' : 'Join the interest list'}
+                </button>
+                <div className={styles.gateMeta} aria-live="polite">
+                  {interestState === 'success' && <p className={styles.success}>You’re on the list. Thank you.</p>}
+                  {interestState === 'duplicate' && <p className={styles.success}>You’re already on the list.</p>}
+                  {interestState === 'error' && <p className={styles.error} role="alert">{error}</p>}
+                  {interestState === 'idle' && <p>This does not create an Arc account or open the beta.</p>}
+                </div>
+              </form>
+            )}
           </section>
         )}
       </section>
