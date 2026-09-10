@@ -20,7 +20,7 @@ export type FurniturePanel = 'settings' | 'fridge' | 'taskbar' | 'drawer';
 export type CalendarViewMode = 'day' | 'week' | 'month';
 
 export interface SelectionRef {
-  objectType: PlaceableType | 'note';
+  objectType: PlaceableType | 'note' | 'date';
   objectId: string;
 }
 
