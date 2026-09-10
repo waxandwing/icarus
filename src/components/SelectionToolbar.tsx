@@ -91,8 +91,8 @@ export function SelectionToolbar({ onEdit }: { onEdit: (type: string, id: string
       )}
 
       {unit && view === 'week' && placement && (
-        <span className={styles.hint} aria-label="Unit movement is available in Month and Quarter">
-          Move in Month/Quarter
+        <span className={styles.hint} aria-label="Unit movement is available in Month">
+          Move in Month
         </span>
       )}
 
