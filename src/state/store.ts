@@ -16,7 +16,7 @@ import type {
 } from '../domain/types';
 import { loadPersisted, savePersisted } from '../persistence/db';
 
-export type FurniturePanel = 'settings' | 'fridge' | 'taskbar' | 'drawer' | null;
+export type FurniturePanel = 'settings' | 'fridge' | 'taskbar' | 'drawer';
 export type CalendarViewMode = 'day' | 'week' | 'month';
 
 export interface SelectionRef {
@@ -43,7 +43,7 @@ interface UiState {
   view: CalendarViewMode;
   anchorDate: ISODate;
   selection: SelectionRef | null;
-  openPanel: FurniturePanel;
+  openPanels: Record<FurniturePanel, boolean>;
   shiftDialog: ShiftDialogState;
   liveClassroom: LiveClassroomState;
   toast: { message: string; tone: 'error' | 'info' } | null;
@@ -64,8 +64,9 @@ interface WorkspaceStore {
   setView: (view: CalendarViewMode) => void;
   setAnchorDate: (date: ISODate) => void;
   select: (ref: SelectionRef | null) => void;
-  openFurniture: (panel: FurniturePanel) => void;
-  toggleFurniture: (panel: Exclude<FurniturePanel, null>) => void;
+  openFurniture: (panel: FurniturePanel, open?: boolean) => void;
+  toggleFurniture: (panel: FurniturePanel) => void;
+  closeAllFurniture: () => void;
   dismissToast: () => void;
 
   createCourse: (name: string, colorToken: PaletteToken) => ActionResult;
@@ -162,16 +163,18 @@ function schedulePersist(get: () => WorkspaceStore) {
   }, 250);
 }
 
-const initialUi: UiState = {
-  ready: false,
-  view: 'week',
-  anchorDate: new Date().toISOString().slice(0, 10),
-  selection: null,
-  openPanel: null,
-  shiftDialog: { open: false, sectionId: null, fromDate: null, schoolDays: 1, reason: '' },
-  liveClassroom: { open: false, sectionId: null, lessonId: null },
-  toast: null,
-};
+function createInitialUi(): UiState {
+  return {
+    ready: false,
+    view: 'week',
+    anchorDate: new Date().toISOString().slice(0, 10),
+    selection: null,
+    openPanels: { settings: false, fridge: false, taskbar: false, drawer: false },
+    shiftDialog: { open: false, sectionId: null, fromDate: null, schoolDays: 1, reason: '' },
+    liveClassroom: { open: false, sectionId: null, lessonId: null },
+    toast: null,
+  };
+}
 
 export const useWorkspaceStore = create<WorkspaceStore>()(
   immer((set, get) => {
@@ -199,7 +202,7 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
     return {
       domain: createInitialState(),
       undo: null,
-      ui: initialUi,
+      ui: createInitialUi(),
 
       init: async () => {
         const persisted = await loadPersisted();
@@ -224,13 +227,19 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
         set((state) => {
           state.ui.selection = ref;
         }),
-      openFurniture: (panel) =>
+      openFurniture: (panel, open = true) =>
         set((state) => {
-          state.ui.openPanel = panel;
+          state.ui.openPanels[panel] = open;
         }),
       toggleFurniture: (panel) =>
         set((state) => {
-          state.ui.openPanel = state.ui.openPanel === panel ? null : panel;
+          state.ui.openPanels[panel] = !state.ui.openPanels[panel];
+        }),
+      closeAllFurniture: () =>
+        set((state) => {
+          for (const panel of Object.keys(state.ui.openPanels) as FurniturePanel[]) {
+            state.ui.openPanels[panel] = false;
+          }
         }),
       dismissToast: () =>
         set((state) => {
@@ -410,7 +419,7 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
         set((state) => {
           state.domain = fresh;
           state.undo = null;
-          state.ui = { ...initialUi, ready: true };
+          state.ui = { ...createInitialUi(), ready: true };
         });
         schedulePersist(get);
       },
