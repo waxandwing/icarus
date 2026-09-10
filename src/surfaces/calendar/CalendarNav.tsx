@@ -4,6 +4,7 @@ import {
   formatShort,
   fromISODate,
   getWeekDays,
+  toISODate,
 } from '../../calendar/dates';
 import { ChevronGlyph } from '../../assets/Icons';
 import { useWorkspaceStore } from '../../state/store';
@@ -33,7 +34,7 @@ export function CalendarNav() {
     if (view === 'month') {
       const d = fromISODate(anchor);
       d.setMonth(d.getMonth() + direction);
-      setAnchor(d.toISOString().slice(0, 10));
+      setAnchor(toISODate(d));
       return;
     }
     setAnchor(addCalendarDays(anchor, direction * (view === 'day' ? 1 : 7)));
@@ -57,7 +58,7 @@ export function CalendarNav() {
         <button
           type="button"
           className={styles.todayButton}
-          onClick={() => setAnchor(new Date().toISOString().slice(0, 10))}
+          onClick={() => setAnchor(toISODate(new Date()))}
         >
           Today
         </button>
