@@ -4,7 +4,7 @@ import { migratePersisted, type PersistedWorkspace } from './db';
 
 describe('workspace persistence migrations', () => {
   it('upgrades a v1 workspace to v2 without losing objects or placements', () => {
-    const domain = createInitialState();
+    const domain = structuredClone(createInitialState());
     domain.schemaVersion = 1;
     const noteIds = Object.keys(domain.notes);
     const placementIds = Object.keys(domain.placements);
