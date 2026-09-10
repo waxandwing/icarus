@@ -19,10 +19,9 @@ export function CalendarShell({ onEdit, onCreate }: ViewProps) {
   return (
     <section className={styles.shell} aria-label="Calendar">
       <header className={styles.header}>
-        <div className={styles.brand}>
-          <ArcMark size={30} />
-          <span className={styles.brandName}>Arc</span>
-        </div>
+        <button type="button" className={styles.brand} aria-label="Arc home">
+          <ArcMark size={42} />
+        </button>
         <CalendarNav />
         <ViewSwitcher />
       </header>
