@@ -4,6 +4,7 @@ import styles from './SelectionToolbar.module.css';
 
 export function SelectionToolbar({ onEdit }: { onEdit: (type: string, id: string) => void }) {
   const selection = useWorkspaceStore((s) => s.ui.selection);
+  const view = useWorkspaceStore((s) => s.ui.view);
   const domain = useWorkspaceStore((s) => s.domain);
   const select = useWorkspaceStore((s) => s.select);
   const markImportant = useWorkspaceStore((s) => s.markImportant);
@@ -32,6 +33,7 @@ export function SelectionToolbar({ onEdit }: { onEdit: (type: string, id: string
   );
   const important = 'important' in obj ? obj.important : false;
   const crossedOut = 'crossedOut' in obj ? obj.crossedOut : false;
+  const canMovePlacement = Boolean(placement && !placement.fixed && !(unit && view === 'week'));
 
   return (
     <div className={styles.bar} role="toolbar" aria-label={`${objectType} actions`}>
@@ -46,9 +48,10 @@ export function SelectionToolbar({ onEdit }: { onEdit: (type: string, id: string
           type="button"
           className={styles.button}
           aria-pressed={important}
+          aria-label={important ? `Remove red circle from ${obj.title}` : `Circle ${obj.title} in red`}
           onClick={() => markImportant(objectType as 'unit' | 'lesson' | 'note', objectId, !important)}
         >
-          {important ? 'Important \u2713' : 'Mark important'}
+          {important ? 'Uncircle' : 'Circle in red'}
         </button>
       )}
 
@@ -63,7 +66,7 @@ export function SelectionToolbar({ onEdit }: { onEdit: (type: string, id: string
         </button>
       )}
 
-      {placement && !placement.fixed && (
+      {canMovePlacement && placement && (
         <label className={styles.button} style={{ display: 'inline-flex', gap: 6, alignItems: 'center' }}>
           Move to
           <input
@@ -73,6 +76,12 @@ export function SelectionToolbar({ onEdit }: { onEdit: (type: string, id: string
             onChange={(e) => e.target.value && movePlacement(placement.id, e.target.value)}
           />
         </label>
+      )}
+
+      {unit && view === 'week' && placement && (
+        <span className={styles.button} aria-label="Unit movement is available in Month and Quarter">
+          Move in Month/Quarter
+        </span>
       )}
 
       {lesson && placement && (
@@ -120,7 +129,7 @@ export function SelectionToolbar({ onEdit }: { onEdit: (type: string, id: string
         </>
       )}
 
-      {placement && (
+      {placement && !(unit && view === 'week') && (
         <button type="button" className={styles.button} onClick={() => unplace(placement.id)}>
           Unplace
         </button>
