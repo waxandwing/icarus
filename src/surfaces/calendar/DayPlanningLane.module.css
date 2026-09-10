@@ -1,0 +1,118 @@
+.lane {
+  position: relative;
+  min-height: 58px;
+  padding: 7px 8px 6px;
+  border-left: 1px solid rgba(71, 67, 60, 0.12);
+  background: rgba(255, 255, 255, 0.12);
+  transition: background var(--arc-motion-fast) var(--arc-ease);
+}
+
+.lane:last-child {
+  border-right: 1px solid rgba(71, 67, 60, 0.12);
+}
+
+.lane[data-kind='weekend'],
+.lane[data-kind='no-school'] {
+  background: rgba(91, 101, 105, 0.045);
+}
+
+.lane[data-kind='early-release'] {
+  background: linear-gradient(to bottom, rgba(190, 148, 62, 0.05), rgba(255, 255, 255, 0.09));
+}
+
+.lane[data-dragover='true'] {
+  background: rgba(91, 120, 118, 0.1);
+}
+
+.lane[data-today='true']::before {
+  content: '';
+  position: absolute;
+  inset: 2px 3px auto;
+  height: 1px;
+  background: var(--arc-ink);
+  opacity: 0.45;
+}
+
+.stateLabel {
+  margin-bottom: 3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 9px;
+  line-height: 1.2;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--arc-charcoal);
+}
+
+.items {
+  display: grid;
+  gap: 2px;
+}
+
+.note,
+.task {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  padding: 1px 0;
+  text-align: left;
+  font: inherit;
+  font-size: 10px;
+  line-height: 1.25;
+  color: var(--arc-ink);
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.note::before {
+  content: '•';
+  margin-right: 4px;
+  opacity: 0.55;
+}
+
+.task {
+  font-size: 9px;
+  color: var(--arc-charcoal);
+}
+
+.task[data-crossed='true'] {
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+}
+
+.quickAdd {
+  margin-top: 2px;
+}
+
+.input {
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid transparent;
+  background: transparent;
+  padding: 2px 0 1px;
+  font: inherit;
+  font-size: 10px;
+  color: var(--arc-ink);
+}
+
+.input::placeholder {
+  color: var(--arc-charcoal);
+  opacity: 0.4;
+  font-style: italic;
+}
+
+.input:focus {
+  outline: 0;
+  border-bottom-color: rgba(71, 67, 60, 0.35);
+}
+
+@media (forced-colors: active) {
+  .lane[data-kind='weekend'],
+  .lane[data-kind='no-school'],
+  .lane[data-kind='early-release'] {
+    border-top: 2px dashed CanvasText;
+  }
+}
