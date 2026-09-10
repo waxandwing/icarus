@@ -1,0 +1,7 @@
+/* Teaching Mode hard accessibility gate. Keep focus treatment visible for all focus modalities. */
+[role='dialog'][aria-label='Arc Table teacher controller'] button:focus,
+[role='dialog'][aria-label='Arc Table teacher controller'] input:focus,
+[role='dialog'][aria-label='Arc Table teacher controller'] textarea:focus {
+  outline: 3px solid #2D7B82;
+  outline-offset: 3px;
+}
