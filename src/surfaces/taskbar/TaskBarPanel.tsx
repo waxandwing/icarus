@@ -16,6 +16,8 @@ function Column({ id, label }: { id: TaskColumn; label: string }) {
   const crossOut = useWorkspaceStore((s) => s.crossOut);
   const select = useWorkspaceStore((s) => s.select);
   const moveNoteToTaskBar = useWorkspaceStore((s) => s.moveNoteToTaskBar);
+  const moveNoteToDrawer = useWorkspaceStore((s) => s.moveNoteToDrawer);
+  const deleteObject = useWorkspaceStore((s) => s.deleteObject);
   const createNote = useWorkspaceStore((s) => s.createNote);
   const [draft, setDraft] = useState('');
   const [dragOver, setDragOver] = useState(false);
@@ -46,14 +48,15 @@ function Column({ id, label }: { id: TaskColumn; label: string }) {
           <div
             key={note.id}
             className={styles.task}
-            draggable
+            data-complete={note.crossedOut}
+            draggable={!note.crossedOut}
             onDragStart={(e) => e.dataTransfer.setData('text/arc-taskbar-note', note.id)}
           >
             <input
               type="checkbox"
               checked={note.crossedOut}
               onChange={(e) => crossOut('note', note.id, e.target.checked)}
-              aria-label={`Mark "${note.title}" done`}
+              aria-label={`${note.crossedOut ? 'Restore' : 'Complete'} “${note.title}”`}
             />
             <button
               type="button"
@@ -63,6 +66,28 @@ function Column({ id, label }: { id: TaskColumn; label: string }) {
             >
               {note.title}
             </button>
+            {note.crossedOut && (
+              <div className={styles.completeActions} aria-label={`Completed task actions for ${note.title}`}>
+                <button
+                  type="button"
+                  className={styles.resolveButton}
+                  onClick={() => moveNoteToDrawer(note.id)}
+                  aria-label={`Minimize completed task ${note.title}`}
+                  title="Minimize to drawer"
+                >
+                  −
+                </button>
+                <button
+                  type="button"
+                  className={styles.resolveButton}
+                  onClick={() => deleteObject('note', note.id)}
+                  aria-label={`Remove completed task ${note.title}`}
+                  title="Remove"
+                >
+                  ×
+                </button>
+              </div>
+            )}
           </div>
         ))}
       </div>
@@ -79,7 +104,7 @@ function Column({ id, label }: { id: TaskColumn; label: string }) {
         <input
           type="text"
           className={styles.addInput}
-          placeholder={`Add to ${label.toLowerCase()}\u2026`}
+          placeholder={`Add to ${label.toLowerCase()}…`}
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           aria-label={`Add a note to ${label}`}
