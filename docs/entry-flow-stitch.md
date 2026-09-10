@@ -4,42 +4,65 @@ This branch stitches the entry experience ahead of the planner shell.
 
 ## Canonical opening animation
 
-Do not substitute or regenerate this media during integration.
+The approved opening motion is V8 GOLD. Do not substitute, simplify, regenerate, or re-time it during integration.
 
-- Video: `Arc_Motion_Transparent.webm`
-- Format: WebM, VP9 alpha
+Production source candidate:
+
+- Review MP4: `ARC_Opening_Motion_v8_REVIEW.mp4`
+- White-background WebM source candidate: `ARC_Opening_Motion_v8_WHITE.webm`
 - Canvas: 900 × 900
-- Duration: 8 seconds
-- SHA-256: `d0d7b8d8aded140dc2beaea132d880908c485a738d421aa5e7718a57eb0b515b`
-- Poster: `arc-motion-final-transparent.png`
-- Poster: 900 × 900 RGBA PNG
-- Poster SHA-256: `53d6f13fd70969f8667fa93a5b1306b10b676b05eb7b810957051b3d6ef5a4ff`
+- Duration: approximately 9.23 seconds
+- Review MP4 SHA-256: `666388951b06af48da672f395fd5178d87948da6a7c1d3ec4c6f6fb9842e7078`
+- Current WebM candidate SHA-256: `112008b320789fa1689ed6bbaec2896e8531871bb6aa7991bd8e8a7778508d7b`
 
-Timing is inherited from the approved repaired source:
+V8 GOLD motion authority:
 
-- note-arrival phase ends: 3.28s
-- settle completes: 6.65s
-- copy/access reveal: 7.08s
-- opening scale: 1.10
-- settled scale: 0.68
-- progressive top trim: 40.10%
+- Teacher planning notes accumulate quickly and become overwhelming.
+- Notes use varied, gravity-led arrival timing and a unified physical scale.
+- Stationery spans multiple content areas and teacher-life reminders.
+- Planning objects swirl and compress without disappearing.
+- Significant tangram fragments inherit visible provenance from individual notes or magnets.
+- Those same fragments become the ARC geometry. No substitution event and no dissolve standing in for transformation.
+- The exact current ARC mark hard-locks at approximately 7.08s.
+- Once locked, the mark does not bounce, pulse, drift, or resettle.
+- `PLAN THE WAY YOU THINK.` enters separately and more slowly beginning around 7.52s.
+- The completed animation remains above the access gate. The password surface appears below it and must not displace or resize the final mark.
 
-The animation shows planning overload resolving into the ARC mark. The landing copy is:
+## Password handoff
 
-- `PLAN THE WAY YOU THINK.`
-- `Making it make sense.`
-- `A teacher planner built for what actually happens.`
-- `Sign up with email`
-- `Log in with beta password`
+The password experience is physically tied to the animation rather than being a second unrelated screen.
 
-Reduced-motion and media-error states must fail open to the transparent final poster plus immediately available access controls.
+- The opening motion occupies the upper entry field.
+- The final ARC mark and `PLAN THE WAY YOU THINK.` remain visually intact above the access surface.
+- When the reel finishes, the beta gate enters below it.
+- The gate is a cream-paper work surface using the current ARC paper and blue-paper textures, not a generic SaaS card.
+- Beta password is the default mode.
+- Password verification remains server-side through `/api/beta-access` and `ARC_BETA_PASSWORD`.
+- Media failure and reduced-motion states fail open to a current ARC mark plus immediately available access controls.
+- Successful access hands directly into teacher setup.
+
+## GOLD review authority
+
+Entry integration must survive the standing review authority before merge:
+
+1. disciplinary ruthless review
+2. teacher-with-a-task review
+3. accessibility and reduced-motion review
+4. hostile/random-frame review
+5. primitive/placeholder detection
+6. material-provenance review
+7. brand-with-logo-covered recognition
+8. implementation fidelity review
+9. final adversarial veto
+
+Taste alone does not reopen GOLD. New evidence does.
 
 ## Stitch order
 
-1. canonical opening animation
-2. access / beta password
+1. V8 GOLD opening animation
+2. integrated access / beta password beneath the resolved animation
 3. teacher setup
 4. existing ARC planner shell
-5. implementation audit against the GREEN++ Figma specification
+5. implementation audit against the locked GREEN++ / GOLD authority
 
-The binary media has been recovered from the canonical embedded landing candidate and verified locally. It still needs to be placed in `/public` on this branch before the branch can be treated as a runnable integration candidate.
+The text integration is now wired on `stitch/entry-flow-greenpp`. The approved V8 binary still needs to be placed in `/public/Arc_Motion_Transparent.webm` before the branch can be treated as a complete runnable candidate. Do not merge with an older opening reel in that path.
