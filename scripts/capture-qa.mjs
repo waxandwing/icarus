@@ -11,15 +11,20 @@ async function capture(page, path) {
   await page.screenshot({ path, fullPage: false });
 }
 
+async function openFurniture(page) {
+  await page.click('#arc-settings-tab');
+  await page.click('#arc-fridge-tab');
+  await page.click('#arc-taskbar-tab');
+  await page.waitForTimeout(650);
+}
+
 async function captureDesktop() {
   const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
   const page = await context.newPage();
   await page.goto(base, { waitUntil: 'networkidle' });
   await capture(page, `${out}/week-1440-closed.png`);
 
-  await page.click('#arc-settings-tab');
-  await page.click('#arc-fridge-tab');
-  await page.click('#arc-taskbar-tab');
+  await openFurniture(page);
   await capture(page, `${out}/week-1440-all-open.png`);
 
   await context.close();
@@ -30,9 +35,7 @@ async function captureMedium() {
   const page = await context.newPage();
   await page.goto(base, { waitUntil: 'networkidle' });
   await capture(page, `${out}/week-1280-closed.png`);
-  await page.click('#arc-settings-tab');
-  await page.click('#arc-fridge-tab');
-  await page.click('#arc-taskbar-tab');
+  await openFurniture(page);
   await capture(page, `${out}/week-1280-all-open.png`);
   await context.close();
 }
@@ -46,12 +49,11 @@ async function captureMobile() {
 }
 
 async function captureZoom() {
-  const context = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+  // A 640 CSS-pixel viewport at DPR 2 represents a 1280px-wide display at
+  // 200% effective zoom while still exercising the responsive/reflow rules.
+  const context = await browser.newContext({ viewport: { width: 640, height: 400 }, deviceScaleFactor: 2 });
   const page = await context.newPage();
   await page.goto(base, { waitUntil: 'networkidle' });
-  await page.evaluate(() => {
-    document.documentElement.style.zoom = '2';
-  });
   await capture(page, `${out}/week-200-percent.png`);
   await context.close();
 }
