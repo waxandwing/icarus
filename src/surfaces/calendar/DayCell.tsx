@@ -19,6 +19,9 @@ export interface DayCellProps {
 
 export function DayCell({ date, dimmed, compact, onCreate, cellRef, onFocusDate, tabIndex }: DayCellProps) {
   const domain = useWorkspaceStore((s) => s.domain);
+  const selection = useWorkspaceStore((s) => s.ui.selection);
+  const setAnchor = useWorkspaceStore((s) => s.setAnchorDate);
+  const select = useWorkspaceStore((s) => s.select);
   const movePlacement = useWorkspaceStore((s) => s.movePlacement);
   const placeMagnetOnCalendar = useWorkspaceStore((s) => s.placeMagnetOnCalendar);
   const placeNoteOnCalendar = useWorkspaceStore((s) => s.placeNoteOnCalendar);
@@ -27,9 +30,15 @@ export function DayCell({ date, dimmed, compact, onCreate, cellRef, onFocusDate,
   const kind = dayKind(domain.calendar, date);
   const label = dayLabel(domain.calendar, date);
   const today = isToday(date);
+  const selected = selection?.objectType === 'date' && selection.objectId === date;
   const placements = getPlacementsForDate(domain, date);
   const continuing = getContinuingUnits(domain, date);
   const dayNumber = Number(date.slice(-2));
+
+  function chooseDate() {
+    setAnchor(date);
+    select(selected ? null : { objectType: 'date', objectId: date });
+  }
 
   function handleDrop(e: React.DragEvent) {
     e.preventDefault();
@@ -57,6 +66,7 @@ export function DayCell({ date, dimmed, compact, onCreate, cellRef, onFocusDate,
       className={styles.cell}
       data-kind={kind}
       data-today={today}
+      data-selected={selected}
       data-dimmed={dimmed}
       style={dimmed ? { opacity: 0.45 } : undefined}
       data-dragover={dragOver}
@@ -66,7 +76,18 @@ export function DayCell({ date, dimmed, compact, onCreate, cellRef, onFocusDate,
       }}
       onDragLeave={() => setDragOver(false)}
       onDrop={handleDrop}
+      onClick={(e) => {
+        if ((e.target as HTMLElement).closest('button')) return;
+        chooseDate();
+      }}
+      onKeyDown={(e) => {
+        if ((e.key === 'Enter' || e.key === ' ') && e.target === e.currentTarget) {
+          e.preventDefault();
+          chooseDate();
+        }
+      }}
       role="gridcell"
+      aria-selected={selected}
       aria-label={`${date}${today ? ', today' : ''}${label ? `, ${label}` : ''}`}
       tabIndex={tabIndex}
       onFocus={() => onFocusDate?.(date)}
