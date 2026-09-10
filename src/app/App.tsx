@@ -21,13 +21,12 @@ export function App() {
     document.documentElement.setAttribute('data-reduced-motion', String(reducedMotionSetting));
   }, [highContrast, reducedMotionSetting]);
 
-  const completeEntry = () => {
-    applyStoredSetupToWorkspace();
-    setEntryComplete(true);
-  };
+  useEffect(() => {
+    if (ready && entryComplete) applyStoredSetupToWorkspace();
+  }, [ready, entryComplete]);
 
   if (!entryComplete) {
-    return <EntryFlow onComplete={completeEntry} />;
+    return <EntryFlow onComplete={() => setEntryComplete(true)} />;
   }
 
   if (!ready) {
