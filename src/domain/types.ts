@@ -8,7 +8,13 @@
 
 export type ISODate = string; // "YYYY-MM-DD"
 
-export type DayKind = 'instructional' | 'no-school' | 'early-release' | 'weekend';
+export type DayKind =
+  | 'instructional'
+  | 'no-school'
+  | 'early-release'
+  | 'testing'
+  | 'special-schedule'
+  | 'weekend';
 
 export type Confidence = 'confirmed' | 'tentative';
 
