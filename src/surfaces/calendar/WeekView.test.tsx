@@ -21,10 +21,10 @@ function resetWeek() {
 describe('Week planning projection', () => {
   beforeEach(resetWeek);
 
-  it('renders classes as rows with a selectable but non-draggable Unit span', () => {
+  it('renders classes as an accessible list with a selectable but non-draggable Unit span', () => {
     render(<WeekView onEdit={() => undefined} onCreate={() => undefined} />);
 
-    expect(screen.getByRole('row', { name: /AP Art History, Period 2/i })).toBeTruthy();
+    expect(screen.getByRole('listitem', { name: /AP Art History, Period 2/i })).toBeTruthy();
     const unit = screen.getByRole('button', { name: /Unit: Prehistory/i });
     expect(unit.getAttribute('draggable')).not.toBe('true');
   });
