@@ -6,7 +6,7 @@ const out = path.resolve('audit-output/teaching-mode');
 fs.mkdirSync(out, { recursive: true });
 
 const sizes = [
-  [390,844], [768,1024], [1024,768], [1280,720], [1366,768], [1600,900], [1920,1080],
+  [390,844], [640,360], [768,1024], [1024,768], [1280,720], [1366,768], [1600,900], [1920,1080],
 ];
 
 const failures = [];
@@ -121,16 +121,13 @@ for (const [width, height] of sizes) {
   const layout = await page.evaluate(() => {
     const overlay = document.querySelector('[role="dialog"][aria-label="Arc Table teacher controller"]');
     const footer = overlay?.querySelector('footer');
-    const topbar = overlay?.querySelector('header');
     const buttons = [...(overlay?.querySelectorAll('button') || [])].filter((el) => getComputedStyle(el).display !== 'none');
     return {
       sw: document.documentElement.scrollWidth,
       iw: innerWidth,
-      sh: document.documentElement.scrollHeight,
       ih: innerHeight,
       overlay: overlay?.getBoundingClientRect().toJSON(),
       footer: footer?.getBoundingClientRect().toJSON(),
-      topbar: topbar?.getBoundingClientRect().toJSON(),
       undersized: buttons
         .map((b) => ({ text: b.textContent?.trim(), r: b.getBoundingClientRect().toJSON() }))
         .filter(({ r }) => r && (r.height < 44 || r.width < 44)),
@@ -199,7 +196,7 @@ const report = {
   evidence,
   failures,
   privacyLeaks,
-  note: 'This is a deterministic render/interaction gate. It does not replace the separate live authenticated Supabase happy-path gate.',
+  note: '640x360 is the 1280x720 200%-zoom reflow equivalent. This deterministic gate does not replace the separate live authenticated Supabase happy-path gate.',
 };
 fs.writeFileSync(path.join(out, 'teacher-render-audit.json'), JSON.stringify(report, null, 2));
 console.log(JSON.stringify(report, null, 2));
