@@ -15,12 +15,11 @@ export default function handler(req: any, res: any) {
     return res.status(405).json({ ok: false });
   }
 
-  const expected = process.env.ARC_BETA_PASSWORD;
-  if (!expected) {
-    return res.status(503).json({ ok: false, error: 'Beta access is temporarily unavailable.' });
-  }
-
+  // The beta is intentionally protected by a shared tester password.
+  // Environment configuration may override the founder-locked default.
+  const expected = process.env.ARC_BETA_PASSWORD || 'icarus';
   const supplied = typeof req.body?.password === 'string' ? req.body.password : '';
+
   if (!supplied || supplied.length > 256 || !sameSecret(supplied, expected)) {
     return res.status(401).json({ ok: false, error: 'Access could not be verified.' });
   }
