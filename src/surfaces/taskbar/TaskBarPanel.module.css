@@ -13,14 +13,21 @@
   border-bottom: none;
   border-radius: var(--arc-radius-lg) var(--arc-radius-lg) 0 0;
   box-shadow: var(--arc-shadow-lifted);
-  transition: transform var(--arc-motion-slow) var(--arc-ease);
+  transition:
+    transform var(--arc-motion-slow) var(--arc-ease),
+    visibility 0s linear var(--arc-motion-slow);
   z-index: 36;
   padding: var(--arc-space-4) var(--arc-space-5);
   display: flex;
   flex-direction: column;
+  visibility: hidden;
+  pointer-events: none;
 }
 .panel[data-open='true'] {
   transform: translateX(-50%) translateY(0);
+  visibility: visible;
+  pointer-events: auto;
+  transition-delay: 0s;
 }
 
 .headerRow {
