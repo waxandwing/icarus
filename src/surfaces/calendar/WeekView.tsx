@@ -80,6 +80,7 @@ export function WeekView({ onCreate }: ViewProps) {
         {days.map((date) => {
           const kind = dayKind(domain.calendar, date);
           const label = dayLabel(domain.calendar, date);
+          const selected = selection?.objectType === 'date' && selection.objectId === date;
           return (
             <button
               key={date}
@@ -90,9 +91,14 @@ export function WeekView({ onCreate }: ViewProps) {
               className={styles.dateHeader}
               data-kind={kind}
               data-today={isToday(date)}
+              data-selected={selected}
+              aria-pressed={selected}
               tabIndex={date === focusedDate ? 0 : -1}
               onFocus={() => setFocusedDate(date)}
-              onClick={() => setAnchor(date)}
+              onClick={() => {
+                setAnchor(date);
+                select(selected ? null : { objectType: 'date', objectId: date });
+              }}
               onDoubleClick={() => onCreate(date)}
               aria-label={`${fromISODate(date).toLocaleDateString()}${label ? `, ${label}` : ''}`}
             >
