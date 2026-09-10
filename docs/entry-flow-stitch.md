@@ -31,22 +31,40 @@ V8 GOLD motion authority:
 - The exact current ARC mark hard-locks at approximately 7.08s.
 - Once locked, the mark does not bounce, pulse, drift, or resettle.
 - `PLAN THE WAY YOU THINK.` enters separately and more slowly beginning around 7.52s.
-- The completed animation remains above the access gate. The password surface appears below it and must not displace or resize the final mark.
+- The completed animation remains above the access gate. Entry choices appear below it and must not displace or resize the final mark.
 
-## Password handoff
+## Entry architecture authority
 
-The password experience is physically tied to the animation rather than being a second unrelated screen.
+There are exactly two entry branches. No third login/signup path may be introduced without founder approval.
 
-- The opening motion occupies the upper entry field on true white.
-- The final ARC mark and `PLAN THE WAY YOU THINK.` remain visually intact above the access surface.
-- When the reel finishes, the beta gate enters below it without changing the reel geometry.
-- The gate is a cream-paper work surface using current ARC cream-paper and blue-paper textures, not a generic SaaS card.
-- Only the implemented beta-password path is exposed. The earlier email pseudo-auth path was removed rather than presented as functional account creation.
-- Password verification remains server-side through `/api/beta-access` and `ARC_BETA_PASSWORD`.
-- Password responses are uncached and deliberately generic; supplied input is bounded to 256 characters.
-- Media failure and reduced-motion states fail open to the current ARC mark plus immediately available access controls.
-- Error state uses both text and a non-color-dependent field state; status is announced with `aria-live` / `role=alert`.
-- Successful access hands directly into teacher setup.
+1. `/beta` — beta tester login.
+   - Shared tester password: `icarus` unless overridden by the `ARC_BETA_PASSWORD` server environment variable.
+   - Validation stays server-side through `/api/beta-access`.
+   - Success enters teacher setup, then the planner.
+2. `/interest` — public interest form.
+   - Email required; name and role optional.
+   - Submissions write to the canonical Supabase table `arc_interest_signups` through `/api/interest`.
+   - Interest submission does not create an account, unlock the beta, or enter setup.
+   - Duplicate addresses return a calm already-on-the-list state.
+
+The former email pseudo-auth route is superseded. Email is an interest-list branch only.
+
+## Entry visual/material rules
+
+- The V8 mark and `PLAN THE WAY YOU THINK.` remain visually intact above the entry surface.
+- Entry surfaces use assets already present in `/public/assets/arc`, including the approved paper textures, ARC geometric pattern, and ARC mark.
+- Do not invent generic decorative primitives, placeholder illustrations, faux stationery, generic gradients, or substitute icons for this flow.
+- Functional HTML controls remain semantic controls, but their material surfaces inherit approved ARC textures rather than decorative CSS approximations.
+- The beta and interest branches share one physical ARC apparatus and switch content without moving the resolved mark.
+- The stage remains true white to match V8.
+
+## Accessibility + trust
+
+- Media failure and reduced-motion states fail open to the current ARC mark plus immediately available entry controls.
+- Password responses are uncached and deliberately generic; input is bounded.
+- Interest form includes server-side validation, a honeypot field, bounded inputs, loading/error/duplicate/success states, and no false-success path.
+- Errors use text and a non-color-dependent field state and are announced live.
+- Both branches are direct-loadable routes through Vercel rewrites and remain keyboard accessible.
 
 ## Typography authority
 
@@ -56,7 +74,7 @@ Implementation must load and use the current ARC typography system:
 - League Spartan — short labels and controls
 - Instrument Serif — large editorial headings and brief accents
 
-Legacy Nunito/Fraunces/Caveat loading was implementation drift and has been removed from this branch.
+Legacy Nunito/Fraunces/Caveat loading is implementation drift.
 
 ## GOLD review authority
 
@@ -72,22 +90,24 @@ Entry integration must survive the standing review authority before merge:
 8. implementation fidelity review
 9. final adversarial veto
 
-Taste alone does not reopen GOLD. New evidence does.
+GOLD is not a synonym for acceptable. It means no meaningful defect survives the full review cycle. Taste alone does not reopen GOLD. New evidence does.
 
 ## Current implementation evidence
 
-- Password surface reviewed in desktop default, desktop loading, desktop error, mobile default, and mobile error states.
-- Initial audit exposed two real defects: the final tagline was partially hidden by the gate, and an off-white page revealed the video canvas as a white square. Both were corrected by reducing the reel footprint, removing the negative overlap, and matching the stage to true white.
-- CI exposed a `verbatimModuleSyntax` TypeScript failure for `FormEvent`; the import was corrected to a type-only import.
-- Latest Arc CI on the branch passes lint and production build.
+- V8 is founder-approved GOLD motion.
+- Password surface has been reviewed in desktop default, loading, error, mobile default, and mobile error states.
+- The earlier single-password-only implementation was corrected after architecture review to restore the canonical `/beta` and `/interest` split.
+- The historical Group 4 entry-gate branch confirmed the same public route contract: `Enter the beta` -> `/beta`; `Join the interest list` -> `/interest`.
+- The historical interest branch confirmed the existing `arc_interest_signups` Supabase destination. The current implementation moves that write behind `/api/interest` instead of exposing the write logic in the browser.
+- CI previously exposed and resolved a TypeScript `verbatimModuleSyntax` failure. Lint + production build were green before the two-route restoration and must rerun after these changes.
 - The regenerated V8 production WebM is locally verified at 900 × 900, 30 fps, 9.233 seconds. Its remaining blocker is repository binary placement plus final browser playback verification.
 
 ## Stitch order
 
 1. V8 GOLD opening animation
-2. integrated beta password beneath the resolved animation
-3. teacher setup
+2. two-route entry apparatus: `/beta` + `/interest`
+3. teacher setup from successful beta access only
 4. existing ARC planner shell
 5. implementation audit against the locked GREEN++ / GOLD authority
 
-The text implementation is wired on `stitch/entry-flow-greenpp`. Do not merge until the verified `cdaa5f4c...` V8 WebM has been placed in the application media slot and playback has been checked in the target browsers.
+Do not merge until the verified `cdaa5f4c...` V8 WebM has been placed in the application media slot, both entry branches pass browser verification, and the complete entry flow survives the GOLD review authority.
