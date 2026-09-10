@@ -29,9 +29,10 @@ export const teachingController = {
     lessonTitle: string;
     roomProjection: RoomProjection;
   }): Promise<LiveSession> {
-    return liveSessionTransport.start({
+    const result = await liveSessionTransport.start({
       accessToken: await token(),
       classId: input.classId,
+      sectionId: input.sectionId,
       lessonTitle: input.lessonTitle,
       teacherState: {
         sectionId: input.sectionId,
@@ -43,6 +44,7 @@ export const teachingController = {
       },
       roomProjection: input.roomProjection,
     });
+    return result.session;
   },
 
   async resume() {
@@ -58,20 +60,21 @@ export const teachingController = {
     });
   },
 
-  async roster(sessionId: string): Promise<RosterStudent[]> {
-    return liveSessionTransport.roster(await token(), sessionId);
+  async roster(input: { classId?: string; sectionId?: string }): Promise<RosterStudent[]> {
+    const result = await liveSessionTransport.roster({ accessToken: await token(), ...input });
+    return result.roster;
   },
 
   async startPass(sessionId: string, studentId: string) {
-    return liveSessionTransport.startPass(await token(), sessionId, studentId);
+    return liveSessionTransport.startPass({ accessToken: await token(), sessionId, studentId });
   },
 
-  async returnPass(sessionId: string, passEventId: string) {
-    return liveSessionTransport.returnPass(await token(), sessionId, passEventId);
+  async returnPass(passId: string) {
+    return liveSessionTransport.returnPass({ accessToken: await token(), passId });
   },
 
-  async activePasses(sessionId: string) {
-    return liveSessionTransport.activePasses(await token(), sessionId);
+  async activePasses(input: { classId?: string; sectionId?: string }) {
+    return liveSessionTransport.activePasses({ accessToken: await token(), ...input });
   },
 
   async end(sessionId: string) {
