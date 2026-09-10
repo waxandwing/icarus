@@ -1,6 +1,6 @@
 import { type IDBPDatabase, openDB } from 'idb';
 import { CURRENT_SCHEMA_VERSION } from '../domain/seed';
-import type { WorkspaceDomainState } from '../domain/types';
+import type { Lesson, WorkspaceDomainState } from '../domain/types';
 
 const DB_NAME = 'arc-workspace';
 const DB_VERSION = 1;
@@ -19,9 +19,7 @@ function getDb() {
   if (!dbPromise) {
     dbPromise = openDB(DB_NAME, DB_VERSION, {
       upgrade(db) {
-        if (!db.objectStoreNames.contains(STORE)) {
-          db.createObjectStore(STORE);
-        }
+        if (!db.objectStoreNames.contains(STORE)) db.createObjectStore(STORE);
       },
     });
   }
@@ -32,6 +30,7 @@ function migrateDomain(rawDomain: WorkspaceDomainState): WorkspaceDomainState {
   const domain: WorkspaceDomainState = {
     ...rawDomain,
     calendar: { ...rawDomain.calendar, days: { ...rawDomain.calendar.days } },
+    lessons: { ...rawDomain.lessons },
     notes: { ...rawDomain.notes },
   };
 
@@ -39,11 +38,22 @@ function migrateDomain(rawDomain: WorkspaceDomainState): WorkspaceDomainState {
 
   const startingVersion = domain.schemaVersion || 1;
   if (startingVersion < 2) {
-    // v2 introduces optional Task date association and the expanded school-day
-    // vocabulary (testing / special schedule). Existing v1 records are already
-    // semantically valid, so migration preserves every object and placement and
-    // advances only the explicit schema contract.
+    // v2 introduces optional Task date association and expanded school-day vocabulary.
     domain.schemaVersion = 2;
+  }
+
+  if (domain.schemaVersion < 3) {
+    // v3 adds ordered structured Lesson fields. Existing freeform body text is
+    // deliberately preserved as body rather than reinterpreted as a field.
+    // Every old lesson gains an empty field array, retaining ids, placement,
+    // section scope, visibility and all teacher-authored text exactly as-is.
+    domain.lessons = Object.fromEntries(
+      Object.entries(domain.lessons).map(([id, lesson]) => [
+        id,
+        { ...lesson, fields: Array.isArray((lesson as Lesson).fields) ? (lesson as Lesson).fields : [] },
+      ]),
+    );
+    domain.schemaVersion = 3;
   }
 
   if (domain.schemaVersion < CURRENT_SCHEMA_VERSION) {
