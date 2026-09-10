@@ -45,10 +45,11 @@
   --arc-radius-lg: 12px;
   --arc-radius-full: 999px;
 
-  /* Type */
-  --arc-font-sans: 'Nunito', 'Segoe UI Rounded', 'Segoe UI', system-ui, sans-serif;
-  --arc-font-serif: 'Fraunces', Georgia, 'Times New Roman', serif;
-  --arc-font-hand: 'Caveat', cursive;
+  /* Type — locked ARC authority */
+  --arc-font-sans: 'Inter', system-ui, sans-serif;
+  --arc-font-label: 'League Spartan', 'Inter', system-ui, sans-serif;
+  --arc-font-serif: 'Instrument Serif', Georgia, 'Times New Roman', serif;
+  --arc-font-hand: 'Instrument Serif', Georgia, serif;
   --arc-text-body: 16px;
   --arc-text-meta: 14px;
 
@@ -77,27 +78,11 @@
   --arc-ink: #000000;
 }
 
-.arc-token-mustard {
-  --token-color: var(--arc-mustard);
-}
-.arc-token-terracotta {
-  --token-color: var(--arc-terracotta);
-}
-.arc-token-blue {
-  --token-color: var(--arc-blue);
-}
-.arc-token-sage {
-  --token-color: var(--arc-sage);
-}
-.arc-token-pink {
-  --token-color: var(--arc-pink);
-}
-.arc-token-lavender {
-  --token-color: var(--arc-lavender);
-}
-.arc-token-kraft {
-  --token-color: var(--arc-kraft);
-}
-.arc-token-charcoal {
-  --token-color: var(--arc-charcoal);
-}
+.arc-token-mustard { --token-color: var(--arc-mustard); }
+.arc-token-terracotta { --token-color: var(--arc-terracotta); }
+.arc-token-blue { --token-color: var(--arc-blue); }
+.arc-token-sage { --token-color: var(--arc-sage); }
+.arc-token-pink { --token-color: var(--arc-pink); }
+.arc-token-lavender { --token-color: var(--arc-lavender); }
+.arc-token-kraft { --token-color: var(--arc-kraft); }
+.arc-token-charcoal { --token-color: var(--arc-charcoal); }
