@@ -11,3 +11,10 @@ if (!source.includes(before)) {
 const runtimePath = '/tmp/b08-browser-v5-runtime.mjs';
 await writeFile(runtimePath, source.replace(before, after), 'utf8');
 await import(`file://${runtimePath}?run=${Date.now()}`);
+
+// The imported hostile circuit owns Chromium/Vite teardown. GitHub-hosted runners can
+// keep inherited child-process handles alive after those processes receive SIGTERM,
+// which previously caused a verified GREEN circuit to idle until the job timeout.
+// Reaching this line means the full circuit completed without throwing, so terminate
+// the harness process explicitly rather than letting stale handles invalidate evidence.
+process.exit(0);
