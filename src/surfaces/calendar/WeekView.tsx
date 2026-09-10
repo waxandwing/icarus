@@ -72,7 +72,8 @@ export function WeekView({ onCreate }: ViewProps) {
       <div
         className={styles.dateGrid}
         style={{ gridTemplateColumns }}
-        role="row"
+        role="group"
+        aria-label="Week dates"
         onKeyDown={handleDateKeyDown}
       >
         <div className={styles.cornerLabel}>Planning</div>
@@ -110,7 +111,7 @@ export function WeekView({ onCreate }: ViewProps) {
         ))}
       </div>
 
-      <div className={styles.classRows} role="grid" aria-label="Week by class">
+      <div className={styles.classRows} role="list" aria-label="Week by class">
         {sections.length === 0 && (
           <div className={styles.emptyState}>Add a class in Settings to begin planning this week.</div>
         )}
@@ -140,10 +141,10 @@ export function WeekView({ onCreate }: ViewProps) {
               key={section.id}
               className={styles.classRow}
               style={{ gridTemplateColumns }}
-              role="row"
+              role="listitem"
               aria-label={`${course.name}, ${section.name}`}
             >
-              <div className={styles.classLabel} role="rowheader">
+              <div className={styles.classLabel}>
                 <span className={styles.courseName}>{course.name}</span>
                 <span className={styles.sectionName}>{section.name}</span>
               </div>
