@@ -11,6 +11,47 @@ async function capture(page, path) {
   await page.screenshot({ path, fullPage: false });
 }
 
+function assertSameBox(before, after, label) {
+  if (!before || !after) throw new Error(`${label}: calendar shell bounding box is missing.`);
+  for (const key of ['x', 'y', 'width', 'height']) {
+    if (Math.abs(before[key] - after[key]) > 0.5) {
+      throw new Error(
+        `${label}: opening furniture changed calendar ${key} from ${before[key]} to ${after[key]}.`,
+      );
+    }
+  }
+}
+
+async function assertClosedFurnitureHidden(page) {
+  const state = await page.evaluate(() => {
+    const ids = ['arc-settings-panel', 'arc-fridge-panel', 'arc-taskbar-panel'];
+    return Object.fromEntries(
+      ids.map((id) => {
+        const element = document.getElementById(id);
+        return [id, element ? getComputedStyle(element).visibility : 'missing'];
+      }),
+    );
+  });
+  for (const [id, visibility] of Object.entries(state)) {
+    if (visibility !== 'hidden') throw new Error(`${id} is ${visibility} while closed; expected hidden.`);
+  }
+}
+
+async function assertOpenFurnitureVisible(page) {
+  const state = await page.evaluate(() => {
+    const ids = ['arc-settings-panel', 'arc-fridge-panel', 'arc-taskbar-panel'];
+    return Object.fromEntries(
+      ids.map((id) => {
+        const element = document.getElementById(id);
+        return [id, element ? getComputedStyle(element).visibility : 'missing'];
+      }),
+    );
+  });
+  for (const [id, visibility] of Object.entries(state)) {
+    if (visibility !== 'visible') throw new Error(`${id} is ${visibility} while open; expected visible.`);
+  }
+}
+
 async function openFurniture(page) {
   await page.click('#arc-settings-tab');
   await page.click('#arc-fridge-tab');
@@ -22,9 +63,14 @@ async function captureDesktop() {
   const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
   const page = await context.newPage();
   await page.goto(base, { waitUntil: 'networkidle' });
+  await assertClosedFurnitureHidden(page);
+  const before = await page.locator('#arc-calendar-shell').boundingBox();
   await capture(page, `${out}/week-1440-closed.png`);
 
   await openFurniture(page);
+  await assertOpenFurnitureVisible(page);
+  const after = await page.locator('#arc-calendar-shell').boundingBox();
+  assertSameBox(before, after, '1440 desktop');
   await capture(page, `${out}/week-1440-all-open.png`);
 
   await context.close();
@@ -34,8 +80,13 @@ async function captureMedium() {
   const context = await browser.newContext({ viewport: { width: 1280, height: 800 } });
   const page = await context.newPage();
   await page.goto(base, { waitUntil: 'networkidle' });
+  await assertClosedFurnitureHidden(page);
+  const before = await page.locator('#arc-calendar-shell').boundingBox();
   await capture(page, `${out}/week-1280-closed.png`);
   await openFurniture(page);
+  await assertOpenFurnitureVisible(page);
+  const after = await page.locator('#arc-calendar-shell').boundingBox();
+  assertSameBox(before, after, '1280 desktop');
   await capture(page, `${out}/week-1280-all-open.png`);
   await context.close();
 }
@@ -44,6 +95,7 @@ async function captureMobile() {
   const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
   const page = await context.newPage();
   await page.goto(base, { waitUntil: 'networkidle' });
+  await assertClosedFurnitureHidden(page);
   await capture(page, `${out}/week-390.png`);
   await context.close();
 }
@@ -54,6 +106,7 @@ async function captureZoom() {
   const context = await browser.newContext({ viewport: { width: 640, height: 400 }, deviceScaleFactor: 2 });
   const page = await context.newPage();
   await page.goto(base, { waitUntil: 'networkidle' });
+  await assertClosedFurnitureHidden(page);
   await capture(page, `${out}/week-200-percent.png`);
   await context.close();
 }
@@ -62,6 +115,7 @@ async function captureForcedColors() {
   const context = await browser.newContext({ viewport: { width: 1280, height: 800 }, forcedColors: 'active' });
   const page = await context.newPage();
   await page.goto(base, { waitUntil: 'networkidle' });
+  await assertClosedFurnitureHidden(page);
   await capture(page, `${out}/week-forced-colors.png`);
   await context.close();
 }
