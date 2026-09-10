@@ -22,7 +22,7 @@ export function CalendarNav() {
   const showWeekends = useWorkspaceStore((s) => s.domain.settings.showWeekends);
 
   const weekDays = getWeekDays(anchor, weekStartsOn, showWeekends);
-  const title = view === 'week' && weekDays.length > 0 ? monthTitle(weekDays[0]) : monthTitle(anchor);
+  const title = monthTitle(anchor);
   const subtitle =
     view === 'day'
       ? formatFriendly(anchor)
