@@ -19,9 +19,22 @@ jobs:
           cache-dependency-path: package.json
       - name: Install dependencies
         run: npm install --no-audit --no-fund
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
       - name: Lint
         run: npm run lint
       - name: Build
         run: npm run build
       - name: Teaching Mode contract audit
         run: node scripts/teaching-mode-gold-contract.mjs
+      - name: Start production preview
+        run: npm run preview -- --host 127.0.0.1 --port 4173 > /tmp/arc-preview.log 2>&1 &
+      - name: Classroom display render audit
+        run: npm run audit:teaching-render
+      - name: Upload Gold render evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: teaching-mode-gold-render-evidence
+          path: audit-output/teaching-mode
+          if-no-files-found: error
