@@ -29,6 +29,8 @@ jobs:
         run: node scripts/teaching-mode-gold-contract.mjs
       - name: Start production preview
         run: npm run preview -- --host 127.0.0.1 --port 4173 > /tmp/arc-preview.log 2>&1 &
+      - name: Constitutional typography load audit
+        run: node scripts/teaching-mode-font-audit.mjs
       - name: Student classroom display render audit
         run: npm run audit:teaching-render
       - name: Teacher controller render and interaction audit
