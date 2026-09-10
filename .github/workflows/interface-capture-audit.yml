@@ -1,9 +1,9 @@
 name: Arc Interface Capture Audit
 
 on:
-  push:
+  pull_request:
     branches:
-      - audit/gold-interface-capture
+      - main
   workflow_dispatch:
 
 permissions:
@@ -11,6 +11,7 @@ permissions:
 
 jobs:
   capture:
+    if: github.head_ref == 'audit/gold-interface-capture' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
