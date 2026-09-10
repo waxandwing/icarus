@@ -28,16 +28,11 @@ function getDb() {
   return dbPromise;
 }
 
-/**
- * Versioned migration layer. Every persisted-shape change gets an explicit
- * schema branch so existing teacher work upgrades in place instead of being
- * reset or silently reinterpreted.
- */
-export function migratePersisted(raw: PersistedWorkspace): PersistedWorkspace {
+function migrateDomain(rawDomain: WorkspaceDomainState): WorkspaceDomainState {
   const domain: WorkspaceDomainState = {
-    ...raw.domain,
-    calendar: { ...raw.domain.calendar, days: { ...raw.domain.calendar.days } },
-    notes: { ...raw.domain.notes },
+    ...rawDomain,
+    calendar: { ...rawDomain.calendar, days: { ...rawDomain.calendar.days } },
+    notes: { ...rawDomain.notes },
   };
 
   if (domain.isSampleWorkspace === undefined) domain.isSampleWorkspace = false;
@@ -55,7 +50,26 @@ export function migratePersisted(raw: PersistedWorkspace): PersistedWorkspace {
     throw new Error(`Arc: missing migration from schema ${domain.schemaVersion} to ${CURRENT_SCHEMA_VERSION}.`);
   }
 
-  return { ...raw, domain };
+  return domain;
+}
+
+/**
+ * Versioned migration layer. Every persisted-shape change gets an explicit
+ * schema branch so existing teacher work upgrades in place instead of being
+ * reset or silently reinterpreted. Undo snapshots migrate with the live domain
+ * so Undo can never restore an obsolete schema after reload.
+ */
+export function migratePersisted(raw: PersistedWorkspace): PersistedWorkspace {
+  return {
+    ...raw,
+    domain: migrateDomain(raw.domain),
+    undo: raw.undo
+      ? {
+          ...raw.undo,
+          snapshot: migrateDomain(raw.undo.snapshot),
+        }
+      : null,
+  };
 }
 
 export async function loadPersisted(): Promise<PersistedWorkspace | null> {
