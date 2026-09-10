@@ -1,9 +1,15 @@
-import { addSchoolDays } from '../calendar/dates';
+import { addSchoolDays, fromISODate } from '../calendar/dates';
 import { useWorkspaceStore } from '../state/store';
 import { getAvailableActions } from './selectionActions';
 import styles from './SelectionToolbar.module.css';
 
-export function SelectionToolbar({ onEdit }: { onEdit: (type: string, id: string) => void }) {
+export function SelectionToolbar({
+  onEdit,
+  onCreate,
+}: {
+  onEdit: (type: string, id: string) => void;
+  onCreate: (date: string) => void;
+}) {
   const selection = useWorkspaceStore((s) => s.ui.selection);
   const view = useWorkspaceStore((s) => s.ui.view);
   const domain = useWorkspaceStore((s) => s.domain);
@@ -22,6 +28,45 @@ export function SelectionToolbar({ onEdit }: { onEdit: (type: string, id: string
   if (!selection) return null;
 
   const { objectType, objectId } = selection;
+
+  if (objectType === 'date') {
+    const actions = new Set(
+      getAvailableActions({
+        selection,
+        view,
+        hasPlacement: false,
+        placementFixed: false,
+        hasSection: false,
+      }),
+    );
+    const dateLabel = fromISODate(objectId).toLocaleDateString(undefined, {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+    });
+
+    return (
+      <div className={styles.bar} role="toolbar" aria-label={`Actions for ${dateLabel}`}>
+        <span className={styles.title}>{dateLabel}</span>
+        {actions.has('add') && (
+          <button
+            type="button"
+            className={styles.button}
+            onClick={() => {
+              onCreate(objectId);
+              select(null);
+            }}
+          >
+            Add to this day
+          </button>
+        )}
+        <button type="button" className={styles.closeButton} onClick={() => select(null)} aria-label="Close toolbar">
+          {'\u2715'}
+        </button>
+      </div>
+    );
+  }
+
   const unit = objectType === 'unit' ? domain.units[objectId] : undefined;
   const lesson = objectType === 'lesson' ? domain.lessons[objectId] : undefined;
   const note = objectType === 'note' ? domain.notes[objectId] : undefined;
