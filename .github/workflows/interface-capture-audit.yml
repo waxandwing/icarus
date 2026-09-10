@@ -1,0 +1,56 @@
+name: Arc Interface Capture Audit
+
+on:
+  push:
+    branches:
+      - audit/gold-interface-capture
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install app dependencies
+        run: npm ci
+
+      - name: Install Playwright without changing lockfile
+        run: |
+          npm install --no-save --package-lock=false @playwright/test
+          npx playwright install --with-deps chromium
+
+      - name: Start Arc locally
+        run: |
+          npm run dev -- --host 127.0.0.1 --port 43217 > /tmp/arc-vite.log 2>&1 &
+          echo $! > /tmp/arc-vite.pid
+          for i in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:43217 >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/arc-vite.log
+          exit 1
+
+      - name: Capture current interface states
+        run: node scripts/capture-qa.mjs
+
+      - name: Upload rendered PNG evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: arc-interface-captures
+          path: artifacts/visual-qa/*.png
+          if-no-files-found: error
+          retention-days: 14
