@@ -80,7 +80,10 @@ export function AppFrame() {
         />
       </main>
 
-      <SelectionToolbar onEdit={(type, id) => setEditingId({ type, id })} />
+      <SelectionToolbar
+        onEdit={(type, id) => setEditingId({ type, id })}
+        onCreate={(date) => setCreatingFor(date)}
+      />
       {creatingFor && <CreateItemDialog date={creatingFor} onClose={() => setCreatingFor(null)} />}
       {editingId && (
         <EditDialog objectType={editingId.type} objectId={editingId.id} onClose={() => setEditingId(null)} />
