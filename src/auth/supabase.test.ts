@@ -18,7 +18,7 @@ function installFakeSupabase(options?: { session?: Session | null; remotePayload
   }));
   const eq = vi.fn(() => ({ maybeSingle }));
   const select = vi.fn(() => ({ eq }));
-  const upsert = vi.fn(async () => ({ data: null, error: null }));
+  const upsert = vi.fn(async (_value: { user_id: string; payload: unknown; updated_at: string }, _options: { onConflict: string }) => ({ data: null, error: null }));
   const from = vi.fn(() => ({ select, upsert }));
   const createClient = vi.fn(() => ({
     auth: { getSession, signInWithPassword, signOut, onAuthStateChange },
@@ -66,12 +66,10 @@ describe('B08 Supabase boundary', () => {
     const fake = installFakeSupabase();
     const { saveRemoteWorkspace } = await import('./supabase');
     await saveRemoteWorkspace('user-b', { marker: 'B' });
-    expect(fake.upsert).toHaveBeenCalledTimes(1);
-    const [value, options] = fake.upsert.mock.calls[0];
-    expect(value.user_id).toBe('user-b');
-    expect(value.payload).toEqual({ marker: 'B' });
-    expect(typeof value.updated_at).toBe('string');
-    expect(options).toEqual({ onConflict: 'user_id' });
+    expect(fake.upsert).toHaveBeenCalledWith(
+      expect.objectContaining({ user_id: 'user-b', payload: { marker: 'B' } }),
+      { onConflict: 'user_id' },
+    );
   });
 
   it('subscribes and returns the provider unsubscribe handle', async () => {
