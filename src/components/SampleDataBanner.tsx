@@ -3,7 +3,7 @@ import styles from './SampleDataBanner.module.css';
 
 /**
  * Arc must never present generated content as if it were the teacher's real
- * plan (Canonical Product Spec \u00a72: "Never show demo data inside a real
+ * plan (Canonical Product Spec §2: "Never show demo data inside a real
  * teacher workspace"). This banner keeps the distinction explicit until the
  * teacher clears the example plan or chooses to keep browsing it.
  */
@@ -17,7 +17,7 @@ export function SampleDataBanner() {
 
   return (
     <div className={styles.banner} role="status">
-      <span>This is an example plan so you can explore Arc \u2014 it isn&apos;t your real schedule.</span>
+      <span>This is an example plan so you can explore Arc. It isn&apos;t your real schedule.</span>
       <div className={styles.actions}>
         <button
           type="button"
