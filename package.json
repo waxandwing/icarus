@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "audit:teaching-render": "node scripts/teaching-mode-render-audit.mjs"
+    "audit:teaching-render": "node scripts/teaching-mode-render-audit.mjs",
+    "audit:teaching-teacher-render": "node scripts/teaching-mode-teacher-render-audit.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.107.0",
