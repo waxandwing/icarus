@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { dayKind, dayLabel, formatFriendly } from '../../calendar/dates';
-import { PlacementChip, UnitBar } from '../../components/PlacementChip';
+import { PlacementChip } from '../../components/PlacementChip';
 import {
-  countLessonsInUnit,
   deliveryForSection,
   getCourseUnitsIntersecting,
   getLoosePlacementsForDate,
@@ -76,14 +75,7 @@ export function DayView({ onCreate }: ViewProps) {
               )}
 
               {groups.map(({ unit, lessons: kids }) => (
-                <div key={unit.placementId} className={`arc-token-${unit.colorToken} ${styles.unitNest}`}>
-                  <UnitBar
-                    view={unit}
-                    showTitle
-                    lessonCount={countLessonsInUnit(domain, unit.objectId)}
-                    continueLeft={!unit.isRangeStart}
-                    continueRight={!unit.isRangeEnd}
-                  />
+                <div key={unit.placementId} className={styles.unitNest}>
                   <div className={styles.unitChildren}>
                     {kids.length === 0 ? (
                       <p className={styles.empty}>Nothing placed in this unit today.</p>

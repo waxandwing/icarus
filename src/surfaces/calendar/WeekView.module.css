@@ -92,8 +92,8 @@
 .sectionLabel::before {
   content: '';
   display: block;
-  width: 22px;
-  height: 4px;
+  width: 28px;
+  height: 6px;
   background: var(--token-color);
   margin-bottom: 10px;
 }

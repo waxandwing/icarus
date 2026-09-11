@@ -2,7 +2,6 @@ import { useMemo, useRef, useState } from 'react';
 import { dayKind, dayLabel, fromISODate, getWeekDays, isToday, rangeOverlapColumns } from '../../calendar/dates';
 import { PlacementChip, UnitBar } from '../../components/PlacementChip';
 import {
-  countLessonsInUnit,
   deliveryForSection,
   getCourseUnitsIntersecting,
   getLoosePlacementsForDate,
@@ -226,7 +225,6 @@ export function WeekView({ onCreate }: ViewProps) {
                           <UnitBar
                             view={unit}
                             showTitle
-                            lessonCount={countLessonsInUnit(domain, unit.objectId)}
                             continueLeft={unit.startDate < days[0]}
                             continueRight={(unit.endDate ?? unit.startDate) > days[days.length - 1]}
                           />

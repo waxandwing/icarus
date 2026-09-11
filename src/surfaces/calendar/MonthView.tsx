@@ -2,7 +2,6 @@ import { useMemo, useRef, useState } from 'react';
 import { dayKind, dayLabel, fromISODate, getMonthGrid, isToday, rangeOverlapColumns } from '../../calendar/dates';
 import { PlacementChip, UnitBar } from '../../components/PlacementChip';
 import {
-  countLessonsInUnit,
   getPlacementsIntersectingRange,
   nestLessonsInUnits,
 } from '../../projections/selectors';
@@ -153,7 +152,6 @@ export function MonthView({ onCreate }: ViewProps) {
                         view={unit}
                         showTitle
                         density="compact"
-                        lessonCount={countLessonsInUnit(domain, unit.objectId)}
                         continueLeft={unit.startDate < days[0]}
                         continueRight={(unit.endDate ?? unit.startDate) > days[days.length - 1]}
                       />

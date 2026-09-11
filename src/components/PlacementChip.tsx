@@ -47,14 +47,12 @@ export function UnitBar({
   continueLeft,
   continueRight,
   showTitle = true,
-  lessonCount,
   density = 'spread',
 }: {
   view: PlacementView;
   continueLeft?: boolean;
   continueRight?: boolean;
   showTitle?: boolean;
-  lessonCount?: number;
   density?: 'spread' | 'compact';
 }) {
   const { isSelected, handleClick, handleKeyDown, handleDragStart } = useObjectSelect(view);
@@ -78,11 +76,6 @@ export function UnitBar({
     >
       {showTitle && <span className={styles.unitKicker}>Unit</span>}
       {showTitle ? <span className={styles.unitTitle}>{title}</span> : <span className={styles.unitTitle}>&nbsp;</span>}
-      {showTitle && lessonCount != null && lessonCount > 0 && (
-        <span className={styles.unitCount}>
-          {'\u203A'} {lessonCount} {lessonCount === 1 ? 'lesson' : 'lessons'}
-        </span>
-      )}
       {view.important && <ImportantCircle size={16} />}
       {view.fixed && (
         <span className={styles.fixedBadge} title="Fixed date">

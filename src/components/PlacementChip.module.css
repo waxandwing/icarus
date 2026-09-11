@@ -37,7 +37,7 @@
   min-height: 28px;
   font-size: 13px;
   padding: 5px 10px;
-  border-radius: 6px;
+  border-radius: 2px;
 }
 
 .unitKicker {
@@ -54,13 +54,6 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   flex: 1;
-}
-
-.unitCount {
-  flex-shrink: 0;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--arc-charcoal);
 }
 
 .slip {
@@ -97,10 +90,11 @@
 }
 
 .slip[data-type='lesson'][data-density='compact'] {
-  min-height: 24px;
-  padding: 4px 8px;
-  background: color-mix(in srgb, var(--token-color) 42%, var(--arc-paper-white));
+  min-height: 0;
+  padding: 2px 4px;
+  background: transparent;
   border: none;
+  font-size: 12px;
 }
 
 .slip:hover {
