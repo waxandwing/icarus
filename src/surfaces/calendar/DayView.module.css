@@ -76,16 +76,16 @@
 }
 
 .nestAdd {
-  align-self: flex-start;
+  align-self: stretch;
   border: none;
+  border-bottom: 1px dashed var(--arc-line-strong);
   background: transparent;
   color: var(--arc-charcoal);
   cursor: pointer;
-  font-size: 14px;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  padding: 4px 0;
-  min-height: 32px;
+  font-size: 16px;
+  padding: 8px 0;
+  min-height: 36px;
+  text-align: left;
 }
 
 .dayKindBanner {
@@ -107,24 +107,40 @@
   color: var(--arc-charcoal);
 }
 
+.writtenLine {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 10px;
+}
+
+.writtenSep {
+  color: var(--arc-charcoal);
+}
+
 .textAction {
   border: none;
   background: transparent;
   color: var(--arc-ink);
-  padding: 0;
-  font-size: 14px;
+  padding: 4px 0;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 500;
   cursor: pointer;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  white-space: nowrap;
+  min-height: 36px;
 }
 
-.finalBadge {
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--arc-charcoal);
+.textAction:hover,
+.saveNote:hover,
+.nestAdd:hover {
+  color: var(--arc-forest);
+}
+
+.textAction:focus-visible,
+.saveNote:focus-visible,
+.nestAdd:focus-visible {
+  outline: 2px solid var(--arc-ink);
+  outline-offset: 3px;
 }
 
 .addRow {
@@ -199,18 +215,17 @@
   padding: 0;
 }
 
-.noteForm button {
+.saveNote {
   align-self: flex-start;
   border: none;
   background: transparent;
-  padding: 0;
+  padding: 4px 0;
   cursor: pointer;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  text-decoration: underline;
-  text-underline-offset: 3px;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--arc-ink);
+  min-height: 36px;
 }
 
 @media (max-width: 820px) {

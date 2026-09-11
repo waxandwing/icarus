@@ -14,6 +14,39 @@ import { useWorkspaceStore } from '../../state/store';
 import type { ViewProps } from './CalendarShell';
 import styles from './DayView.module.css';
 
+function PeriodVerbs({
+  instructional,
+  final,
+  delivery,
+  onStart,
+  onShift,
+}: {
+  instructional: boolean;
+  final: boolean;
+  delivery?: string;
+  onStart: () => void;
+  onShift: () => void;
+}) {
+  if (!instructional) return null;
+  return (
+    <div className={styles.writtenLine}>
+      {final ? (
+        <span>{delivery === 'completed' ? 'Taught' : 'Skipped'}</span>
+      ) : (
+        <button type="button" className={styles.textAction} onClick={onStart}>
+          {delivery === 'in-progress' ? 'Resume class' : 'Start class'}
+        </button>
+      )}
+      <span className={styles.writtenSep} aria-hidden="true">
+        {'\u00b7'}
+      </span>
+      <button type="button" className={styles.textAction} onClick={onShift}>
+        Shift from today
+      </button>
+    </div>
+  );
+}
+
 export function DayView({ onCreate }: ViewProps) {
   const anchor = useWorkspaceStore((s) => s.ui.anchorDate);
   const domain = useWorkspaceStore((s) => s.domain);
@@ -96,29 +129,13 @@ export function DayView({ onCreate }: ViewProps) {
                         return (
                           <div className={styles.row} key={lesson.placementId}>
                             {notesLine && <p className={styles.lessonNote}>{notesLine}</p>}
-                            {instructional &&
-                              (final ? (
-                                <span className={styles.finalBadge}>
-                                  {delivery === 'completed' ? 'Taught' : 'Skipped'}
-                                </span>
-                              ) : (
-                                <button
-                                  type="button"
-                                  className={styles.textAction}
-                                  onClick={() => openLiveClassroom(section.id, lesson.objectId)}
-                                >
-                                  {delivery === 'in-progress' ? 'Resume class' : 'Start class'}
-                                </button>
-                              ))}
-                            {instructional && (
-                              <button
-                                type="button"
-                                className={styles.textAction}
-                                onClick={() => openShiftDialog(section.id, anchor)}
-                              >
-                                Shift from today
-                              </button>
-                            )}
+                            <PeriodVerbs
+                              instructional={instructional}
+                              final={final}
+                              delivery={delivery}
+                              onStart={() => openLiveClassroom(section.id, lesson.objectId)}
+                              onShift={() => openShiftDialog(section.id, anchor)}
+                            />
                           </div>
                         );
                       })
@@ -141,20 +158,13 @@ export function DayView({ onCreate }: ViewProps) {
                 return (
                   <div className={styles.row} key={lesson.placementId}>
                     <PlacementChip view={{ ...lesson, deliveryState: delivery }} date={anchor} />
-                    {instructional &&
-                      (final ? (
-                        <span className={styles.finalBadge}>
-                          {delivery === 'completed' ? 'Taught' : 'Skipped'}
-                        </span>
-                      ) : (
-                        <button
-                          type="button"
-                          className={styles.textAction}
-                          onClick={() => openLiveClassroom(section.id, lesson.objectId)}
-                        >
-                          {delivery === 'in-progress' ? 'Resume class' : 'Start class'}
-                        </button>
-                      ))}
+                    <PeriodVerbs
+                      instructional={instructional}
+                      final={final}
+                      delivery={delivery}
+                      onStart={() => openLiveClassroom(section.id, lesson.objectId)}
+                      onShift={() => openShiftDialog(section.id, anchor)}
+                    />
                   </div>
                 );
               })}
@@ -195,7 +205,9 @@ export function DayView({ onCreate }: ViewProps) {
               onChange={(e) => setTeacherDraft(e.target.value)}
               placeholder={'Add a note\u2026'}
             />
-            <button type="submit">Save note</button>
+            <button type="submit" className={styles.saveNote}>
+              Save note
+            </button>
           </form>
         </section>
 

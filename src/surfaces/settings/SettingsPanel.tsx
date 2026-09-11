@@ -151,7 +151,7 @@ export function SettingsPanel() {
                           onChange={(e) => setOverrideLabel(e.target.value)}
                         />
                       </div>
-                      <button type="submit" className={formStyles.primaryButton}>
+                      <button type="submit" className={styles.writeAction}>
                         Set day
                       </button>
                     </form>
@@ -194,7 +194,7 @@ export function SettingsPanel() {
                         onChange={(e) => setNewSectionName((s) => ({ ...s, [course.id]: e.target.value }))}
                         aria-label={`Add a section to ${course.name}`}
                       />
-                      <button type="submit" className={formStyles.secondaryButton}>
+                      <button type="submit" className={styles.writeAction}>
                         Add
                       </button>
                     </form>
@@ -218,7 +218,7 @@ export function SettingsPanel() {
                   onChange={(e) => setNewCourseName(e.target.value)}
                   aria-label="New course name"
                 />
-                <button type="submit" className={formStyles.primaryButton}>
+                <button type="submit" className={styles.writeAction}>
                   Add course
                 </button>
               </form>
