@@ -31,6 +31,8 @@
 
 .folder {
   position: relative;
+  box-sizing: border-box;
+  width: 100%;
   background: var(--arc-blue);
   border-radius: 18px 0 16px 16px;
   padding: 10px 10px 10px 12px;
@@ -40,10 +42,13 @@
 }
 
 .paper {
+  box-sizing: border-box;
+  width: 100%;
   background: var(--arc-paper);
   border-radius: 12px;
   padding: 22px 16px 16px;
   max-height: min(700px, 74vh);
+  overflow-x: hidden;
   overflow-y: auto;
 }
 
@@ -92,6 +97,7 @@
   padding: 8px 10px 10px 12px;
   border-radius: 8px;
   background: var(--arc-paper-white);
+  min-width: 0;
 }
 
 .sections {
@@ -100,6 +106,8 @@
   border-radius: 8px;
   background: color-mix(in srgb, var(--arc-paper-white) 70%, var(--arc-paper));
   border-left: 3px solid var(--token-color, var(--arc-line-strong));
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .sectionsLabel {
@@ -162,10 +170,12 @@
   display: flex;
   gap: 6px;
   margin: 8px 0 4px;
+  min-width: 0;
 }
 
 .inlineForm input {
   flex: 1;
+  min-width: 0;
   font-size: 14px;
   padding: 6px 8px;
   border-radius: var(--arc-radius-sm);
