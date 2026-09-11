@@ -61,8 +61,8 @@ function DeskPostIts() {
           key={note.id}
           type="button"
           className={styles.postIt}
+          data-side={(note.deskX ?? 8) > 50 ? 'right' : 'left'}
           style={{
-            left: `${note.deskX ?? 8}%`,
             top: `${note.deskY ?? 30}%`,
             transform: `rotate(${note.deskRotate ?? 0}deg)`,
           }}
