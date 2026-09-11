@@ -5,7 +5,7 @@
   bottom: 0;
   width: var(--arc-furniture-width);
   background:
-    linear-gradient(rgba(124, 156, 173, 0.18), rgba(124, 156, 173, 0.18)),
+    url('/assets/arc/fridge-open-surface.webp') center / 100% 100% no-repeat,
     url('/assets/arc/texture-blue-paper.webp') center / cover,
     var(--arc-blue);
   color: var(--arc-ink);
