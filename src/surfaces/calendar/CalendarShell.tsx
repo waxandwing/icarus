@@ -21,6 +21,7 @@ import { MonthView } from './MonthView';
 import { ViewSwitcher } from './ViewSwitcher';
 import { WeekView } from './WeekView';
 import { YearView } from './YearView';
+import { Toast } from '../../components/Toast';
 import styles from './CalendarShell.module.css';
 
 export interface CreateNest {
@@ -129,6 +130,9 @@ export function CalendarShell({ onEdit, onCreate }: ViewProps) {
 
           <footer className={styles.spreadFooter}>
             <span>Plans that change are still plans.</span>
+            <div className={styles.footerReceipt}>
+              <Toast />
+            </div>
             <span>Arc {'\u00b7'} teacher planner</span>
           </footer>
         </div>

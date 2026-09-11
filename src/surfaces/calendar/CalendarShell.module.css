@@ -120,15 +120,27 @@
 .spreadFooter {
   position: relative;
   z-index: 2;
-  display: flex;
-  justify-content: space-between;
-  gap: var(--arc-space-4);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: var(--arc-space-3);
+  align-items: baseline;
   padding: 8px 28px 14px;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--arc-charcoal);
+}
+
+.spreadFooter > :last-child {
+  text-align: right;
+}
+
+.footerReceipt {
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 600;
+  min-width: 0;
 }
 
 @media (max-width: 720px) {

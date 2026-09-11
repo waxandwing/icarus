@@ -72,13 +72,13 @@
 }
 
 .edgeLeft {
-  right: calc(100% - 11px);
+  right: 100%;
   flex-direction: row;
   justify-content: flex-end;
 }
 
 .edgeRight {
-  left: calc(100% - 11px);
+  left: 100%;
   flex-direction: row;
   justify-content: flex-start;
 }

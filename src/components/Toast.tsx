@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useWorkspaceStore } from '../state/store';
 import styles from './Toast.module.css';
 
+/** Receipt on the paper — not a floating SaaS chip. */
 export function Toast() {
   const toast = useWorkspaceStore((s) => s.ui.toast);
   const undo = useWorkspaceStore((s) => s.undo);
@@ -14,21 +15,23 @@ export function Toast() {
     return () => clearTimeout(timer);
   }, [toast, dismissToast]);
 
+  if (!toast && !undo) return null;
+
   return (
-    <>
+    <div className={styles.receipt}>
       {toast && (
-        <div className={styles.toast} data-tone={toast.tone} role="alert">
+        <span className={styles.alert} data-tone={toast.tone} role="alert">
           {toast.message}
-        </div>
+        </span>
       )}
       {undo && (
-        <div className={styles.undoPill}>
-          <span>{undo.label}</span>
+        <span className={styles.undo}>
+          {undo.label}
           <button type="button" className={styles.undoButton} onClick={() => undoLast()}>
             Undo
           </button>
-        </div>
+        </span>
       )}
-    </>
+    </div>
   );
 }

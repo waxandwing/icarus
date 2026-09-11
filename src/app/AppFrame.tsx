@@ -2,7 +2,6 @@ import { CalendarShell } from '../surfaces/calendar/CalendarShell';
 import { CreateItemDialog } from '../components/CreateItemDialog';
 import { EditDialog } from '../components/EditDialog';
 import { ShiftDialog } from '../components/ShiftDialog';
-import { Toast } from '../components/Toast';
 import { FridgePanel } from '../surfaces/fridge/FridgePanel';
 import { FridgeTab } from '../surfaces/fridge/FridgeTab';
 import { SettingsPanel } from '../surfaces/settings/SettingsPanel';
@@ -94,7 +93,6 @@ export function AppFrame() {
         <EditDialog objectType={editingId.type} objectId={editingId.id} onClose={() => setEditingId(null)} />
       )}
       <ShiftDialog />
-      <Toast />
     </div>
   );
 }

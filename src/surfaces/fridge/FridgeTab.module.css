@@ -14,6 +14,7 @@
   min-width: 36px;
   min-height: 44px;
   z-index: 5;
+  margin-left: -14px;
 }
 
 .label {
@@ -42,6 +43,7 @@
     border-right: 1px solid var(--arc-line-strong);
     border-radius: var(--arc-radius);
     flex-direction: row;
+    margin-left: 0;
   }
   .label {
     writing-mode: horizontal-tb;
