@@ -61,22 +61,24 @@
 }
 
 .actionButton {
-  border: 1px solid var(--arc-ink);
+  border: none;
   background: transparent;
   color: var(--arc-ink);
-  padding: 10px 18px;
-  border-radius: var(--arc-radius-sm);
+  padding: 4px 0;
+  border-radius: 0;
   cursor: pointer;
   font-size: 16px;
   font-weight: 600;
   min-height: 44px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 .actionButton:hover {
-  background: var(--arc-paper);
+  background: transparent;
 }
 .actionButton[data-tone='primary'] {
-  background: var(--arc-sage);
-  border-color: var(--arc-sage);
+  background: transparent;
+  border-color: transparent;
   color: var(--arc-ink);
 }
 .actionButton:disabled {

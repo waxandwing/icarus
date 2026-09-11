@@ -20,6 +20,7 @@ export function DayView({ onCreate }: ViewProps) {
   const openLiveClassroom = useWorkspaceStore((s) => s.openLiveClassroom);
   const openShiftDialog = useWorkspaceStore((s) => s.openShiftDialog);
   const createNote = useWorkspaceStore((s) => s.createNote);
+  const select = useWorkspaceStore((s) => s.select);
   const [teacherDraft, setTeacherDraft] = useState('');
 
   const kind = dayKind(domain.calendar, anchor);
@@ -64,11 +65,18 @@ export function DayView({ onCreate }: ViewProps) {
                 <p>{section.name}</p>
               </header>
 
-              {headline && (
-                <p className={styles.headline}>
-                  {headline.objectType === 'unit' ? headline.title : headline.title}
-                </p>
-              )}
+              {headline &&
+                (headline.objectType === 'lesson' ? (
+                  <button
+                    type="button"
+                    className={styles.headline}
+                    onClick={() => select({ objectType: 'lesson', objectId: headline.objectId })}
+                  >
+                    {headline.title}
+                  </button>
+                ) : (
+                  <p className={styles.headline}>{headline.title.replace(/^Unit\s+\d+\s*[·.•\-–]\s*/i, '')}</p>
+                ))}
 
               {inProgress.length > 0 && (
                 <p className={styles.hold}>Holding your place in {inProgress[0].title}.</p>
@@ -87,7 +95,6 @@ export function DayView({ onCreate }: ViewProps) {
                         const notesLine = domain.lessons[lesson.objectId]?.body;
                         return (
                           <div className={styles.row} key={lesson.placementId}>
-                            <PlacementChip view={{ ...lesson, deliveryState: delivery }} date={anchor} />
                             {notesLine && <p className={styles.lessonNote}>{notesLine}</p>}
                             {instructional &&
                               (final ? (
