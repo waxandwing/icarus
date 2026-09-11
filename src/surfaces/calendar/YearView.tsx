@@ -75,7 +75,10 @@ export function YearView() {
                   {week.map((cell) => {
                     const kind = dayKind(domain.calendar, cell.date);
                     const quarter = schoolQuarter(cell.date);
-                    const canCross = cell.inCurrentMonth && isInstructionalDay(domain.calendar, cell.date);
+                    const inYear =
+                      cell.date >= domain.calendar.startDate && cell.date <= domain.calendar.endDate;
+                    const canCross =
+                      cell.inCurrentMonth && inYear && isInstructionalDay(domain.calendar, cell.date);
                     const isCrossed = Boolean(crossed[cell.date]);
                     const dayNum = cell.inCurrentMonth ? Number(cell.date.slice(-2)) : '';
                     if (!canCross) {

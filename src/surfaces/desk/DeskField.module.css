@@ -4,7 +4,7 @@
   bottom: 28px;
   width: 148px;
   height: 148px;
-  z-index: 3;
+  z-index: 1;
 }
 
 .padSheet,
@@ -60,7 +60,7 @@
   text-align: left;
   color: var(--arc-ink);
   cursor: pointer;
-  z-index: 2;
+  z-index: 1;
 }
 
 .magnetWell {
@@ -71,7 +71,7 @@
   flex-direction: column;
   align-items: flex-end;
   gap: 16px;
-  z-index: 3;
+  z-index: 1;
   max-width: 168px;
 }
 

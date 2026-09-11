@@ -397,5 +397,6 @@ describe('Unit magnets stay units', () => {
     state = apply(state, (d) => cmd.toggleYearCross(d, { date: '2026-09-11' })).next;
     expect(state.calendar.crossedDates['2026-09-11']).toBeUndefined();
     expect(() => apply(state, (d) => cmd.toggleYearCross(d, { date: '2026-09-12' }))).toThrow(DomainError);
+    expect(() => apply(state, (d) => cmd.toggleYearCross(d, { date: '2026-07-31' }))).toThrow(DomainError);
   });
 });

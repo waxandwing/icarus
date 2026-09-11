@@ -778,7 +778,11 @@ export function setCalendarDay(
 }
 
 export function toggleYearCross(draft: D, payload: { date: ISODate }): void {
-  if (!isInstructionalDay(draft.calendar, payload.date)) {
+  if (
+    !isInstructionalDay(draft.calendar, payload.date) ||
+    compareISO(payload.date, draft.calendar.startDate) < 0 ||
+    compareISO(payload.date, draft.calendar.endDate) > 0
+  ) {
     throw new DomainError('Only a school day can be crossed out on the Year lens.');
   }
   if (!draft.calendar.crossedDates) draft.calendar.crossedDates = {};
