@@ -7,7 +7,7 @@
 :root {
   /* Palette */
   --arc-paper: #f3ebdd;
-  --arc-paper-white: #fbf8f1;
+  --arc-paper-white: #f9f4e9;
   --arc-ink: #2c2e2e;
   --arc-mustard: #e4b33d;
   --arc-terracotta: #c96845;
@@ -19,9 +19,16 @@
   --arc-charcoal: #4a4945;
   --arc-red: #b5453e;
 
-  /* Environment (outside the calendar/paper) */
-  --arc-env-bg: #e7e0d2;
-  --arc-env-bg-deep: #d9d0bd;
+  /* Environment (outside the calendar/paper) — Figma REBUILD shell */
+  --arc-env-bg: #faf7f0;
+  --arc-env-bg-deep: #ebe4d4;
+  --arc-cover: #1c4030;
+  --arc-desk: #faf7f0;
+  --arc-forest: #1c4030;
+  --arc-fold: #e0d4ba;
+  --arc-page: #f9f4e9;
+  --arc-today-wash: #f7f0d9;
+  --arc-weekend-wash: color-mix(in srgb, var(--arc-blue) 22%, var(--arc-page));
 
   /* Elevation / lines */
   --arc-line: rgba(44, 46, 46, 0.14);
@@ -46,7 +53,7 @@
   --arc-radius-full: 999px;
 
   /* Type */
-  --arc-font-sans: 'Nunito', 'Segoe UI Rounded', 'Segoe UI', system-ui, sans-serif;
+  --arc-font-sans: 'Nunito Sans', 'Segoe UI Rounded', 'Segoe UI', system-ui, sans-serif;
   --arc-font-serif: 'Fraunces', Georgia, 'Times New Roman', serif;
   --arc-font-hand: 'Caveat', cursive;
   --arc-text-body: 16px;
@@ -59,7 +66,7 @@
   --arc-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
 
   /* Furniture */
-  --arc-furniture-width: min(360px, 88vw);
+  --arc-furniture-width: min(320px, 86vw);
   --arc-taskbar-height: min(320px, 62vh);
 }
 
@@ -71,10 +78,24 @@
   }
 }
 
+[data-reduced-motion='true'] {
+  --arc-motion-fast: 0ms;
+  --arc-motion: 0ms;
+  --arc-motion-slow: 0ms;
+}
+
 [data-high-contrast='true'] {
-  --arc-line: rgba(44, 46, 46, 0.55);
-  --arc-line-strong: rgba(44, 46, 46, 0.85);
+  --arc-line: #111111;
+  --arc-line-strong: #000000;
   --arc-ink: #000000;
+  --arc-charcoal: #111111;
+  --arc-paper: #ffffff;
+  --arc-paper-white: #ffffff;
+  --arc-page: #ffffff;
+  --arc-today-wash: #f3f3f3;
+  --arc-weekend-wash: #e8e8e8;
+  --arc-shadow-soft: none;
+  --arc-shadow-lifted: none;
 }
 
 .arc-token-mustard {

@@ -1,4 +1,3 @@
-import { TaskGlyph } from '../../assets/Icons';
 import { useWorkspaceStore } from '../../state/store';
 import styles from './TaskBarTab.module.css';
 
@@ -18,12 +17,12 @@ export function TaskBarTab() {
       type="button"
       id="arc-taskbar-tab"
       className={styles.tab}
+      data-open={isOpen}
       onClick={() => toggleFurniture('taskbar')}
       aria-expanded={isOpen}
       aria-controls="arc-taskbar-panel"
     >
-      <TaskGlyph size={16} />
-      Task Bar
+      Tasks
       {count > 0 && <span className={styles.badge}>{count}</span>}
     </button>
   );

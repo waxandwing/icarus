@@ -1,85 +1,213 @@
-.wrap {
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(220px, 0.7fr);
+  gap: 22px;
+  min-height: 100%;
+  align-items: start;
+}
+
+.classes {
   display: flex;
   flex-direction: column;
-  gap: var(--arc-space-4);
+  gap: 14px;
 }
 
-.continuity {
-  background: var(--arc-paper);
+.classCard {
+  position: relative;
+  padding: 18px 20px 16px 28px;
   border: 1px solid var(--arc-line);
-  border-radius: var(--arc-radius);
-  padding: var(--arc-space-3);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--arc-paper-white) 88%, var(--arc-paper));
 }
 
-.continuity h3 {
-  font-size: 13px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: var(--arc-space-2);
+.classCard::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 18px;
+  bottom: 18px;
+  width: 6px;
+  border-radius: 0 4px 4px 0;
+  background: var(--token-color);
+}
+
+.classHead h3 {
+  font-family: var(--arc-font-serif);
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.classHead p {
+  margin: 2px 0 0;
+  font-size: 14px;
   color: var(--arc-charcoal);
 }
 
-.dayKindBanner {
-  padding: var(--arc-space-2) var(--arc-space-3);
-  border-radius: var(--arc-radius);
-  background: var(--arc-kraft);
-  color: var(--arc-ink);
-  font-weight: 600;
-  font-size: 14px;
+.headline {
+  margin: 10px 0 0;
+  font-size: 16px;
+  font-weight: 700;
 }
 
-.list {
+.hold {
+  margin: 8px 0 0;
+  font-size: 14px;
+  color: var(--arc-terracotta);
+}
+
+.unitNest {
+  margin: 12px 0 0;
+}
+
+.unitChildren {
   display: flex;
   flex-direction: column;
-  gap: var(--arc-space-2);
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.nestAdd {
+  align-self: flex-start;
+  border: none;
+  background: transparent;
+  color: var(--arc-charcoal);
+  cursor: pointer;
+  font-size: 14px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  padding: 4px 0;
+  min-height: 32px;
+}
+
+.dayKindBanner {
+  padding: var(--arc-space-2) 0;
+  font-weight: 600;
+  font-size: 15px;
 }
 
 .row {
   display: flex;
-  align-items: center;
-  gap: var(--arc-space-2);
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
 }
 
-.row > :first-child {
-  flex: 1;
+.lessonNote {
+  margin: 0;
+  font-size: 14px;
+  color: var(--arc-charcoal);
 }
 
-.startClassButton {
-  border: 1px solid var(--arc-ink);
-  background: var(--arc-ink);
-  color: var(--arc-paper-white);
-  border-radius: var(--arc-radius);
-  padding: 5px 10px;
-  font-size: 13px;
+.textAction {
+  border: none;
+  background: transparent;
+  color: var(--arc-ink);
+  padding: 0;
+  font-size: 14px;
   cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
   white-space: nowrap;
 }
 
 .finalBadge {
   font-size: 12px;
   font-weight: 700;
-  text-transform: uppercase;
   letter-spacing: 0.04em;
+  text-transform: uppercase;
   color: var(--arc-charcoal);
-  padding: 5px 10px;
-  white-space: nowrap;
 }
 
 .addRow {
   display: flex;
-  justify-content: center;
-  padding: var(--arc-space-3);
-  border: 1px dashed var(--arc-line-strong);
-  border-radius: var(--arc-radius);
+  justify-content: flex-start;
+  padding: var(--arc-space-3) 0;
+  border: none;
+  border-bottom: 1px dashed var(--arc-line-strong);
   background: transparent;
   cursor: pointer;
   gap: var(--arc-space-2);
   align-items: center;
   color: var(--arc-charcoal);
+  font-size: 16px;
 }
 
 .empty {
   color: var(--arc-charcoal);
-  font-style: italic;
-  padding: var(--arc-space-2) 0;
+  margin: 8px 0 0;
+}
+
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.teacherNotes,
+.nextUp {
+  border-radius: 16px;
+  padding: 18px 18px 16px;
+}
+
+.teacherNotes {
+  background: var(--arc-paper);
+  min-height: 220px;
+}
+
+.teacherNotes h3,
+.nextUp h3 {
+  font-family: var(--arc-font-sans);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin: 0 0 10px;
+  color: var(--arc-charcoal);
+}
+
+.nextUp {
+  background: color-mix(in srgb, var(--arc-blue) 78%, var(--arc-paper-white));
+}
+
+.nextUp p,
+.teacherNotes p {
+  margin: 0;
+  font-size: 15px;
+}
+
+.noteForm {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.noteForm textarea {
+  min-height: 88px;
+  resize: vertical;
+  border: none;
+  background: transparent;
+  padding: 0;
+}
+
+.noteForm button {
+  align-self: flex-start;
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+@media (max-width: 820px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
 }

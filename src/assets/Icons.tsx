@@ -72,6 +72,22 @@ export function DrawerGlyph({ size = 20 }: { size?: number }) {
   );
 }
 
+export function FixedMark({ size = 12 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+      <path
+        d="M8 2.2v9.2M5.2 5.1l2.8-2.6 2.8 2.6"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <circle cx="8" cy="13.2" r="1.1" fill="currentColor" />
+    </svg>
+  );
+}
+
 export function ChevronGlyph({ size = 16, direction = 'left' as 'left' | 'right' }) {
   const rotation = direction === 'left' ? 0 : 180;
   return (

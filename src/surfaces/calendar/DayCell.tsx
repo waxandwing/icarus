@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { dayKind, dayLabel, isToday } from '../../calendar/dates';
 import { AddMark } from '../../assets/Icons';
 import { PlacementChip } from '../../components/PlacementChip';
-import { getContinuingUnits, getPlacementsForDate } from '../../projections/selectors';
+import { getPlacementsForDate, nestLessonsInUnits } from '../../projections/selectors';
 import { useWorkspaceStore } from '../../state/store';
+import { applyCalendarDrop } from './calendarDrop';
 import styles from './DayCell.module.css';
 
 export interface DayCellProps {
@@ -28,28 +29,11 @@ export function DayCell({ date, dimmed, compact, onCreate, cellRef, onFocusDate,
   const label = dayLabel(domain.calendar, date);
   const today = isToday(date);
   const placements = getPlacementsForDate(domain, date);
-  const continuing = getContinuingUnits(domain, date);
+  const units = placements.filter((p) => p.objectType === 'unit');
+  const lessons = placements.filter((p) => p.objectType === 'lesson');
+  const scraps = placements.filter((p) => p.objectType === 'note' || p.objectType === 'magnet');
+  const { groups, loose } = nestLessonsInUnits(units, lessons);
   const dayNumber = Number(date.slice(-2));
-
-  function handleDrop(e: React.DragEvent) {
-    e.preventDefault();
-    setDragOver(false);
-    const placementId = e.dataTransfer.getData('text/arc-placement-id');
-    if (placementId) {
-      movePlacement(placementId, date);
-      return;
-    }
-    const unplaced = e.dataTransfer.getData('text/arc-unplaced');
-    if (unplaced) {
-      try {
-        const { type, id } = JSON.parse(unplaced) as { type: string; id: string };
-        if (type === 'magnet') placeMagnetOnCalendar(id, date);
-        else if (type === 'note') placeNoteOnCalendar(id, date);
-      } catch {
-        // ignore malformed drag payloads
-      }
-    }
-  }
 
   return (
     <div
@@ -58,18 +42,22 @@ export function DayCell({ date, dimmed, compact, onCreate, cellRef, onFocusDate,
       data-kind={kind}
       data-today={today}
       data-dimmed={dimmed}
-      style={dimmed ? { opacity: 0.45 } : undefined}
+      data-compact={compact}
       data-dragover={dragOver}
-      onDragOver={(e) => {
-        e.preventDefault();
-        setDragOver(true);
-      }}
-      onDragLeave={() => setDragOver(false)}
-      onDrop={handleDrop}
       role="gridcell"
       aria-label={`${date}${today ? ', today' : ''}${label ? `, ${label}` : ''}`}
       tabIndex={tabIndex}
       onFocus={() => onFocusDate?.(date)}
+      onDragOver={(e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        setDragOver(true);
+      }}
+      onDragLeave={() => setDragOver(false)}
+      onDrop={(e) => {
+        setDragOver(false);
+        applyCalendarDrop(e, date, { movePlacement, placeMagnetOnCalendar, placeNoteOnCalendar });
+      }}
     >
       <div className={styles.dateRow}>
         <span className={styles.dateNumber}>{dayNumber}</span>
@@ -79,18 +67,26 @@ export function DayCell({ date, dimmed, compact, onCreate, cellRef, onFocusDate,
           aria-label={`Add to ${date}`}
           onClick={() => onCreate(date)}
         >
-          <AddMark size={compact ? 16 : 18} />
+          <AddMark size={compact ? 14 : 18} />
         </button>
       </div>
       {label && <span className={styles.dayKindLabel}>{label}</span>}
-      {continuing.map((u) => (
-        <span key={u.placementId} className={styles.continuityStrip}>
-          {'\u21B3'} continuing {u.title}
-        </span>
-      ))}
+      <div className={styles.unitTrack}>
+        {groups.map(({ unit, lessons: kids }) => (
+          <div key={unit.placementId} className={styles.unitNest}>
+            <PlacementChip view={unit} date={date} density="compact" />
+            {kids.map((lesson) => (
+              <PlacementChip key={lesson.placementId} view={lesson} date={date} density={compact ? 'compact' : 'slip'} />
+            ))}
+          </div>
+        ))}
+      </div>
       <div className={styles.chips}>
-        {placements.map((p) => (
-          <PlacementChip key={p.placementId} view={p} date={date} />
+        {loose.map((p) => (
+          <PlacementChip key={p.placementId} view={p} date={date} density={compact ? 'compact' : 'slip'} />
+        ))}
+        {scraps.map((p) => (
+          <PlacementChip key={p.placementId} view={p} date={date} density={compact ? 'compact' : 'slip'} />
         ))}
       </div>
     </div>

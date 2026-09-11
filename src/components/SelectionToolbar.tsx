@@ -1,5 +1,6 @@
 import { addSchoolDays } from '../calendar/dates';
 import { useWorkspaceStore } from '../state/store';
+import { useEffect, useState } from 'react';
 import styles from './SelectionToolbar.module.css';
 
 export function SelectionToolbar({ onEdit }: { onEdit: (type: string, id: string) => void }) {
@@ -16,14 +17,23 @@ export function SelectionToolbar({ onEdit }: { onEdit: (type: string, id: string
   const moveMagnetToDrawer = useWorkspaceStore((s) => s.moveMagnetToDrawer);
   const openShiftDialog = useWorkspaceStore((s) => s.openShiftDialog);
   const copyLesson = useWorkspaceStore((s) => s.copyLesson);
+  const deleteObject = useWorkspaceStore((s) => s.deleteObject);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
-  if (!selection) return null;
+  const objectType = selection?.objectType;
+  const objectId = selection?.objectId;
 
-  const { objectType, objectId } = selection;
-  const unit = objectType === 'unit' ? domain.units[objectId] : undefined;
-  const lesson = objectType === 'lesson' ? domain.lessons[objectId] : undefined;
-  const note = objectType === 'note' ? domain.notes[objectId] : undefined;
-  const magnet = objectType === 'magnet' ? domain.magnets[objectId] : undefined;
+  useEffect(() => {
+    setConfirmDelete(false);
+  }, [objectType, objectId]);
+
+  if (!selection || !objectType || !objectId) return null;
+  const selectedType = objectType;
+  const selectedId = objectId;
+  const unit = selectedType === 'unit' ? domain.units[selectedId] : undefined;
+  const lesson = selectedType === 'lesson' ? domain.lessons[selectedId] : undefined;
+  const note = selectedType === 'note' ? domain.notes[selectedId] : undefined;
+  const magnet = selectedType === 'magnet' ? domain.magnets[selectedId] : undefined;
   const obj = unit ?? lesson ?? note ?? magnet;
   if (!obj) return null;
 
@@ -32,6 +42,14 @@ export function SelectionToolbar({ onEdit }: { onEdit: (type: string, id: string
   );
   const important = 'important' in obj ? obj.important : false;
   const crossedOut = 'crossedOut' in obj ? obj.crossedOut : false;
+
+  function handleDelete() {
+    const result = deleteObject(selectedType as 'unit' | 'lesson' | 'note' | 'magnet', selectedId);
+    if (result.ok) {
+      setConfirmDelete(false);
+      select(null);
+    }
+  }
 
   return (
     <div className={styles.bar} role="toolbar" aria-label={`${objectType} actions`}>
@@ -48,7 +66,7 @@ export function SelectionToolbar({ onEdit }: { onEdit: (type: string, id: string
           aria-pressed={important}
           onClick={() => markImportant(objectType as 'unit' | 'lesson' | 'note', objectId, !important)}
         >
-          {important ? 'Important \u2713' : 'Mark important'}
+          {important ? 'Important' : 'Mark important'}
         </button>
       )}
 
@@ -126,8 +144,24 @@ export function SelectionToolbar({ onEdit }: { onEdit: (type: string, id: string
         </button>
       )}
 
+      {confirmDelete ? (
+        <>
+          <span className={styles.warning}>Delete destroys this.</span>
+          <button type="button" className={styles.button} data-danger="true" onClick={handleDelete}>
+            Delete
+          </button>
+          <button type="button" className={styles.button} onClick={() => setConfirmDelete(false)}>
+            Keep
+          </button>
+        </>
+      ) : (
+        <button type="button" className={styles.button} onClick={() => setConfirmDelete(true)}>
+          Delete
+        </button>
+      )}
+
       <button type="button" className={styles.closeButton} onClick={() => select(null)} aria-label="Close toolbar">
-        {'\u2715'}
+        Close
       </button>
     </div>
   );

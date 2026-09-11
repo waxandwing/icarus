@@ -14,10 +14,11 @@ import type {
   Visibility,
   WorkspaceDomainState,
 } from '../domain/types';
+import { todayISO } from '../calendar/dates';
 import { loadPersisted, savePersisted } from '../persistence/db';
 
 export type FurniturePanel = 'settings' | 'fridge' | 'taskbar' | 'drawer' | null;
-export type CalendarViewMode = 'day' | 'week' | 'month';
+export type CalendarViewMode = 'day' | 'week' | 'month' | 'year';
 
 export interface SelectionRef {
   objectType: PlaceableType | 'note';
@@ -66,6 +67,7 @@ interface WorkspaceStore {
   select: (ref: SelectionRef | null) => void;
   openFurniture: (panel: FurniturePanel) => void;
   toggleFurniture: (panel: Exclude<FurniturePanel, null>) => void;
+  cleanUp: () => void;
   dismissToast: () => void;
 
   createCourse: (name: string, colorToken: PaletteToken) => ActionResult;
@@ -165,7 +167,7 @@ function schedulePersist(get: () => WorkspaceStore) {
 const initialUi: UiState = {
   ready: false,
   view: 'week',
-  anchorDate: new Date().toISOString().slice(0, 10),
+  anchorDate: todayISO(),
   selection: null,
   openPanel: null,
   shiftDialog: { open: false, sectionId: null, fromDate: null, schoolDays: 1, reason: '' },
@@ -231,6 +233,11 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
       toggleFurniture: (panel) =>
         set((state) => {
           state.ui.openPanel = state.ui.openPanel === panel ? null : panel;
+        }),
+      cleanUp: () =>
+        set((state) => {
+          state.ui.openPanel = null;
+          state.ui.selection = null;
         }),
       dismissToast: () =>
         set((state) => {
@@ -340,7 +347,7 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
 
       setDelivery: (sectionId, lessonId, state_, resumeNote) =>
         run('Update delivery', (d) => {
-          const actualDate = state_ === 'completed' ? new Date().toISOString().slice(0, 10) : undefined;
+          const actualDate = state_ === 'completed' ? todayISO() : undefined;
           cmd.setDelivery(d, { sectionId, lessonId, state: state_, resumeNote, actualDate });
         }),
       openLiveClassroom: (sectionId, lessonId) =>

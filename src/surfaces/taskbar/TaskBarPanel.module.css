@@ -1,33 +1,33 @@
 .panel {
-  position: fixed;
-  left: 50%;
-  bottom: 0;
-  transform: translateX(-50%) translateY(100%);
-  width: min(1000px, 96vw);
-  height: var(--arc-taskbar-height);
-  background:
-    linear-gradient(rgba(198, 167, 125, 0.26), rgba(198, 167, 125, 0.26)),
-    url('/assets/arc/texture-mustard-paper.webp') center / cover,
-    var(--arc-kraft);
-  border: 1px solid var(--arc-line-strong);
-  border-bottom: none;
-  border-radius: var(--arc-radius-lg) var(--arc-radius-lg) 0 0;
-  box-shadow: var(--arc-shadow-lifted);
-  transition: transform var(--arc-motion-slow) var(--arc-ease);
-  z-index: 36;
-  padding: var(--arc-space-4) var(--arc-space-5);
-  display: flex;
-  flex-direction: column;
+  position: relative;
+  width: min(1000px, 100%);
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  background: var(--arc-blue);
+  border: none;
+  border-radius: 0 0 18px 18px;
+  box-shadow: var(--arc-shadow-soft);
+  padding: 0 10px;
+  transition:
+    max-height var(--arc-motion-slow) var(--arc-ease),
+    opacity var(--arc-motion) var(--arc-ease),
+    padding var(--arc-motion) var(--arc-ease);
 }
+
 .panel[data-open='true'] {
-  transform: translateX(-50%) translateY(0);
+  max-height: var(--arc-taskbar-height);
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  overflow-y: auto;
+  padding: 10px 10px 14px;
 }
 
 .headerRow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: var(--arc-space-3);
+  display: none;
 }
 
 .heading {
@@ -41,23 +41,24 @@
   background: transparent;
   font-size: 18px;
   cursor: pointer;
+  min-width: 44px;
+  min-height: 44px;
 }
 
 .columns {
   flex: 1;
   display: flex;
-  gap: var(--arc-space-4);
-  overflow-y: auto;
+  gap: 12px;
 }
 
 .column {
   flex: 1;
   display: flex;
   flex-direction: column;
-  background: rgba(251, 248, 241, 0.5);
-  border-radius: var(--arc-radius);
-  padding: var(--arc-space-3);
   min-height: 0;
+  background: var(--arc-paper-white);
+  border-radius: 12px;
+  padding: 12px 12px 10px;
 }
 
 .column[data-dragover='true'] {
@@ -67,16 +68,17 @@
 
 .columnTitle {
   font-weight: 800;
-  font-size: 13px;
+  font-size: 11px;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.12em;
   margin-bottom: var(--arc-space-2);
+  color: var(--arc-charcoal);
 }
 
 .taskList {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 2px;
   overflow-y: auto;
   flex: 1;
 }
@@ -85,10 +87,9 @@
   display: flex;
   align-items: flex-start;
   gap: 8px;
-  background: var(--arc-paper-white);
-  border-radius: var(--arc-radius);
-  padding: 8px 10px;
-  border: 1px solid var(--arc-line);
+  background: transparent;
+  padding: 6px 0;
+  min-height: 32px;
 }
 
 .taskTitle {
@@ -97,7 +98,7 @@
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 16px;
   color: var(--arc-ink);
   padding: 0;
 }
@@ -115,18 +116,19 @@
 
 .addInput {
   flex: 1;
-  font-size: 13px;
-  padding: 6px 8px;
-  border-radius: 6px;
-  border: 1px solid var(--arc-line-strong);
+  font-size: 16px;
+  padding: 6px 0;
+  border: none;
+  border-bottom: 1px solid var(--arc-line-strong);
+  background: transparent;
 }
 
 .addButton {
   border: none;
-  background: var(--arc-ink);
-  color: var(--arc-paper-white);
-  border-radius: 6px;
-  padding: 0 10px;
+  background: transparent;
+  color: var(--arc-ink);
   cursor: pointer;
-  font-size: 13px;
+  font-size: 14px;
+  font-weight: 700;
+  min-height: 44px;
 }

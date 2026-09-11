@@ -1,4 +1,3 @@
-import { FridgeGlyph } from '../../assets/Icons';
 import { getFridgeItems } from '../../projections/selectors';
 import { useWorkspaceStore } from '../../state/store';
 import styles from './FridgeTab.module.css';
@@ -18,7 +17,6 @@ export function FridgeTab() {
       aria-expanded={isOpen}
       aria-controls="arc-fridge-panel"
     >
-      <FridgeGlyph size={18} />
       <span className={styles.label}>Fridge</span>
       {count > 0 && <span className={styles.badge}>{count}</span>}
     </button>

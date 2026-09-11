@@ -1,22 +1,13 @@
-import { addCalendarDays, formatFriendly, formatShort, fromISODate } from '../../calendar/dates';
+import { addCalendarDays, addCalendarYears, fromISODate, toISODate, todayISO } from '../../calendar/dates';
 import { ChevronGlyph } from '../../assets/Icons';
 import { useWorkspaceStore } from '../../state/store';
+import type { CalendarViewMode } from '../../state/store';
 import styles from './CalendarNav.module.css';
 
-function stepAmount(view: 'day' | 'week' | 'month'): number {
+function stepAmount(view: CalendarViewMode): number {
   if (view === 'day') return 1;
   if (view === 'week') return 7;
-  return 30; // month stepping is re-anchored below, this is just a nudge
-}
-
-function label(view: 'day' | 'week' | 'month', anchor: string): string {
-  if (view === 'day') return formatFriendly(anchor);
-  if (view === 'week') {
-    const start = anchor;
-    const end = addCalendarDays(anchor, 6);
-    return `${formatShort(start)} \u2013 ${formatShort(end)}`;
-  }
-  return fromISODate(anchor).toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+  return 30;
 }
 
 export function CalendarNav() {
@@ -28,7 +19,11 @@ export function CalendarNav() {
     if (view === 'month') {
       const d = fromISODate(anchor);
       d.setMonth(d.getMonth() + direction);
-      setAnchor(d.toISOString().slice(0, 10));
+      setAnchor(toISODate(d));
+      return;
+    }
+    if (view === 'year') {
+      setAnchor(addCalendarYears(anchor, direction));
       return;
     }
     setAnchor(addCalendarDays(anchor, direction * stepAmount(view)));
@@ -44,9 +39,9 @@ export function CalendarNav() {
       >
         <ChevronGlyph direction="left" />
       </button>
-      <span className={styles.label} aria-live="polite">
-        {label(view, anchor)}
-      </span>
+      <button type="button" className={styles.todayButton} onClick={() => setAnchor(todayISO())}>
+        Today
+      </button>
       <button
         type="button"
         className={styles.iconButton}
@@ -54,13 +49,6 @@ export function CalendarNav() {
         aria-label={`Next ${view}`}
       >
         <ChevronGlyph direction="right" />
-      </button>
-      <button
-        type="button"
-        className={styles.todayButton}
-        onClick={() => setAnchor(new Date().toISOString().slice(0, 10))}
-      >
-        Today
       </button>
     </nav>
   );

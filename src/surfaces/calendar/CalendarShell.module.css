@@ -1,61 +1,160 @@
-.shell {
-  position: relative;
-  width: min(1366px, 100%);
-  min-height: 620px;
-  padding: clamp(72px, 8vw, 104px) clamp(72px, 12vw, 172px)
-    clamp(54px, 7vw, 88px);
-  background:
-    url('/assets/arc/calendar-open-planner.webp') center / 100% 100% no-repeat,
-    transparent;
-  filter: drop-shadow(0 16px 24px rgba(44, 46, 46, 0.18));
+.workspace {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
 }
 
-.header {
+.cover {
+  position: relative;
+  background: var(--arc-cover);
+  border-radius: 28px;
+  padding: 14px 14px 16px 16px;
+  box-shadow: 0 22px 48px rgba(28, 64, 48, 0.22);
+}
+
+.pages {
   position: relative;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
+  min-height: 640px;
+  background: var(--arc-page);
+  border-radius: 22px;
+  overflow: hidden;
+}
+
+.grain {
+  z-index: 0;
+  mix-blend-mode: multiply;
+  opacity: 0.28;
+}
+
+.fold {
+  position: absolute;
+  left: calc(50% - 4px);
+  top: 18px;
+  bottom: 18px;
+  width: 8px;
+  background: var(--arc-fold);
+  box-shadow: 6px 0 18px rgba(44, 46, 46, 0.06), -6px 0 18px rgba(44, 46, 46, 0.06);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.spreadHeader {
+  position: relative;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
   gap: var(--arc-space-4);
-  padding: var(--arc-space-4) var(--arc-space-6) var(--arc-space-3);
-  border-bottom: 1px solid var(--arc-line);
-  flex-wrap: wrap;
+  align-items: end;
+  padding: 22px 28px 10px;
 }
 
 .brand {
   display: flex;
-  align-items: center;
-  gap: var(--arc-space-2);
+  align-items: flex-end;
+  gap: var(--arc-space-3);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+  color: inherit;
+  min-width: 0;
 }
 
-.brandName {
+.titles {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.monthName {
   font-family: var(--arc-font-serif);
+  font-size: 44px;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 0.95;
+  color: var(--arc-forest);
+}
+
+.kicker {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--arc-charcoal);
+}
+
+.headerTools {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: 8px;
+  min-height: 72px;
+}
+
+.handNote {
+  font-family: var(--arc-font-hand);
   font-size: 20px;
-  letter-spacing: 0.02em;
+  color: var(--arc-charcoal);
+  transform: rotate(-2deg);
+  margin-bottom: 4px;
 }
 
-.body {
+.page {
   position: relative;
-  padding: var(--arc-space-4) var(--arc-space-6) var(--arc-space-6);
+  z-index: 1;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 4px 24px 64px;
 }
 
-@media (max-width: 900px) {
-  .shell {
-    min-height: 0;
-    padding: 0;
-    background:
-      linear-gradient(rgba(251, 248, 241, 0.9), rgba(251, 248, 241, 0.9)),
-      url('/assets/arc/texture-cream-paper.webp') center / cover;
-    border: 1px solid var(--arc-line);
-    border-radius: var(--arc-radius-lg);
-    filter: drop-shadow(0 10px 20px rgba(44, 46, 46, 0.14));
-    overflow: hidden;
-  }
+.page > * {
+  flex: 1;
+}
+
+.spreadFooter {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  gap: var(--arc-space-4);
+  padding: 8px 28px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--arc-charcoal);
 }
 
 @media (max-width: 720px) {
-  .header,
-  .body {
-    padding-left: var(--arc-space-3);
-    padding-right: var(--arc-space-3);
+  .spreadHeader {
+    grid-template-columns: 1fr;
+    padding: 16px 16px 8px;
+  }
+
+  .headerTools {
+    align-items: flex-start;
+    min-height: 0;
+  }
+
+  .monthName {
+    font-size: 32px;
+  }
+
+  .fold {
+    display: none;
+  }
+
+  .page {
+    padding: var(--arc-space-3) var(--arc-space-3) 64px;
+  }
+
+  .handNote {
+    display: none;
   }
 }
