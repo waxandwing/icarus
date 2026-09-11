@@ -12,6 +12,7 @@ function emptyState(): WorkspaceDomainState {
       startDate: '2026-08-01',
       endDate: '2027-06-15',
       days: {},
+      crossedDates: {},
       showWeekends: false,
       weekStartsOn: 'monday',
       source: 'test-fixture',
@@ -258,5 +259,143 @@ describe('Nothing important disappears silently (Canonical Brand System \u00a73)
         cmd.createLesson(d, { courseId: course.id, sectionId: section.id, title: 'Meiosis', date: '2026-09-10' }),
       ),
     ).toThrow(DomainError);
+  });
+});
+
+describe('Unit magnets stay units', () => {
+  it('keeps the same unit when its placement moves', () => {
+    let state = emptyState();
+    const courseCreated = apply(state, (d) => cmd.createCourse(d, { name: 'Biology', colorToken: 'sage' }));
+    state = courseCreated.next;
+    const course = courseCreated.result;
+    const created = apply(state, (d) =>
+      cmd.createUnit(d, {
+        courseId: course.id,
+        title: 'Cell Structure',
+        colorToken: 'blue',
+        startDate: '2026-09-08',
+        endDate: '2026-09-25',
+      }),
+    );
+    state = created.next;
+    const unit = created.result;
+    const placement = Object.values(state.placements).find((p) => p.objectType === 'unit' && p.objectId === unit.id);
+    expect(placement?.endDate).toBe('2026-09-25');
+
+    state = apply(state, (d) => cmd.move(d, { placementId: placement!.id, date: '2026-09-10' })).next;
+    const moved = Object.values(state.placements).find((p) => p.objectType === 'unit' && p.objectId === unit.id);
+    expect(state.units[unit.id]).toBeDefined();
+    expect(state.units[unit.id].kind).toBe('unit');
+    expect(Object.values(state.lessons)).toHaveLength(0);
+    expect(Object.values(state.notes)).toHaveLength(0);
+    expect(moved?.date).toBe('2026-09-10');
+    expect(moved?.endDate).toBe('2026-09-27');
+    expect(moved?.objectType).toBe('unit');
+    expect(moved?.objectId).toBe(unit.id);
+  });
+
+  it('creates a unit from a brand magnet, not a lesson or task', () => {
+    let state = emptyState();
+    state = apply(state, (d) => cmd.createCourse(d, { name: 'Biology', colorToken: 'sage' })).next;
+    const created = apply(state, (d) => cmd.createUnitFromMagnet(d, { colorToken: 'terracotta', date: '2026-09-14' }));
+    state = created.next;
+    const unit = created.result;
+    expect(unit.kind).toBe('unit');
+    expect(state.units[unit.id].colorToken).toBe('terracotta');
+    const placement = Object.values(state.placements).find((p) => p.objectId === unit.id);
+    expect(placement?.objectType).toBe('unit');
+    expect(placement?.date).toBe('2026-09-14');
+    expect(Object.values(state.lessons)).toHaveLength(0);
+  });
+
+  it('writes an idea onto the desk as a post-it', () => {
+    let state = emptyState();
+    const created = apply(state, (d) => cmd.createNote(d, { title: 'Socratic seminar', location: 'desk' }));
+    state = created.next;
+    const note = created.result;
+    expect(state.notes[note.id].location).toBe('desk');
+    expect(state.notes[note.id].deskX).toBeDefined();
+    expect(state.notes[note.id].deskY).toBeDefined();
+  });
+
+  it('stows a unit in the Fridge drawer without destroying it or turning it into a task', () => {
+    let state = emptyState();
+    const courseCreated = apply(state, (d) => cmd.createCourse(d, { name: 'Biology', colorToken: 'sage' }));
+    state = courseCreated.next;
+    const course = courseCreated.result;
+    const created = apply(state, (d) =>
+      cmd.createUnit(d, {
+        courseId: course.id,
+        title: 'Cell Structure',
+        colorToken: 'blue',
+        startDate: '2026-09-08',
+        endDate: '2026-09-25',
+      }),
+    );
+    state = created.next;
+    const unit = created.result;
+    const sectionCreated = apply(state, (d) => cmd.createSection(d, { courseId: course.id, name: 'Period 2' }));
+    state = sectionCreated.next;
+    const section = sectionCreated.result;
+    state = apply(state, (d) =>
+      cmd.createLesson(d, {
+        courseId: course.id,
+        unitId: unit.id,
+        sectionId: section.id,
+        title: 'Membrane lab',
+        date: '2026-09-10',
+      }),
+    ).next;
+
+    state = apply(state, (d) => cmd.stowUnitInDrawer(d, { unitId: unit.id })).next;
+    expect(state.units[unit.id]).toBeDefined();
+    expect(state.units[unit.id].kind).toBe('unit');
+    expect(state.units[unit.id].location).toBe('drawer');
+    expect(state.units[unit.id].title).toBe('Cell Structure');
+    expect(Object.values(state.notes)).toHaveLength(0);
+    expect(Object.keys(state.taskbar.columns.must)).toHaveLength(0);
+    const unitPlacement = Object.values(state.placements).find(
+      (p) => p.objectType === 'unit' && p.objectId === unit.id,
+    );
+    expect(unitPlacement?.storage).toBe('drawer');
+    expect(unitPlacement?.date).toBe('2026-09-08');
+    expect(unitPlacement?.endDate).toBe('2026-09-25');
+    const lessonPlacement = Object.values(state.placements).find((p) => p.objectType === 'lesson');
+    expect(lessonPlacement?.storage).toBe('drawer');
+    expect(state.lessons[lessonPlacement!.objectId].unitId).toBe(unit.id);
+
+    state = apply(state, (d) => cmd.placeUnitOnDate(d, { unitId: unit.id, date: '2026-09-21' })).next;
+    expect(state.units[unit.id].location).toBe('calendar');
+    const restored = Object.values(state.placements).find(
+      (p) => p.objectType === 'unit' && p.objectId === unit.id,
+    );
+    expect(restored?.storage).toBe('calendar');
+    expect(restored?.date).toBe('2026-09-21');
+    expect(restored?.endDate).toBe('2026-10-08');
+    const restoredLesson = Object.values(state.placements).find((p) => p.objectType === 'lesson');
+    expect(restoredLesson?.storage).toBe('calendar');
+    expect(restoredLesson?.date).toBe('2026-09-23');
+  });
+
+  it('creates a unit in the drawer from a blank magnet, not a note or task', () => {
+    let state = emptyState();
+    state = apply(state, (d) => cmd.createCourse(d, { name: 'Biology', colorToken: 'sage' })).next;
+    const created = apply(state, (d) => cmd.createUnitInDrawer(d, { colorToken: 'terracotta' }));
+    state = created.next;
+    const unit = created.result;
+    expect(unit.kind).toBe('unit');
+    expect(state.units[unit.id].location).toBe('drawer');
+    expect(Object.values(state.placements)).toHaveLength(0);
+    expect(Object.values(state.notes)).toHaveLength(0);
+    expect(Object.values(state.magnets)).toHaveLength(0);
+  });
+
+  it('crosses an instructional Year-lens day and refuses weekends', () => {
+    let state = emptyState();
+    state = apply(state, (d) => cmd.toggleYearCross(d, { date: '2026-09-11' })).next;
+    expect(state.calendar.crossedDates['2026-09-11']).toBe(true);
+    state = apply(state, (d) => cmd.toggleYearCross(d, { date: '2026-09-11' })).next;
+    expect(state.calendar.crossedDates['2026-09-11']).toBeUndefined();
+    expect(() => apply(state, (d) => cmd.toggleYearCross(d, { date: '2026-09-12' }))).toThrow(DomainError);
   });
 });

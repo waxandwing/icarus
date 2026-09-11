@@ -22,7 +22,7 @@ export function TaskBarTab() {
       aria-expanded={isOpen}
       aria-controls="arc-taskbar-panel"
     >
-      Tasks
+      <span className={styles.label}>Tasks</span>
       {count > 0 && <span className={styles.badge}>{count}</span>}
     </button>
   );

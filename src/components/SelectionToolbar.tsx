@@ -15,6 +15,7 @@ export function SelectionToolbar({ onEdit }: { onEdit: (type: string, id: string
   const moveNoteToDrawer = useWorkspaceStore((s) => s.moveNoteToDrawer);
   const moveMagnetToFridge = useWorkspaceStore((s) => s.moveMagnetToFridge);
   const moveMagnetToDrawer = useWorkspaceStore((s) => s.moveMagnetToDrawer);
+  const stowUnitInDrawer = useWorkspaceStore((s) => s.stowUnitInDrawer);
   const openShiftDialog = useWorkspaceStore((s) => s.openShiftDialog);
   const copyLesson = useWorkspaceStore((s) => s.copyLesson);
   const deleteObject = useWorkspaceStore((s) => s.deleteObject);
@@ -81,7 +82,7 @@ export function SelectionToolbar({ onEdit }: { onEdit: (type: string, id: string
         </button>
       )}
 
-      {placement && !placement.fixed && (
+      {placement && !placement.fixed && placement.storage !== 'drawer' && (
         <label className={styles.button} style={{ display: 'inline-flex', gap: 6, alignItems: 'center' }}>
           Move to
           <input
@@ -116,6 +117,12 @@ export function SelectionToolbar({ onEdit }: { onEdit: (type: string, id: string
         </button>
       )}
 
+      {unit && (
+        <button type="button" className={styles.button} onClick={() => stowUnitInDrawer(objectId)}>
+          To drawer
+        </button>
+      )}
+
       {note && (
         <>
           <button type="button" className={styles.button} onClick={() => moveNoteToFridge(objectId)}>
@@ -138,7 +145,7 @@ export function SelectionToolbar({ onEdit }: { onEdit: (type: string, id: string
         </>
       )}
 
-      {placement && (
+      {placement && placement.storage !== 'drawer' && (
         <button type="button" className={styles.button} onClick={() => unplace(placement.id)}>
           Unplace
         </button>

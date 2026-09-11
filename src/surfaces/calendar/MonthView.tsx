@@ -19,8 +19,9 @@ export function MonthView({ onCreate }: ViewProps) {
   const weekStartsOn = domain.settings.weekStartsOn;
   const setAnchor = useWorkspaceStore((s) => s.setAnchorDate);
   const movePlacement = useWorkspaceStore((s) => s.movePlacement);
-  const placeMagnetOnCalendar = useWorkspaceStore((s) => s.placeMagnetOnCalendar);
   const placeNoteOnCalendar = useWorkspaceStore((s) => s.placeNoteOnCalendar);
+  const placeUnitOnDate = useWorkspaceStore((s) => s.placeUnitOnDate);
+  const createUnitFromMagnet = useWorkspaceStore((s) => s.createUnitFromMagnet);
 
   const weeks = useMemo(
     () => getMonthGrid(anchor, weekStartsOn, showWeekends),
@@ -33,7 +34,7 @@ export function MonthView({ onCreate }: ViewProps) {
   );
   const cellRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const [dragOver, setDragOver] = useState<string | null>(null);
-  const dropActions = { movePlacement, placeMagnetOnCalendar, placeNoteOnCalendar };
+  const dropActions = { movePlacement, placeNoteOnCalendar, placeUnitOnDate, createUnitFromMagnet };
 
   function moveFocus(date: string | undefined) {
     if (!date) return;

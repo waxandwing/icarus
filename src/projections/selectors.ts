@@ -57,6 +57,7 @@ function resolveColor(domain: WorkspaceDomainState, type: PlaceableType, id: str
 export function getPlacementsForDate(domain: WorkspaceDomainState, date: ISODate): PlacementView[] {
   const views: PlacementView[] = [];
   for (const placement of Object.values(domain.placements)) {
+    if (placement.storage === 'drawer') continue;
     const start = placement.date;
     const end = placement.endDate ?? placement.date;
     if (compareISO(date, start) < 0 || compareISO(date, end) > 0) continue;
@@ -117,7 +118,26 @@ export function getFridgeItems(domain: WorkspaceDomainState) {
 export function getDrawerItems(domain: WorkspaceDomainState) {
   const notes = Object.values(domain.notes).filter((n) => n.location === 'drawer');
   const magnets = Object.values(domain.magnets).filter((m) => m.location === 'drawer');
-  return [...notes, ...magnets].sort((a, b) => b.createdAt - a.createdAt);
+  const units = Object.values(domain.units).filter((u) => u.location === 'drawer');
+  return [...units, ...notes, ...magnets].sort((a, b) => b.createdAt - a.createdAt);
+}
+
+export function getDeskUnits(domain: WorkspaceDomainState) {
+  return Object.values(domain.units)
+    .filter((unit) => unit.location !== 'drawer')
+    .sort((a, b) => a.createdAt - b.createdAt);
+}
+
+export function getDeskNotes(domain: WorkspaceDomainState) {
+  return Object.values(domain.notes)
+    .filter((n) => n.location === 'desk')
+    .sort((a, b) => a.createdAt - b.createdAt);
+}
+
+export function getLessonsForUnit(domain: WorkspaceDomainState, unitId: string) {
+  return Object.values(domain.lessons)
+    .filter((l) => l.unitId === unitId)
+    .sort((a, b) => a.createdAt - b.createdAt);
 }
 
 export function getTaskBarNotes(domain: WorkspaceDomainState, column: 'must' | 'should' | 'could') {
@@ -147,6 +167,7 @@ export function getCourseUnitsIntersecting(
   const views: PlacementView[] = [];
   for (const placement of Object.values(domain.placements)) {
     if (placement.objectType !== 'unit') continue;
+    if (placement.storage === 'drawer') continue;
     const unit = domain.units[placement.objectId];
     if (!unit || unit.courseId !== courseId) continue;
     const pEnd = placement.endDate ?? placement.date;
@@ -265,6 +286,7 @@ export function getPlacementsIntersectingRange(
 ): PlacementView[] {
   const views: PlacementView[] = [];
   for (const placement of Object.values(domain.placements)) {
+    if (placement.storage === 'drawer') continue;
     const pEnd = placement.endDate ?? placement.date;
     if (pEnd < start || placement.date > end) continue;
     const onStart = getPlacementsForDate(domain, placement.date).find((view) => view.placementId === placement.id);

@@ -2,6 +2,7 @@ import { CalendarShell } from '../surfaces/calendar/CalendarShell';
 import { CreateItemDialog } from '../components/CreateItemDialog';
 import { EditDialog } from '../components/EditDialog';
 import { ShiftDialog } from '../components/ShiftDialog';
+import { DeskField } from '../surfaces/desk/DeskField';
 import { FridgePanel } from '../surfaces/fridge/FridgePanel';
 import { FridgeTab } from '../surfaces/fridge/FridgeTab';
 import { SettingsPanel } from '../surfaces/settings/SettingsPanel';
@@ -52,10 +53,15 @@ export function AppFrame() {
       </a>
 
       <div className={styles.desk}>
+        <DeskField />
         <div className={styles.stage}>
-          <aside className={styles.edgeLeft} data-open={openPanel === 'settings'}>
+          <aside className={styles.edgeLeft}>
             <SettingsPanel />
-            <SettingsTab />
+            <TaskBarPanel />
+            <div className={styles.tabStack}>
+              <SettingsTab />
+              <TaskBarTab />
+            </div>
           </aside>
 
           <div className={styles.bookColumn}>
@@ -63,11 +69,6 @@ export function AppFrame() {
               onEdit={(type, id) => setEditingId({ type, id })}
               onCreate={(date, nest) => setCreatingFor({ date, ...nest })}
             />
-
-            <div className={styles.edgeBottom} data-open={openPanel === 'taskbar'}>
-              <TaskBarTab />
-              <TaskBarPanel />
-            </div>
           </div>
 
           <aside className={styles.edgeRight} data-open={openPanel === 'fridge'}>

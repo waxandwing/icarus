@@ -21,8 +21,9 @@ export interface DayCellProps {
 export function DayCell({ date, dimmed, compact, onCreate, cellRef, onFocusDate, tabIndex }: DayCellProps) {
   const domain = useWorkspaceStore((s) => s.domain);
   const movePlacement = useWorkspaceStore((s) => s.movePlacement);
-  const placeMagnetOnCalendar = useWorkspaceStore((s) => s.placeMagnetOnCalendar);
   const placeNoteOnCalendar = useWorkspaceStore((s) => s.placeNoteOnCalendar);
+  const placeUnitOnDate = useWorkspaceStore((s) => s.placeUnitOnDate);
+  const createUnitFromMagnet = useWorkspaceStore((s) => s.createUnitFromMagnet);
   const [dragOver, setDragOver] = useState(false);
 
   const kind = dayKind(domain.calendar, date);
@@ -56,7 +57,7 @@ export function DayCell({ date, dimmed, compact, onCreate, cellRef, onFocusDate,
       onDragLeave={() => setDragOver(false)}
       onDrop={(e) => {
         setDragOver(false);
-        applyCalendarDrop(e, date, { movePlacement, placeMagnetOnCalendar, placeNoteOnCalendar });
+        applyCalendarDrop(e, date, { movePlacement, placeNoteOnCalendar, placeUnitOnDate, createUnitFromMagnet });
       }}
     >
       <div className={styles.dateRow}>

@@ -5,10 +5,12 @@
   min-height: 100%;
 }
 
-.hint {
+.countdown {
   margin: 0;
-  font-size: 14px;
-  color: var(--arc-charcoal);
+  font-family: var(--arc-font-hand);
+  font-size: 22px;
+  line-height: 1.2;
+  color: var(--arc-ink);
 }
 
 .months {
@@ -25,14 +27,8 @@
   border: 1px solid var(--arc-line);
   border-radius: 12px;
   background: color-mix(in srgb, var(--arc-paper-white) 70%, var(--arc-paper));
-  cursor: pointer;
   text-align: left;
   color: inherit;
-}
-
-.monthCard:hover,
-.monthCard:focus-visible {
-  border-color: var(--arc-line-strong);
 }
 
 .monthHead {
@@ -40,6 +36,19 @@
   align-items: baseline;
   justify-content: space-between;
   gap: 8px;
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 0;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.monthHead:hover .monthName,
+.monthHead:focus-visible .monthName {
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .monthName {
@@ -72,13 +81,36 @@
 }
 
 .day {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   min-height: 22px;
+  border: none;
+  padding: 0;
   border-radius: 4px;
   font-size: 11px;
   font-variant-numeric: tabular-nums;
+  color: inherit;
+  background: transparent;
+}
+
+button.day {
+  cursor: pointer;
+}
+
+.xMark {
+  position: absolute;
+  inset: -2px;
+  width: calc(100% + 4px);
+  height: calc(100% + 4px);
+  object-fit: contain;
+  pointer-events: none;
+  mix-blend-mode: multiply;
+}
+
+.day[data-crossed='true'] {
+  color: color-mix(in srgb, var(--arc-ink) 55%, transparent);
 }
 
 .day[data-in-month='false'] {

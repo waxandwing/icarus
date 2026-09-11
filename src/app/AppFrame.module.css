@@ -8,7 +8,7 @@
 
 .pattern {
   position: absolute;
-  left: 0;
+  left: 4px;
   top: 0;
   bottom: 0;
   width: 32px;
@@ -37,7 +37,7 @@
   position: relative;
   min-height: 100vh;
   box-sizing: border-box;
-  padding: 28px 72px 48px 88px;
+  padding: 16px 96px 28px 88px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -45,7 +45,7 @@
 
 .stage {
   position: relative;
-  width: min(1120px, 100%);
+  width: min(1280px, 100%);
 }
 
 .bookColumn {
@@ -58,7 +58,7 @@
 .edgeLeft,
 .edgeRight {
   position: absolute;
-  top: 152px;
+  top: 108px;
   z-index: 4;
   display: flex;
   align-items: flex-start;
@@ -67,7 +67,7 @@
 
 .edgeLeft > *,
 .edgeRight > *,
-.edgeBottom > * {
+.tabStack > * {
   pointer-events: auto;
 }
 
@@ -77,24 +77,22 @@
   justify-content: flex-end;
 }
 
+.tabStack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
 .edgeRight {
   left: calc(100% - 12px);
   flex-direction: row;
   justify-content: flex-start;
 }
 
-.edgeBottom {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  position: relative;
-  z-index: 4;
-  margin-top: -20px;
-}
-
 .cleanUp {
   align-self: flex-end;
-  margin-top: var(--arc-space-4);
+  margin-top: var(--arc-space-3);
   border: none;
   background: transparent;
   cursor: pointer;
@@ -129,6 +127,10 @@
   .edgeRight {
     flex-direction: column-reverse;
     order: 1;
+  }
+
+  .tabStack {
+    flex-direction: row;
   }
 
   .stage {

@@ -78,7 +78,8 @@ export function CalendarShell({ onEdit, onCreate }: ViewProps) {
       <div className={styles.cover} id="arc-calendar-shell">
         <div className={styles.pages}>
           <PaperGrain baseColor="transparent" opacity={0.35} className={styles.grain} />
-          <div className={styles.fold} aria-hidden="true" />
+          <div className={`${styles.fold} ${styles.foldHead}`} aria-hidden="true" />
+          <div className={`${styles.fold} ${styles.foldFoot}`} aria-hidden="true" />
 
           <header className={styles.spreadHeader}>
             <button
@@ -90,7 +91,7 @@ export function CalendarShell({ onEdit, onCreate }: ViewProps) {
               }}
               aria-label="Back to the teaching week"
             >
-              <ArcMark size={52} />
+              <ArcMark size={40} />
               <span className={styles.titles}>
                 <span className={styles.monthName}>{title}</span>
                 {!liveOpen && (
@@ -102,9 +103,6 @@ export function CalendarShell({ onEdit, onCreate }: ViewProps) {
             </button>
             {!liveOpen && (
               <div className={styles.headerTools}>
-                <span className={styles.handNote} aria-hidden="true">
-                  Good work matters.
-                </span>
                 <ViewSwitcher />
                 <CalendarNav />
               </div>
@@ -129,7 +127,6 @@ export function CalendarShell({ onEdit, onCreate }: ViewProps) {
           {!liveOpen && <SelectionToolbar onEdit={onEdit} />}
 
           <footer className={styles.spreadFooter}>
-            <span>Plans that change are still plans.</span>
             <div className={styles.footerReceipt}>
               <Toast />
             </div>

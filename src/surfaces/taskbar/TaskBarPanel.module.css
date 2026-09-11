@@ -1,42 +1,68 @@
 .panel {
   position: relative;
-  width: min(1000px, 100%);
-  max-height: 0;
-  overflow: hidden;
+  box-sizing: border-box;
+  width: 0;
+  max-width: 0;
+  min-width: 0;
+  max-height: min(720px, 78vh);
+  background: transparent;
+  border: none;
+  padding: 0;
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  background: var(--arc-blue);
-  border: none;
-  border-radius: 0 0 18px 18px;
-  box-shadow: var(--arc-shadow-soft);
-  padding: 0 10px;
+  overflow: hidden;
   transition:
-    max-height var(--arc-motion-slow) var(--arc-ease),
-    opacity var(--arc-motion) var(--arc-ease),
-    padding var(--arc-motion) var(--arc-ease);
+    max-width var(--arc-motion-slow) var(--arc-ease),
+    width var(--arc-motion-slow) var(--arc-ease),
+    opacity var(--arc-motion) var(--arc-ease);
 }
 
 .panel[data-open='true'] {
-  max-height: var(--arc-taskbar-height);
+  max-width: var(--arc-furniture-width);
+  width: var(--arc-furniture-width);
+  min-width: var(--arc-furniture-width);
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
-  overflow-y: auto;
-  padding: 10px 10px 14px;
+  overflow: visible;
 }
 
-.headerRow {
-  display: none;
+.folder {
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  background: var(--arc-blue);
+  border-radius: 18px 0 16px 16px;
+  padding: 10px 10px 10px 12px;
+  box-shadow: var(--arc-shadow-soft);
+  max-height: min(720px, 78vh);
+  overflow: hidden;
+}
+
+.paper {
+  box-sizing: border-box;
+  width: 100%;
+  background: var(--arc-paper);
+  border-radius: 12px;
+  padding: 22px 16px 16px;
+  max-height: min(700px, 74vh);
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .heading {
   font-family: var(--arc-font-serif);
-  font-size: 20px;
-  margin: 0;
+  font-size: 22px;
+  margin: 0 0 12px;
+  color: var(--arc-forest);
 }
 
 .closeButton {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 2;
   border: none;
   background: transparent;
   font-size: 18px;
@@ -46,19 +72,18 @@
 }
 
 .columns {
-  flex: 1;
   display: flex;
-  gap: 12px;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .column {
-  flex: 1;
   display: flex;
   flex-direction: column;
   min-height: 0;
   background: var(--arc-paper-white);
-  border-radius: 12px;
-  padding: 12px 12px 10px;
+  border-radius: 8px;
+  padding: 10px 10px 8px;
 }
 
 .column[data-dragover='true'] {
@@ -79,8 +104,6 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
-  overflow-y: auto;
-  flex: 1;
 }
 
 .task {
@@ -116,6 +139,7 @@
 
 .addInput {
   flex: 1;
+  min-width: 0;
   font-size: 16px;
   padding: 6px 0;
   border: none;
@@ -128,7 +152,22 @@
   background: transparent;
   color: var(--arc-ink);
   cursor: pointer;
-  font-size: 14px;
-  font-weight: 700;
-  min-height: 44px;
+  font-size: 16px;
+  font-weight: 500;
+  min-height: 36px;
+}
+
+@media (max-width: 900px) {
+  .panel {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    max-height: 0;
+  }
+  .panel[data-open='true'] {
+    max-height: 50vh;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
 }

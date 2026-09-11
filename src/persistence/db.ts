@@ -1,5 +1,5 @@
 import { type IDBPDatabase, openDB } from 'idb';
-import { CURRENT_SCHEMA_VERSION } from '../domain/seed';
+import { CURRENT_SCHEMA_VERSION, markSampleYearCrosses } from '../domain/seed';
 import type { WorkspaceDomainState } from '../domain/types';
 
 const DB_NAME = 'arc-workspace';
@@ -39,6 +39,24 @@ function migrate(raw: PersistedWorkspace): PersistedWorkspace {
   if (!domain.schemaVersion || domain.schemaVersion < CURRENT_SCHEMA_VERSION) {
     domain.schemaVersion = CURRENT_SCHEMA_VERSION;
   }
+  const hadYearMarks = Boolean(raw.domain.calendar?.crossedDates);
+  domain.calendar = {
+    ...domain.calendar,
+    crossedDates: domain.calendar?.crossedDates ?? {},
+  };
+  if (!hadYearMarks && domain.isSampleWorkspace) {
+    markSampleYearCrosses(domain.calendar);
+  }
+  const units = { ...domain.units };
+  for (const [id, unit] of Object.entries(units)) {
+    if (!('location' in unit) || !(unit as { location?: string }).location) {
+      const parked = Object.values(domain.placements ?? {}).some(
+        (p) => p.objectType === 'unit' && p.objectId === id && p.storage === 'drawer',
+      );
+      units[id] = { ...unit, location: parked ? 'drawer' : 'calendar' };
+    }
+  }
+  domain.units = units;
   return { ...raw, domain };
 }
 

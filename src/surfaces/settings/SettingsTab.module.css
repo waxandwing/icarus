@@ -2,9 +2,9 @@
   position: relative;
   background: var(--arc-blue);
   border: 1px solid color-mix(in srgb, var(--arc-ink) 16%, var(--arc-blue));
-  border-left: none;
-  border-radius: 0 10px 10px 0;
-  padding: 18px 9px 18px 6px;
+  border-right: none;
+  border-radius: 10px 0 0 10px;
+  padding: 18px 6px 18px 9px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -28,7 +28,7 @@
 
 @media (max-width: 900px) {
   .tab {
-    border-left: 1px solid var(--arc-line-strong);
+    border-right: 1px solid var(--arc-line-strong);
     border-radius: var(--arc-radius);
     flex-direction: row;
     writing-mode: horizontal-tb;

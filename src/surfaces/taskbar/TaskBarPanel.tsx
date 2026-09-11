@@ -95,20 +95,29 @@ function Column({ id, label }: { id: TaskColumn; label: string }) {
 export function TaskBarPanel() {
   const openPanel = useWorkspaceStore((s) => s.ui.openPanel);
   const isOpen = openPanel === 'taskbar';
+  const openFurniture = useWorkspaceStore((s) => s.openFurniture);
 
   return (
-    <section
+    <aside
       id="arc-taskbar-panel"
       className={styles.panel}
       data-open={isOpen}
       aria-hidden={!isOpen}
-      aria-label="Task Bar"
+      aria-label="Tasks"
     >
-      <div className={styles.columns}>
-        {COLUMNS.map((c) => (
-          <Column key={c.id} id={c.id} label={c.label} />
-        ))}
+      <div className={styles.folder}>
+        <button type="button" className={styles.closeButton} onClick={() => openFurniture(null)} aria-label="Close tasks">
+          {'\u2715'}
+        </button>
+        <div className={styles.paper}>
+          <h2 className={styles.heading}>Tasks</h2>
+          <div className={styles.columns}>
+            {COLUMNS.map((c) => (
+              <Column key={c.id} id={c.id} label={c.label} />
+            ))}
+          </div>
+        </div>
       </div>
-    </section>
+    </aside>
   );
 }

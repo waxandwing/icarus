@@ -7,18 +7,18 @@
 .cover {
   position: relative;
   background: var(--arc-cover);
-  border-radius: 28px;
-  padding: 14px 14px 16px 16px;
-  box-shadow: 0 22px 48px rgba(28, 64, 48, 0.22);
+  border-radius: 22px;
+  padding: 8px 10px 10px 10px;
+  box-shadow: 0 18px 40px rgba(28, 64, 48, 0.2);
 }
 
 .pages {
   position: relative;
   display: flex;
   flex-direction: column;
-  min-height: 640px;
+  min-height: 680px;
   background: var(--arc-page);
-  border-radius: 22px;
+  border-radius: 16px;
   overflow: hidden;
 }
 
@@ -30,14 +30,27 @@
 
 .fold {
   position: absolute;
-  left: calc(50% - 4px);
-  top: 18px;
-  bottom: 18px;
-  width: 8px;
-  background: var(--arc-fold);
-  box-shadow: 6px 0 18px rgba(44, 46, 46, 0.06), -6px 0 18px rgba(44, 46, 46, 0.06);
+  left: 50%;
+  width: 14px;
+  transform: translateX(-50%);
   pointer-events: none;
-  z-index: 2;
+  z-index: 0;
+  background: linear-gradient(
+    to right,
+    transparent,
+    color-mix(in srgb, var(--arc-fold) 45%, transparent) 50%,
+    transparent
+  );
+}
+
+.foldHead {
+  top: 6px;
+  height: 16px;
+}
+
+.foldFoot {
+  bottom: 6px;
+  height: 14px;
 }
 
 .spreadHeader {
@@ -47,7 +60,7 @@
   grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
   gap: var(--arc-space-4);
   align-items: end;
-  padding: 22px 28px 10px;
+  padding: 12px 20px 6px;
 }
 
 .brand {
@@ -72,7 +85,7 @@
 
 .monthName {
   font-family: var(--arc-font-serif);
-  font-size: 44px;
+  font-size: 34px;
   font-weight: 500;
   letter-spacing: -0.03em;
   line-height: 0.95;
@@ -92,16 +105,7 @@
   flex-direction: column;
   align-items: flex-end;
   justify-content: flex-end;
-  gap: 8px;
-  min-height: 72px;
-}
-
-.handNote {
-  font-family: var(--arc-font-hand);
-  font-size: 20px;
-  color: var(--arc-charcoal);
-  transform: rotate(-2deg);
-  margin-bottom: 4px;
+  gap: 6px;
 }
 
 .page {
@@ -110,7 +114,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 4px 24px 64px;
+  padding: 2px 18px 16px;
 }
 
 .page > * {
@@ -121,10 +125,10 @@
   position: relative;
   z-index: 2;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: var(--arc-space-3);
   align-items: baseline;
-  padding: 8px 28px 14px;
+  padding: 6px 20px 10px;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.1em;
@@ -163,10 +167,6 @@
   }
 
   .page {
-    padding: var(--arc-space-3) var(--arc-space-3) 64px;
-  }
-
-  .handNote {
-    display: none;
+    padding: var(--arc-space-3);
   }
 }

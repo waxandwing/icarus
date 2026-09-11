@@ -9,6 +9,7 @@ import {
   schoolQuarter,
   schoolWeekNumber,
   schoolYearWindow,
+  countSchoolDaysLeft,
 } from './dates';
 import type { SchoolCalendar } from '../domain/types';
 
@@ -18,6 +19,7 @@ const calendar: SchoolCalendar = {
   days: {
     '2026-09-14': { date: '2026-09-14', kind: 'no-school', label: 'Staff development', confidence: 'confirmed' },
   },
+  crossedDates: {},
   showWeekends: false,
   weekStartsOn: 'monday',
   source: 'test',
@@ -96,6 +98,23 @@ describe('school year lens helpers', () => {
     expect(schoolQuarter('2026-11-02')).toBe(2);
     expect(schoolQuarter('2027-02-10')).toBe(3);
     expect(schoolQuarter('2027-04-15')).toBe(4);
+  });
+
+  it('counts remaining school days after today through the last day', () => {
+    const shortYear: SchoolCalendar = {
+      startDate: '2026-09-10',
+      endDate: '2026-09-16',
+      days: {
+        '2026-09-14': { date: '2026-09-14', kind: 'no-school', label: 'Staff development', confidence: 'confirmed' },
+      },
+      crossedDates: {},
+      showWeekends: false,
+      weekStartsOn: 'monday',
+      source: 'test',
+    };
+    // After Friday the 11th: Monday 14 is no-school, so Tue 15 + Wed 16.
+    expect(countSchoolDaysLeft(shortYear, '2026-09-11')).toBe(2);
+    expect(countSchoolDaysLeft(shortYear, '2026-09-16')).toBe(0);
   });
 });
 

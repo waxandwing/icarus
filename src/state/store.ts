@@ -90,6 +90,10 @@ interface WorkspaceStore {
     visibility?: Visibility;
     allowCollision?: boolean;
   }) => ActionResult;
+  createUnitFromMagnet: (colorToken: PaletteToken, date: ISODate) => ActionResult;
+  placeUnitOnDate: (unitId: string, date: ISODate) => ActionResult;
+  stowUnitInDrawer: (unitId: string) => ActionResult;
+  createUnitInDrawer: (colorToken: PaletteToken) => ActionResult;
   createNote: (payload: {
     title: string;
     body?: string;
@@ -119,6 +123,7 @@ interface WorkspaceStore {
     important: boolean,
   ) => ActionResult;
   crossOut: (objectType: 'lesson' | 'note', objectId: string, crossedOut: boolean) => ActionResult;
+  toggleYearCross: (date: ISODate) => ActionResult;
 
   moveNoteToFridge: (noteId: string) => ActionResult;
   moveNoteToDrawer: (noteId: string) => ActionResult;
@@ -256,6 +261,22 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
         run(`Create unit "${payload.title}"`, (d) => {
           cmd.createUnit(d, payload);
         }),
+      createUnitFromMagnet: (colorToken, date) =>
+        run('Place unit magnet', (d) => {
+          cmd.createUnitFromMagnet(d, { colorToken, date });
+        }),
+      placeUnitOnDate: (unitId, date) =>
+        run('Move unit', (d) => {
+          cmd.placeUnitOnDate(d, { unitId, date });
+        }),
+      stowUnitInDrawer: (unitId) =>
+        run('Store unit in drawer', (d) => {
+          cmd.stowUnitInDrawer(d, { unitId });
+        }),
+      createUnitInDrawer: (colorToken) =>
+        run('Store unit in drawer', (d) => {
+          cmd.createUnitInDrawer(d, { colorToken });
+        }),
       createLesson: (payload) =>
         run(`Create lesson "${payload.title}"`, (d) => {
           cmd.createLesson(d, payload);
@@ -314,6 +335,10 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
       crossOut: (objectType, objectId, crossedOut) =>
         run('Cross out', (d) => {
           cmd.crossOut(d, { objectType, objectId, crossedOut });
+        }),
+      toggleYearCross: (date) =>
+        run('Cross out school day', (d) => {
+          cmd.toggleYearCross(d, { date });
         }),
 
       moveNoteToFridge: (noteId) =>

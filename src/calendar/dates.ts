@@ -231,6 +231,23 @@ export function compareISO(a: ISODate, b: ISODate): number {
   return a < b ? -1 : a > b ? 1 : 0;
 }
 
+/**
+ * Instructional / early-release days strictly after `fromISO` through the
+ * school-year end. Used by the Year lens countdown, not a “Caught up” meter.
+ */
+export function countSchoolDaysLeft(calendar: SchoolCalendar, fromISO: ISODate): number {
+  const start =
+    compareISO(fromISO, calendar.startDate) < 0 ? calendar.startDate : addCalendarDays(fromISO, 1);
+  if (compareISO(start, calendar.endDate) > 0) return 0;
+  let n = 0;
+  let cursor = start;
+  while (compareISO(cursor, calendar.endDate) <= 0) {
+    if (isInstructionalDay(calendar, cursor)) n += 1;
+    cursor = addCalendarDays(cursor, 1);
+  }
+  return n;
+}
+
 /** Inclusive column span of [start, end] over an ordered day list, or null if no overlap. */
 export function rangeOverlapColumns(
   days: ISODate[],

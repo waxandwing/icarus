@@ -27,6 +27,8 @@ export interface SchoolCalendar {
   showWeekends: boolean;
   weekStartsOn: 'monday' | 'sunday';
   source: string;
+  /** Teacher-crossed instructional days on the Year lens (hand-drawn X marks). */
+  crossedDates: Record<ISODate, true>;
 }
 
 export interface Course {
@@ -45,6 +47,8 @@ export interface Section {
   archived?: boolean;
 }
 
+export type UnitLocation = 'calendar' | 'desk' | 'drawer';
+
 export interface Unit {
   id: string;
   kind: 'unit';
@@ -54,6 +58,8 @@ export interface Unit {
   notes?: string;
   important: boolean;
   createdAt: number;
+  /** Calendar, desk magnet, or Fridge drawer — never a task, idea, or destroyed object. */
+  location: UnitLocation;
 }
 
 export interface Lesson {
@@ -71,7 +77,7 @@ export interface Lesson {
 }
 
 export type TaskColumn = 'must' | 'should' | 'could';
-export type NoteLocation = 'calendar' | 'fridge' | 'drawer' | 'taskbar';
+export type NoteLocation = 'calendar' | 'fridge' | 'drawer' | 'taskbar' | 'desk';
 
 export interface Note {
   id: string;
@@ -83,6 +89,10 @@ export interface Note {
   location: NoteLocation;
   taskColumn?: TaskColumn;
   fridgeSlot?: number;
+  /** Percent of the desk, when the note is a post-it around the planner. */
+  deskX?: number;
+  deskY?: number;
+  deskRotate?: number;
   createdAt: number;
 }
 
@@ -102,6 +112,8 @@ export interface Magnet {
 
 export type PlaceableType = 'unit' | 'lesson' | 'note' | 'magnet';
 
+export type PlacementStorage = 'calendar' | 'drawer';
+
 export interface Placement {
   id: string;
   objectType: PlaceableType;
@@ -112,6 +124,11 @@ export interface Placement {
   order: number;
   /** Fixed anchors never move through a shift unless explicitly changed. */
   fixed: boolean;
+  /**
+   * Drawer storage parks the same placement off the spread.
+   * Dates are remembered; the object is not destroyed or recast.
+   */
+  storage?: PlacementStorage;
 }
 
 export type DeliveryState = 'not-started' | 'in-progress' | 'completed' | 'skipped';

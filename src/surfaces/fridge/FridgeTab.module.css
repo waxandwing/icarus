@@ -3,9 +3,9 @@
   background: var(--arc-mustard);
   color: var(--arc-ink);
   border: 1px solid color-mix(in srgb, var(--arc-ink) 18%, var(--arc-mustard));
-  border-right: none;
-  border-radius: 10px 0 0 10px;
-  padding: 18px 6px 18px 9px;
+  border-left: none;
+  border-radius: 0 10px 10px 0;
+  padding: 18px 9px 18px 6px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -15,6 +15,11 @@
   min-height: 44px;
   flex-shrink: 0;
   z-index: 5;
+}
+
+.tab[data-drop='true'] {
+  outline: 2px solid var(--arc-ink);
+  outline-offset: 1px;
 }
 
 .label {
@@ -40,7 +45,7 @@
 
 @media (max-width: 900px) {
   .tab {
-    border-right: 1px solid var(--arc-line-strong);
+    border-left: 1px solid var(--arc-line-strong);
     border-radius: var(--arc-radius);
     flex-direction: row;
   }
