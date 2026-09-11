@@ -6,22 +6,21 @@
   width: min(1000px, 96vw);
   height: var(--arc-taskbar-height);
   background:
-    linear-gradient(rgba(198, 167, 125, 0.26), rgba(198, 167, 125, 0.26)),
+    url('/assets/arc/taskbar-folder-mustard.webp') center top / 100% 100% no-repeat,
     url('/assets/arc/texture-mustard-paper.webp') center / cover,
     var(--arc-kraft);
-  border: 1px solid var(--arc-line-strong);
-  border-bottom: none;
-  border-radius: var(--arc-radius-lg) var(--arc-radius-lg) 0 0;
+  border: 0;
   box-shadow: var(--arc-shadow-lifted);
   transition:
     transform var(--arc-motion-slow) var(--arc-ease),
     visibility 0s linear var(--arc-motion-slow);
   z-index: 36;
-  padding: var(--arc-space-4) var(--arc-space-5);
+  padding: calc(var(--arc-space-4) + 10px) var(--arc-space-5) var(--arc-space-4);
   display: flex;
   flex-direction: column;
   visibility: hidden;
   pointer-events: none;
+  filter: drop-shadow(0 16px 24px rgba(44, 46, 46, 0.16));
 }
 .panel[data-open='true'] {
   transform: translateX(-50%) translateY(0);
@@ -195,6 +194,11 @@
 }
 
 @media (forced-colors: active) {
+  .panel {
+    border: 1px solid CanvasText;
+    border-bottom: 0;
+    filter: none;
+  }
   .taskTitle[data-crossed='true'] {
     text-decoration: line-through;
   }
