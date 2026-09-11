@@ -1,38 +1,26 @@
 .tab {
   position: fixed;
   left: 50%;
-  bottom: -4px;
-  width: 232px;
-  height: 76px;
+  bottom: 0;
   transform: translateX(-50%);
-  border: 0;
-  padding: 20px 32px 10px;
+  background: var(--arc-kraft);
+  border: 1px solid var(--arc-line-strong);
+  border-bottom: none;
+  border-radius: var(--arc-radius-lg) var(--arc-radius-lg) 0 0;
+  padding: 8px 20px;
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 8px;
   cursor: pointer;
+  box-shadow: var(--arc-shadow-soft);
   z-index: 35;
   color: var(--arc-ink);
-  background: transparent url('/assets/arc/taskbar-folder-mustard.webp') center / contain no-repeat;
-  filter: drop-shadow(0 9px 12px rgba(44, 46, 46, 0.14));
-  transition: transform var(--arc-motion) var(--arc-ease), filter var(--arc-motion) var(--arc-ease);
-}
-
-.tab:hover {
-  transform: translateX(-50%) translateY(-4px);
-  filter: drop-shadow(0 11px 14px rgba(44, 46, 46, 0.17));
-}
-
-.tab:focus-visible {
-  outline: 2px solid var(--arc-ink);
-  outline-offset: 2px;
-}
-
-.label {
   font-weight: 700;
   font-size: 13px;
   letter-spacing: 0.04em;
+}
+.tab:hover {
+  padding-bottom: 12px;
 }
 
 .badge {
@@ -46,12 +34,4 @@
   align-items: center;
   justify-content: center;
   padding: 0 4px;
-}
-
-@media (max-width: 700px) {
-  .tab {
-    width: 196px;
-    height: 66px;
-    padding-top: 18px;
-  }
 }
