@@ -1,0 +1,206 @@
+:root {
+  --table-pine: #183a32;
+  --table-slate: #4f6f8c;
+  --table-ochre: #c69a3a;
+  --table-clay: #c6473d;
+  --table-cream: #f6efe1;
+  --table-fog: #dad6cd;
+  --table-ink: #17262a;
+  --table-shadow-surface: 0 10px 30px rgba(32, 37, 34, 0.10);
+  --table-shadow-object: 0 5px 14px rgba(32, 37, 34, 0.14);
+  --table-shadow-furniture: 0 9px 24px rgba(32, 37, 34, 0.18);
+}
+
+.page {
+  min-height: 100vh;
+  color: var(--table-ink);
+  background: var(--table-cream);
+  font-family: Montserrat, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  padding: 20px clamp(18px, 3vw, 46px) 28px;
+  position: relative;
+  overflow: hidden;
+}
+
+.paperTexture {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: .13;
+  background-image: url('/assets/arc/texture-cream-paper.webp');
+  background-size: 720px auto;
+  mix-blend-mode: multiply;
+}
+
+.header {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  max-width: 1540px;
+  margin: 0 auto 18px;
+}
+
+.brandLockup { display: flex; align-items: center; gap: 14px; }
+.divider { width: 1px; height: 38px; background: rgba(23, 38, 42, .34); }
+.tableWord { letter-spacing: .24em; font-size: 18px; font-weight: 700; color: var(--table-pine); }
+.context { font-size: 12px; letter-spacing: .14em; font-weight: 700; }
+.context span { opacity: .35; margin: 0 8px; }
+
+.teacherStage,
+.studentStage {
+  position: relative;
+  max-width: 1540px;
+  margin: 0 auto;
+  min-height: calc(100vh - 118px);
+}
+
+.lessonSurface,
+.studentStage {
+  background: rgba(255, 252, 246, .92);
+  border: 1px solid rgba(23, 38, 42, .14);
+  box-shadow: var(--table-shadow-surface);
+}
+
+.lessonSurface {
+  position: relative;
+  min-height: 680px;
+  border-radius: 18px;
+  padding: 34px 34px 24px 96px;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 260px;
+  grid-template-rows: auto auto 1fr auto;
+  gap: 22px 26px;
+}
+
+.arcCrop {
+  position: absolute;
+  left: -130px;
+  top: 82px;
+  width: 260px;
+  height: 360px;
+  border-radius: 0 180px 180px 0;
+  background: var(--table-ochre) url('/assets/arc/texture-mustard-paper.webp') center/cover;
+  box-shadow: inset -1px 0 rgba(23, 38, 42, .08);
+  opacity: .97;
+}
+
+.lessonHeader { grid-column: 1; max-width: 760px; padding-top: 8px; }
+.eyebrow { display: block; font-size: 11px; letter-spacing: .22em; font-weight: 800; margin-bottom: 10px; }
+.lessonHeader h1 { margin: 0 0 10px; font-size: clamp(38px, 4.2vw, 72px); line-height: .96; color: var(--table-pine); letter-spacing: -.045em; }
+.lessonHeader p, .studentContent p { margin: 0; font-family: Georgia, serif; font-size: 20px; line-height: 1.5; max-width: 720px; }
+
+.timerBlock { grid-column: 1; display: flex; align-items: center; gap: 22px; }
+.timer { font-size: clamp(72px, 8vw, 128px); line-height: .86; font-weight: 800; letter-spacing: -.07em; color: var(--table-pine); }
+.pauseButton {
+  width: 58px; height: 58px; border-radius: 50%; border: 0; background: #fffdf7; color: var(--table-pine);
+  box-shadow: var(--table-shadow-object); font-size: 20px; cursor: pointer;
+}
+.pauseButton:focus-visible, .furnitureTab:focus-visible, .boardButton:focus-visible, .endButton:focus-visible, .teacherReturn:focus-visible, .drawer button:focus-visible {
+  outline: 3px solid var(--table-slate); outline-offset: 3px;
+}
+
+.progress, .studentProgress { height: 14px; border-radius: 99px; background: #dfdbd2; overflow: hidden; }
+.progress { grid-column: 1; max-width: 640px; margin-top: -8px; }
+.progress span, .studentProgress span { display: block; width: 37%; height: 100%; border-radius: inherit; background: var(--table-pine); }
+
+.flow {
+  grid-column: 1 / -1;
+  align-self: end;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  background: rgba(246, 239, 225, .55);
+  border-top: 1px solid rgba(23, 38, 42, .09);
+  border-bottom: 1px solid rgba(23, 38, 42, .09);
+  padding: 12px 4px;
+}
+.flowItem { display: flex; gap: 10px; align-items: center; padding: 10px 12px; border-radius: 12px; }
+.currentFlow { background: rgba(79,111,140,.10); box-shadow: inset 0 0 0 1px rgba(79,111,140,.16); }
+.flowNumber { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: rgba(24,58,50,.08); font-weight: 800; }
+.flowItem strong, .flowItem small { display: block; }
+.flowItem strong { font-size: 13px; }
+.flowItem small { margin-top: 3px; font-size: 11px; opacity: .72; }
+
+.lessonFooter { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 12px; }
+.lessonFooter > div { display: grid; grid-template-columns: 34px 1fr; column-gap: 10px; align-items: center; }
+.lessonFooter strong, .lessonFooter small { grid-column: 2; display: block; }
+.lessonFooter small { opacity: .7; }
+.unitMagnet { grid-row: 1 / span 2; width: 30px; height: 30px; border-radius: 50%; background: var(--table-ochre) url('/assets/arc/texture-mustard-paper.webp') center/cover; box-shadow: var(--table-shadow-object); }
+.boardButton, .endButton, .primaryAction {
+  border: 0; border-radius: 12px; padding: 13px 18px; font: inherit; font-weight: 700; cursor: pointer;
+}
+.boardButton, .primaryAction { background: var(--table-pine); color: #fff; }
+.endButton { background: transparent; color: var(--table-ink); border: 1px solid rgba(23,38,42,.18); }
+
+.furnitureTab {
+  position: absolute; left: -6px; z-index: 4; width: 78px; min-height: 94px; border: 0; padding: 12px 8px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+  font: inherit; font-size: 12px; font-weight: 800; color: var(--table-ink); cursor: pointer;
+  background: #eee8dc url('/assets/arc/settings-folder-cream.webp') center/cover;
+  box-shadow: var(--table-shadow-furniture); border-radius: 0 12px 12px 0;
+}
+.furnitureTab:nth-of-type(1) { top: 58px; background-color: var(--table-ochre); }
+.furnitureTab:nth-of-type(2) { top: 162px; }
+.furnitureTab:nth-of-type(3) { top: 266px; }
+.furnitureTab > span { font-size: 18px; line-height: 1; }
+.tabActive { transform: translateX(6px); }
+
+.drawer {
+  position: absolute; left: 72px; top: 54px; z-index: 3; width: min(340px, 32vw); min-height: 300px;
+  transform: translateX(-115%); opacity: 0; pointer-events: none;
+  transition: transform .2s ease, opacity .16s ease;
+  background: rgba(255,252,246,.98); border: 1px solid rgba(23,38,42,.13); border-radius: 0 16px 16px 0;
+  box-shadow: var(--table-shadow-furniture); padding: 24px;
+}
+.drawerOpen { transform: translateX(0); opacity: 1; pointer-events: auto; }
+.drawerContent h2 { margin: 0 0 12px; font-size: 28px; color: var(--table-pine); }
+.muted { color: rgba(23,38,42,.7); line-height: 1.5; }
+.toolGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.toolGrid button { min-height: 70px; border: 1px solid rgba(23,38,42,.12); background: #fbf8f1; border-radius: 12px; font: inherit; font-weight: 700; cursor: pointer; }
+.passCard { display: flex; justify-content: space-between; gap: 12px; padding: 14px; background: #fbf8f1; border-radius: 12px; margin: 12px 0 18px; }
+.passCard span { font-size: 12px; opacity: .68; }
+
+.studentStage {
+  border-radius: 18px;
+  min-height: calc(100vh - 118px);
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  padding: 52px 54px 26px;
+}
+.teacherReturn { position: absolute; top: 16px; left: 18px; z-index: 4; border: 0; background: transparent; font: inherit; font-size: 12px; font-weight: 800; opacity: .18; cursor: pointer; }
+.studentDecorLeft, .studentDecorRight { position: absolute; pointer-events: none; opacity: .92; }
+.studentDecorLeft { width: 310px; height: 520px; border-radius: 0 260px 260px 0; background: var(--table-slate) url('/assets/arc/texture-blue-paper.webp') center/cover; left: -170px; top: 120px; }
+.studentDecorRight { width: 270px; height: 510px; border-radius: 250px 0 0 250px; background: var(--table-ochre) url('/assets/arc/texture-mustard-paper.webp') center/cover; right: -145px; top: 74px; }
+.studentContent { position: relative; z-index: 2; align-self: center; justify-self: center; text-align: center; max-width: 920px; }
+.studentContent h1 { margin: 0 0 14px; font-size: clamp(68px, 8.5vw, 150px); line-height: .9; letter-spacing: -.055em; color: var(--table-pine); }
+.studentContent p { margin-inline: auto; font-size: clamp(22px, 2vw, 34px); }
+.studentTimer { margin-top: 34px; font-size: clamp(92px, 11vw, 184px); font-weight: 800; letter-spacing: -.07em; line-height: .9; color: var(--table-pine); }
+.studentProgress { width: min(620px, 70vw); margin: 28px auto 0; height: 18px; }
+.studentFooter { position: relative; z-index: 2; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.studentFooter > div { min-height: 100px; border-radius: 14px; padding: 18px 20px; background: rgba(255,252,246,.86); border: 1px solid rgba(23,38,42,.08); box-shadow: 0 3px 10px rgba(32,37,34,.08); }
+.studentFooter strong { display: block; margin-top: 5px; font-size: clamp(24px, 2.6vw, 42px); color: var(--table-pine); }
+
+@media (max-width: 980px) {
+  .page { padding-inline: 14px; }
+  .header { padding-left: 70px; }
+  .context { display: none; }
+  .lessonSurface { padding: 26px 20px 20px 76px; grid-template-columns: 1fr; }
+  .lessonHeader, .timerBlock, .progress { grid-column: 1; }
+  .flow { grid-template-columns: 1fr; }
+  .flowItem { min-height: 48px; }
+  .lessonFooter { grid-template-columns: 1fr; }
+  .drawer { width: calc(100% - 95px); }
+  .studentStage { padding: 70px 24px 20px; }
+  .studentFooter { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drawer { transition: none; }
+}
+
+:global([data-high-contrast="true"]) .page { --table-pine: #062b23; --table-ink: #061518; }
+:global([data-reduced-motion="true"]) .drawer { transition: none; }
