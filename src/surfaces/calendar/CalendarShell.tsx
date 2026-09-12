@@ -130,7 +130,10 @@ export function CalendarShell({ onEdit, onCreate }: ViewProps) {
             <div className={styles.footerReceipt}>
               <Toast />
             </div>
-            <span>Arc {'\u00b7'} teacher planner</span>
+            <span>
+              Arc {'\u00b7'} teacher planner
+              {import.meta.env.VITE_ARC_SHA ? ` ${'\u00b7'} ${import.meta.env.VITE_ARC_SHA}` : ''}
+            </span>
           </footer>
         </div>
       </div>
