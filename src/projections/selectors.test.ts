@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { PlacementView } from './selectors';
-import { nestLessonsInUnits } from './selectors';
+import { createInitialState } from '../domain/seed';
+import { getNextUp, nestLessonsInUnits } from './selectors';
 
 function view(partial: Partial<PlacementView> & Pick<PlacementView, 'placementId' | 'objectType' | 'objectId'>): PlacementView {
   return {
@@ -58,5 +59,15 @@ describe('nestLessonsInUnits', () => {
     });
     expect(nestLessonsInUnits([unitA], [orphan]).loose).toHaveLength(1);
     expect(nestLessonsInUnits([unitA], [orphan]).groups[0].lessons).toHaveLength(0);
+  });
+});
+
+describe('getNextUp', () => {
+  it('points at the next placed lesson after the day, not a dashboard card', () => {
+    const domain = createInitialState();
+    const next = getNextUp(domain, '2026-09-11');
+    expect(next?.kind).toBe('upcoming');
+    expect(next?.title).toBe('Cell structure quiz');
+    expect(next?.date).toBe('2026-09-15');
   });
 });

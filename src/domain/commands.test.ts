@@ -314,8 +314,8 @@ describe('Unit magnets stay units', () => {
     state = created.next;
     const note = created.result;
     expect(state.notes[note.id].location).toBe('desk');
-    expect(state.notes[note.id].deskX).toBeDefined();
-    expect(state.notes[note.id].deskY).toBeDefined();
+    expect(state.notes[note.id].deskX).toBeLessThan(15);
+    expect(state.notes[note.id].deskY).toBeGreaterThan(40);
   });
 
   it('stows a unit in the Fridge drawer without destroying it or turning it into a task', () => {

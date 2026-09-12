@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { dayKind, dayLabel, formatFriendly } from '../../calendar/dates';
 import { PlacementChip } from '../../components/PlacementChip';
 import {
@@ -55,6 +55,20 @@ export function DayView({ onCreate }: ViewProps) {
   const createNote = useWorkspaceStore((s) => s.createNote);
   const select = useWorkspaceStore((s) => s.select);
   const [teacherDraft, setTeacherDraft] = useState('');
+  const teacherDraftRef = useRef('');
+
+  function writeTeacherDraft(value: string) {
+    teacherDraftRef.current = value;
+    setTeacherDraft(value);
+  }
+
+  function keepTeacherNote() {
+    const title = teacherDraftRef.current.trim();
+    if (!title) return;
+    teacherDraftRef.current = '';
+    setTeacherDraft('');
+    createNote({ title, location: 'calendar', date: anchor });
+  }
 
   const kind = dayKind(domain.calendar, anchor);
   const label = dayLabel(domain.calendar, anchor);
@@ -184,31 +198,37 @@ export function DayView({ onCreate }: ViewProps) {
       <aside className={styles.side}>
         <section className={styles.teacherNotes} aria-label="Teacher notes">
           <h3>Teacher notes</h3>
-          {notes.map((n) => (
-            <PlacementChip key={n.placementId} view={n} date={anchor} density="page" />
-          ))}
-          <form
-            className={styles.noteForm}
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (!teacherDraft.trim()) return;
-              createNote({ title: teacherDraft.trim(), location: 'calendar', date: anchor });
-              setTeacherDraft('');
-            }}
-          >
-            <label className="arc-visually-hidden" htmlFor="teacher-note">
-              Add a teacher note
-            </label>
-            <textarea
-              id="teacher-note"
-              value={teacherDraft}
-              onChange={(e) => setTeacherDraft(e.target.value)}
-              placeholder={'Write on this page\u2026'}
-            />
-            <button type="submit" className={styles.saveNote}>
-              Save note
-            </button>
-          </form>
+          <div className={styles.ruled}>
+            {notes.map((n) => (
+              <PlacementChip key={n.placementId} view={n} date={anchor} density="page" />
+            ))}
+            <form
+              className={styles.noteForm}
+              onSubmit={(e) => {
+                e.preventDefault();
+                keepTeacherNote();
+              }}
+            >
+              <label className="arc-visually-hidden" htmlFor="teacher-note">
+                Write a teacher note
+              </label>
+              <textarea
+                id="teacher-note"
+                value={teacherDraft}
+                onChange={(e) => writeTeacherDraft(e.target.value)}
+                onBlur={keepTeacherNote}
+                onKeyDown={(e) => {
+                  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+                    e.preventDefault();
+                    keepTeacherNote();
+                    e.currentTarget.blur();
+                  }
+                }}
+                placeholder={'Write on this page\u2026'}
+                rows={3}
+              />
+            </form>
+          </div>
         </section>
 
         <section className={styles.nextUp} aria-label="Next up">

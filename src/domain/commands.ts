@@ -344,11 +344,11 @@ export function createNote(
 }
 
 const DESK_SPOTS = [
-  { x: 7, y: 24, r: -6 },
-  { x: 78, y: 16, r: 5 },
-  { x: 76, y: 58, r: -4 },
-  { x: 9, y: 62, r: 7 },
-  { x: 82, y: 38, r: -8 },
+  { x: 6, y: 48, r: -6 },
+  { x: 87, y: 64, r: 5 },
+  { x: 85, y: 78, r: -4 },
+  { x: 8, y: 72, r: 7 },
+  { x: 86, y: 42, r: -8 },
 ];
 
 function scatterDeskNote(note: Note, draft: D) {

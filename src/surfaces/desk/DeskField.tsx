@@ -49,6 +49,13 @@ function IdeaPad() {
   );
 }
 
+function gutterTop(deskX?: number, deskY?: number) {
+  const right = (deskX ?? 8) > 50;
+  const y = deskY ?? (right ? 54 : 52);
+  const min = right ? 40 : 46;
+  return Math.min(68, Math.max(min, y));
+}
+
 function DeskPostIts() {
   const domain = useWorkspaceStore((s) => s.domain);
   const select = useWorkspaceStore((s) => s.select);
@@ -63,7 +70,7 @@ function DeskPostIts() {
           className={styles.postIt}
           data-side={(note.deskX ?? 8) > 50 ? 'right' : 'left'}
           style={{
-            top: `${note.deskY ?? 30}%`,
+            top: `${gutterTop(note.deskX, note.deskY)}%`,
             transform: `rotate(${note.deskRotate ?? 0}deg)`,
           }}
           draggable
