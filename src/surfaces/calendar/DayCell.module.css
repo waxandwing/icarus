@@ -14,13 +14,12 @@
   min-height: 96px;
 }
 
-.cell[data-kind='weekend'],
-.cell[data-kind='no-school'] {
-  background: repeating-linear-gradient(
-    135deg,
-    transparent 0 8px,
-    rgba(44, 46, 46, 0.04) 8px 16px
-  );
+.cell[data-kind='weekend']:not([data-today='true']) {
+  background: var(--arc-weekend-wash);
+}
+
+.cell[data-kind='no-school']:not([data-today='true']) {
+  background: var(--arc-noshool-wash);
 }
 
 .cell[data-today='true'] .dateNumber {

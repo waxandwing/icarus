@@ -22,6 +22,7 @@ import { MonthView } from './MonthView';
 import { ViewSwitcher } from './ViewSwitcher';
 import { WeekView } from './WeekView';
 import { YearView } from './YearView';
+import { ClassOverview } from './ClassOverview';
 import { Toast } from '../../components/Toast';
 import { startMyDay } from '../../table/launch';
 import styles from './CalendarShell.module.css';
@@ -110,13 +111,17 @@ export function CalendarShell({ onEdit, onCreate }: ViewProps) {
                 <ViewSwitcher />
                 <div className={styles.navRow}>
                   <CalendarNav />
-                  <button
-                    type="button"
+                  <a
+                    href="/table"
                     className={styles.startDayButton}
-                    onClick={() => startMyDay()}
+                    title="Teacher table in this window; student board in a second window"
+                    onClick={(event) => {
+                      event.preventDefault();
+                      void startMyDay();
+                    }}
                   >
                     Start my day
-                  </button>
+                  </a>
                   <button
                     type="button"
                     className={styles.focusButton}
@@ -148,6 +153,7 @@ export function CalendarShell({ onEdit, onCreate }: ViewProps) {
           </div>
 
           {!liveOpen && <SelectionToolbar onEdit={onEdit} />}
+          {!liveOpen && <ClassOverview />}
 
           <footer className={styles.spreadFooter}>
             <div className={styles.footerReceipt}>

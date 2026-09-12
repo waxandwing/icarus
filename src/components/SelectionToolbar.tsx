@@ -82,7 +82,7 @@ export function SelectionToolbar({ onEdit }: { onEdit: (type: string, id: string
         </button>
       )}
 
-      {placement && !placement.fixed && placement.storage !== 'drawer' && (
+      {placement && !placement.fixed && placement.storage !== 'drawer' && placement.storage !== 'desk' && (
         <label className={styles.button} style={{ display: 'inline-flex', gap: 6, alignItems: 'center' }}>
           Move to
           <input
@@ -145,7 +145,7 @@ export function SelectionToolbar({ onEdit }: { onEdit: (type: string, id: string
         </>
       )}
 
-      {placement && placement.storage !== 'drawer' && (
+      {placement && placement.storage !== 'drawer' && placement.storage !== 'desk' && (
         <button type="button" className={styles.button} onClick={() => unplace(placement.id)}>
           Unplace
         </button>

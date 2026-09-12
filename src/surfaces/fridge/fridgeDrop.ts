@@ -1,15 +1,17 @@
 /** Drop a unit on the Fridge: it goes in the drawer and stays a unit. */
 
 import type { PaletteToken, WorkspaceDomainState } from '../../domain/types';
+import { readUnplacedDrag } from '../drag/unplacedPayload';
 
 export function applyFridgeDrop(
   e: React.DragEvent,
   ctx: {
     domain: WorkspaceDomainState;
     stowUnitInDrawer: (unitId: string) => void;
-    createUnitInDrawer: (colorToken: PaletteToken) => void;
+    createUnitInDrawer: (colorToken: PaletteToken, title?: string) => void;
     moveNoteToFridge: (noteId: string) => void;
     moveMagnetToFridge: (magnetId: string) => void;
+    stowLessonInDrawer?: (lessonId: string) => void;
   },
 ) {
   e.preventDefault();
@@ -28,30 +30,33 @@ export function applyFridgeDrop(
     }
     if (placement?.objectType === 'magnet') {
       ctx.moveMagnetToFridge(placement.objectId);
+      return;
+    }
+    if (placement?.objectType === 'lesson') {
+      ctx.stowLessonInDrawer?.(placement.objectId);
     }
     return;
   }
 
-  const unplaced = e.dataTransfer.getData('text/arc-unplaced');
-  if (!unplaced) return;
-  try {
-    const payload = JSON.parse(unplaced) as { type: string; id?: string; colorToken?: string };
-    if (payload.type === 'unit' && payload.id) {
-      ctx.stowUnitInDrawer(payload.id);
-      return;
-    }
-    if (payload.type === 'unit-blank' && payload.colorToken) {
-      ctx.createUnitInDrawer(payload.colorToken as PaletteToken);
-      return;
-    }
-    if (payload.type === 'note' && payload.id) {
-      ctx.moveNoteToFridge(payload.id);
-      return;
-    }
-    if (payload.type === 'magnet' && payload.id) {
-      ctx.moveMagnetToFridge(payload.id);
-    }
-  } catch {
-    // ignore malformed drag payloads
+  const payload = readUnplacedDrag(e);
+  if (!payload) return;
+  if (payload.type === 'unit' && payload.id) {
+    ctx.stowUnitInDrawer(payload.id);
+    return;
+  }
+  if (payload.type === 'unit-blank' && payload.colorToken) {
+    ctx.createUnitInDrawer(payload.colorToken as PaletteToken, payload.title);
+    return;
+  }
+  if (payload.type === 'note' && payload.id) {
+    ctx.moveNoteToFridge(payload.id);
+    return;
+  }
+  if (payload.type === 'magnet' && payload.id) {
+    ctx.moveMagnetToFridge(payload.id);
+    return;
+  }
+  if (payload.type === 'lesson' && payload.id) {
+    ctx.stowLessonInDrawer?.(payload.id);
   }
 }

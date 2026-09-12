@@ -4,6 +4,7 @@ import { addCalendarDays, formatFriendly, formatYearSpan } from '../../calendar/
 import { getSectionsForCourse } from '../../projections/selectors';
 import { useOsDisplayPrefs } from '../../app/useOsDisplayPrefs';
 import { useWorkspaceStore } from '../../state/store';
+import { LessonStructureEditor } from './LessonStructureEditor';
 import formStyles from '../../components/Form.module.css';
 import styles from './SettingsPanel.module.css';
 
@@ -74,6 +75,8 @@ export function SettingsPanel() {
   const updateSettings = useWorkspaceStore((s) => s.updateSettings);
   const createCourse = useWorkspaceStore((s) => s.createCourse);
   const createSection = useWorkspaceStore((s) => s.createSection);
+  const editCourse = useWorkspaceStore((s) => s.editCourse);
+  const editSection = useWorkspaceStore((s) => s.editSection);
   const setCalendarDay = useWorkspaceStore((s) => s.setCalendarDay);
   const resetWorkspace = useWorkspaceStore((s) => s.resetWorkspace);
 
@@ -106,7 +109,7 @@ export function SettingsPanel() {
         <div className={styles.paper}>
           <h2 className={styles.heading}>Settings</h2>
 
-          <details className={styles.fold} open>
+          <details className={styles.fold}>
             <summary>Calendar</summary>
             <div className={styles.nest}>
               <details className={styles.fold}>
@@ -120,7 +123,7 @@ export function SettingsPanel() {
                 </p>
               </details>
 
-              <details className={styles.fold} open>
+              <details className={styles.fold}>
                 <summary>Week</summary>
                 <div className={styles.nest}>
                   <PaperToggle
@@ -196,20 +199,35 @@ export function SettingsPanel() {
             </div>
           </details>
 
-          <details className={styles.fold} open>
+          <details className={styles.fold}>
             <summary>Courses</summary>
             <div className={styles.nest}>
-              {courses.map((course, index) => (
-                <details key={course.id} className={styles.fold} open={index === 0}>
+              {courses.map((course) => (
+                <details key={course.id} className={styles.fold}>
                   <summary className={`arc-token-${course.colorToken} ${styles.courseSummary}`}>
                     {course.name}
                   </summary>
                   <div className={`arc-token-${course.colorToken} ${styles.sections}`}>
+                    <LessonStructureEditor
+                      parts={course.lessonStructure ?? []}
+                      frame={course.lessonFrame ?? 'none'}
+                      onParts={(lessonStructure) => editCourse(course.id, { lessonStructure })}
+                      onFrame={(lessonFrame) => editCourse(course.id, { lessonFrame })}
+                    />
                     <p className={styles.sectionsLabel}>Sections</p>
                     {getSectionsForCourse(domain, course.id).map((section) => (
-                      <div key={section.id} className={styles.leaf}>
-                        {section.name}
-                      </div>
+                      <details key={section.id} className={styles.fold}>
+                        <summary className={styles.leaf}>{section.name}</summary>
+                        <div className={styles.nest}>
+                          <LessonStructureEditor
+                            parts={section.lessonStructure ?? []}
+                            frame={section.lessonFrame ?? course.lessonFrame ?? 'none'}
+                            onParts={(lessonStructure) => editSection(section.id, { lessonStructure })}
+                            onFrame={(lessonFrame) => editSection(section.id, { lessonFrame })}
+                            inheritHint="Leave parts empty to use the course recipe above (Bell work, Demo, …)."
+                          />
+                        </div>
+                      </details>
                     ))}
                     <form
                       className={styles.inlineForm}
@@ -260,7 +278,7 @@ export function SettingsPanel() {
             </div>
           </details>
 
-          <details className={styles.fold} open>
+          <details className={styles.fold}>
             <summary>View options</summary>
             <div className={styles.nest}>
               <p className={styles.help}>

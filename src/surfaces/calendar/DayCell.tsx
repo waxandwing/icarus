@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { dayKind, dayLabel, isToday } from '../../calendar/dates';
 import { AddMark } from '../../assets/Icons';
 import { PlacementChip } from '../../components/PlacementChip';
-import { getPlacementsForDate, nestLessonsInUnits } from '../../projections/selectors';
+import { getPlacementsForDate, nestLessonsInUnits, preferCoveringUnits } from '../../projections/selectors';
 import { useWorkspaceStore } from '../../state/store';
 import { applyCalendarDrop } from './calendarDrop';
 import styles from './DayCell.module.css';
@@ -24,13 +24,18 @@ export function DayCell({ date, dimmed, compact, onCreate, cellRef, onFocusDate,
   const placeNoteOnCalendar = useWorkspaceStore((s) => s.placeNoteOnCalendar);
   const placeUnitOnDate = useWorkspaceStore((s) => s.placeUnitOnDate);
   const createUnitFromMagnet = useWorkspaceStore((s) => s.createUnitFromMagnet);
+  const placeMagnetOnCalendar = useWorkspaceStore((s) => s.placeMagnetOnCalendar);
+  const placeLessonOnDate = useWorkspaceStore((s) => s.placeLessonOnDate);
   const [dragOver, setDragOver] = useState(false);
 
   const kind = dayKind(domain.calendar, date);
   const label = dayLabel(domain.calendar, date);
   const today = isToday(date);
   const placements = getPlacementsForDate(domain, date);
-  const units = placements.filter((p) => p.objectType === 'unit');
+  const units = preferCoveringUnits(
+    placements.filter((p) => p.objectType === 'unit'),
+    date,
+  );
   const lessons = placements.filter((p) => p.objectType === 'lesson');
   const scraps = placements.filter((p) => p.objectType === 'note' || p.objectType === 'magnet');
   const { groups, loose } = nestLessonsInUnits(units, lessons);
@@ -42,6 +47,7 @@ export function DayCell({ date, dimmed, compact, onCreate, cellRef, onFocusDate,
       className={styles.cell}
       data-kind={kind}
       data-today={today}
+      data-date={date}
       data-dimmed={dimmed}
       data-compact={compact}
       data-dragover={dragOver}
@@ -57,7 +63,14 @@ export function DayCell({ date, dimmed, compact, onCreate, cellRef, onFocusDate,
       onDragLeave={() => setDragOver(false)}
       onDrop={(e) => {
         setDragOver(false);
-        applyCalendarDrop(e, date, { movePlacement, placeNoteOnCalendar, placeUnitOnDate, createUnitFromMagnet });
+        applyCalendarDrop(e, date, {
+          movePlacement,
+          placeNoteOnCalendar,
+          placeUnitOnDate,
+          createUnitFromMagnet,
+          placeMagnetOnCalendar,
+          placeLessonOnDate,
+        });
       }}
     >
       <div className={styles.dateRow}>

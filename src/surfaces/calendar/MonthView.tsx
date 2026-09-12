@@ -1,9 +1,11 @@
 import { useMemo, useRef, useState } from 'react';
 import { dayKind, dayLabel, fromISODate, getMonthGrid, isToday, rangeOverlapColumns } from '../../calendar/dates';
 import { PlacementChip, UnitBar } from '../../components/PlacementChip';
+import { UnitLessonOrg } from '../../components/UnitLessonOrg';
 import {
   getPlacementsIntersectingRange,
   nestLessonsInUnits,
+  preferCoveringUnits,
 } from '../../projections/selectors';
 import { useWorkspaceStore } from '../../state/store';
 import { applyCalendarDrop } from './calendarDrop';
@@ -22,6 +24,9 @@ export function MonthView({ onCreate }: ViewProps) {
   const placeNoteOnCalendar = useWorkspaceStore((s) => s.placeNoteOnCalendar);
   const placeUnitOnDate = useWorkspaceStore((s) => s.placeUnitOnDate);
   const createUnitFromMagnet = useWorkspaceStore((s) => s.createUnitFromMagnet);
+  const placeMagnetOnCalendar = useWorkspaceStore((s) => s.placeMagnetOnCalendar);
+  const placeLessonOnDate = useWorkspaceStore((s) => s.placeLessonOnDate);
+  const organizingUnitId = useWorkspaceStore((s) => s.ui.organizingUnitId);
 
   const weeks = useMemo(
     () => getMonthGrid(anchor, weekStartsOn, showWeekends),
@@ -34,7 +39,14 @@ export function MonthView({ onCreate }: ViewProps) {
   );
   const cellRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const [dragOver, setDragOver] = useState<string | null>(null);
-  const dropActions = { movePlacement, placeNoteOnCalendar, placeUnitOnDate, createUnitFromMagnet };
+  const dropActions = {
+    movePlacement,
+    placeNoteOnCalendar,
+    placeUnitOnDate,
+    createUnitFromMagnet,
+    placeMagnetOnCalendar,
+    placeLessonOnDate,
+  };
 
   function moveFocus(date: string | undefined) {
     if (!date) return;
@@ -76,7 +88,10 @@ export function MonthView({ onCreate }: ViewProps) {
           const start = days[0];
           const end = days[days.length - 1];
           const placements = start && end ? getPlacementsIntersectingRange(domain, start, end) : [];
-          const units = placements.filter((p) => p.objectType === 'unit');
+          const units = preferCoveringUnits(
+            placements.filter((p) => p.objectType === 'unit'),
+            anchor,
+          );
           const lessons = placements.filter((p) => p.objectType === 'lesson');
           const scraps = placements.filter((p) => p.objectType === 'note' || p.objectType === 'magnet');
           const { groups, loose } = nestLessonsInUnits(units, lessons);
@@ -101,6 +116,7 @@ export function MonthView({ onCreate }: ViewProps) {
                     className={styles.dateHead}
                     data-kind={kind}
                     data-today={today}
+                    data-date={cell.date}
                     data-important={important}
                     data-dimmed={!cell.inCurrentMonth}
                     data-dragover={dragOver === cell.date}
@@ -136,28 +152,33 @@ export function MonthView({ onCreate }: ViewProps) {
                 );
               })}
 
-              {groups.map(({ unit, lessons: kids }) => {
-                const span = rangeOverlapColumns(days, unit.startDate, unit.endDate ?? unit.startDate);
-                if (!span) return null;
-                return (
-                  <div
-                    key={unit.placementId}
-                    className={styles.spanTrack}
-                    style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}
-                  >
-                    <div
-                      className={styles.spanSlot}
-                      style={{ gridColumn: `${span.from + 1} / ${span.to + 2}` }}
-                    >
-                      <UnitBar
-                        view={unit}
-                        showTitle
-                        density="compact"
-                        continueLeft={unit.startDate < days[0]}
-                        continueRight={(unit.endDate ?? unit.startDate) > days[days.length - 1]}
-                      />
-                    </div>
-                    {kids.map((lesson) => {
+              {groups.length > 0 && (
+                <div
+                  className={styles.spanTrack}
+                  style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}
+                >
+                  {groups.map(({ unit }) => {
+                    const span = rangeOverlapColumns(days, unit.startDate, unit.endDate ?? unit.startDate);
+                    if (!span) return null;
+                    return (
+                      <div
+                        key={unit.placementId}
+                        className={`arc-token-${unit.colorToken} ${styles.spanSlot}`}
+                        style={{ gridColumn: `${span.from + 1} / ${span.to + 2}` }}
+                      >
+                        <UnitBar
+                          view={unit}
+                          showTitle
+                          density="compact"
+                          continueLeft={unit.startDate < days[0]}
+                          continueRight={(unit.endDate ?? unit.startDate) > days[days.length - 1]}
+                        />
+                        {organizingUnitId === unit.objectId && <UnitLessonOrg unitId={unit.objectId} />}
+                      </div>
+                    );
+                  })}
+                  {groups.flatMap(({ lessons: kids }) =>
+                    kids.map((lesson) => {
                       const lessonSpan = rangeOverlapColumns(
                         days,
                         lesson.startDate,
@@ -173,10 +194,10 @@ export function MonthView({ onCreate }: ViewProps) {
                           <PlacementChip view={lesson} date={lesson.startDate} density="compact" />
                         </div>
                       );
-                    })}
-                  </div>
-                );
-              })}
+                    }),
+                  )}
+                </div>
+              )}
 
               {(loose.length > 0 || scraps.length > 0) && (
                 <div

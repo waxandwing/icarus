@@ -36,12 +36,34 @@ export interface SchoolCalendar {
   teacherOutDates: Record<ISODate, TeacherOutReason>;
 }
 
+/** How this class’s period is usually sequenced. Empty = no refill. Not a UbD/Marzano CMS. */
+export type LessonFrame = 'none' | 'ubd' | 'marzano';
+
+export type LessonPartKind = 'block' | 'demo' | 'cleanup';
+
+export interface LessonPartDefault {
+  title: string;
+  minutes: number;
+  kind?: LessonPartKind;
+  /** Default prompt (e.g. Bell work → “Daily doodle”). Refills when a lesson has no ## / numbered parts. */
+  prompt?: string;
+}
+
+/** One day’s scrap for a section — not scores, not a gradebook. */
+export interface SectionDayMark {
+  complete: boolean;
+  note: string;
+}
+
 export interface Course {
   id: string;
   name: string;
   colorToken: PaletteToken;
   createdAt: number;
   archived?: boolean;
+  /** Ordered period recipe. Sections inherit unless they set their own non-empty list. */
+  lessonStructure: LessonPartDefault[];
+  lessonFrame: LessonFrame;
 }
 
 export interface Section {
@@ -50,6 +72,10 @@ export interface Section {
   name: string;
   createdAt: number;
   archived?: boolean;
+  /** Non-empty overrides the course recipe. Empty inherits. */
+  lessonStructure: LessonPartDefault[];
+  lessonFrame?: LessonFrame;
+  dayMarks: Record<ISODate, SectionDayMark>;
 }
 
 export type UnitLocation = 'calendar' | 'desk' | 'drawer';
@@ -117,7 +143,7 @@ export interface Magnet {
 
 export type PlaceableType = 'unit' | 'lesson' | 'note' | 'magnet';
 
-export type PlacementStorage = 'calendar' | 'drawer';
+export type PlacementStorage = 'calendar' | 'drawer' | 'desk';
 
 export interface Placement {
   id: string;

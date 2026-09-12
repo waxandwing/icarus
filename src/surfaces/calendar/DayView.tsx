@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { dayKind, dayLabel, formatFriendly } from '../../calendar/dates';
 import { PlacementChip } from '../../components/PlacementChip';
+import { UnitLessonOrg } from '../../components/UnitLessonOrg';
 import {
   deliveryForSection,
   getCourseUnitsIntersecting,
@@ -9,6 +10,7 @@ import {
   getOrderedSections,
   getSectionLessonsForDate,
   nestLessonsInUnits,
+  preferCoveringUnits,
 } from '../../projections/selectors';
 import { useWorkspaceStore } from '../../state/store';
 import { startMyDay } from '../../table/launch';
@@ -55,6 +57,8 @@ export function DayView({ onCreate }: ViewProps) {
   const openShiftDialog = useWorkspaceStore((s) => s.openShiftDialog);
   const createNote = useWorkspaceStore((s) => s.createNote);
   const select = useWorkspaceStore((s) => s.select);
+  const organizingUnitId = useWorkspaceStore((s) => s.ui.organizingUnitId);
+  const openClassOverview = useWorkspaceStore((s) => s.openClassOverview);
   const [teacherDraft, setTeacherDraft] = useState('');
 
   const kind = dayKind(domain.calendar, anchor);
@@ -68,15 +72,23 @@ export function DayView({ onCreate }: ViewProps) {
     <div className={styles.layout}>
       {instructional && (
         <div className={styles.startDayRow}>
-          <button type="button" className={styles.startDay} onClick={() => startMyDay()}>
+          <a
+            href="/table"
+            className={styles.startDay}
+            title="Teacher table in this window; student board in a second window"
+            onClick={(event) => {
+              event.preventDefault();
+              void startMyDay();
+            }}
+          >
             Start my day
-          </button>
-          <p className={styles.startDayHint}>Opens the teacher table. A second window is the student board.</p>
+          </a>
+          <p className={styles.startDayHint}>This window becomes the teacher table. A second window opens for the smartboard student board.</p>
         </div>
       )}
       <div className={styles.classes}>
         {kind !== 'instructional' && (
-          <div className={styles.dayKindBanner}>
+          <div className={styles.dayKindBanner} data-kind={kind}>
             {kind === 'weekend' && 'Weekend — no scheduled instruction.'}
             {kind === 'no-school' && `No school${label ? `: ${label}` : ''}.`}
             {kind === 'early-release' && `Early release${label ? `: ${label}` : ''}.`}
@@ -89,7 +101,7 @@ export function DayView({ onCreate }: ViewProps) {
 
         {sections.map((section) => {
           const course = domain.courses[section.courseId];
-          const units = getCourseUnitsIntersecting(domain, section.courseId, anchor, anchor);
+          const units = preferCoveringUnits(getCourseUnitsIntersecting(domain, section.courseId, anchor, anchor), anchor);
           const lessons = getSectionLessonsForDate(domain, section.id, anchor);
           const { groups, loose } = nestLessonsInUnits(units, lessons);
           const inProgress = lessons.filter(
@@ -103,8 +115,16 @@ export function DayView({ onCreate }: ViewProps) {
               className={`arc-token-${course?.colorToken ?? 'charcoal'} ${styles.classCard}`}
             >
               <header className={styles.classHead}>
-                <h3>{course?.name ?? 'Course'}</h3>
-                <p>{section.name}</p>
+                <button
+                  type="button"
+                  className={styles.classOpen}
+                  onClick={() => openClassOverview(section.id)}
+                  onDoubleClick={() => openClassOverview(section.id)}
+                  aria-label={`Open class overview for ${course?.name ?? 'course'}, ${section.name}`}
+                >
+                  <h3>{course?.name ?? 'Course'}</h3>
+                  <p>{section.name}</p>
+                </button>
               </header>
 
               {headline &&
@@ -126,6 +146,7 @@ export function DayView({ onCreate }: ViewProps) {
 
               {groups.map(({ unit, lessons: kids }) => (
                 <div key={unit.placementId} className={styles.unitNest}>
+                  {organizingUnitId === unit.objectId && <UnitLessonOrg unitId={unit.objectId} />}
                   <div className={styles.unitChildren}>
                     {kids.length === 0 ? null : (
                       kids.map((lesson) => {

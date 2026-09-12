@@ -85,8 +85,17 @@ export function EditDialog({
 
       {(lesson || note || magnet) && (
         <div className={formStyles.field}>
-          <label htmlFor="ed-body">Notes</label>
-          <textarea id="ed-body" value={body} onChange={(e) => setBody(e.target.value)} />
+          <label htmlFor="ed-body">{lesson ? 'Lesson parts' : 'Notes'}</label>
+          <textarea
+            id="ed-body"
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            placeholder={
+              lesson
+                ? 'Optional: ## Warm Up or 1. Demo — each heading becomes a table block.'
+                : undefined
+            }
+          />
         </div>
       )}
 

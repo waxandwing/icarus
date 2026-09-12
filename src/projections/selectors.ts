@@ -57,7 +57,7 @@ function resolveColor(domain: WorkspaceDomainState, type: PlaceableType, id: str
 export function getPlacementsForDate(domain: WorkspaceDomainState, date: ISODate): PlacementView[] {
   const views: PlacementView[] = [];
   for (const placement of Object.values(domain.placements)) {
-    if (placement.storage === 'drawer') continue;
+    if (placement.storage === 'drawer' || placement.storage === 'desk') continue;
     const start = placement.date;
     const end = placement.endDate ?? placement.date;
     if (compareISO(date, start) < 0 || compareISO(date, end) > 0) continue;
@@ -115,22 +115,40 @@ export function getFridgeItems(domain: WorkspaceDomainState) {
   return [...notes, ...magnets].sort((a, b) => (a.fridgeSlot ?? 0) - (b.fridgeSlot ?? 0));
 }
 
+function lessonPlacement(domain: WorkspaceDomainState, lessonId: string) {
+  return Object.values(domain.placements).find((p) => p.objectType === 'lesson' && p.objectId === lessonId);
+}
+
 export function getDrawerItems(domain: WorkspaceDomainState) {
   const notes = Object.values(domain.notes).filter((n) => n.location === 'drawer');
   const magnets = Object.values(domain.magnets).filter((m) => m.location === 'drawer');
   const units = Object.values(domain.units).filter((u) => u.location === 'drawer');
-  return [...units, ...notes, ...magnets].sort((a, b) => b.createdAt - a.createdAt);
+  const lessons = Object.values(domain.lessons).filter((lesson) => {
+    if (lesson.unitId) return false;
+    return lessonPlacement(domain, lesson.id)?.storage === 'drawer';
+  });
+  return [...units, ...notes, ...magnets, ...lessons].sort((a, b) => b.createdAt - a.createdAt);
 }
 
 export function getDeskUnits(domain: WorkspaceDomainState) {
   return Object.values(domain.units)
-    .filter((unit) => unit.location !== 'drawer')
+    .filter((unit) => unit.location === 'desk')
     .sort((a, b) => a.createdAt - b.createdAt);
 }
 
 export function getDeskNotes(domain: WorkspaceDomainState) {
   return Object.values(domain.notes)
     .filter((n) => n.location === 'desk')
+    .sort((a, b) => a.createdAt - b.createdAt);
+}
+
+/** Standalone lesson slips parked on the desk — never notes. */
+export function getDeskLessons(domain: WorkspaceDomainState) {
+  return Object.values(domain.lessons)
+    .filter((lesson) => {
+      if (lesson.unitId) return false;
+      return lessonPlacement(domain, lesson.id)?.storage === 'desk';
+    })
     .sort((a, b) => a.createdAt - b.createdAt);
 }
 
@@ -167,7 +185,7 @@ export function getCourseUnitsIntersecting(
   const views: PlacementView[] = [];
   for (const placement of Object.values(domain.placements)) {
     if (placement.objectType !== 'unit') continue;
-    if (placement.storage === 'drawer') continue;
+    if (placement.storage === 'drawer' || placement.storage === 'desk') continue;
     const unit = domain.units[placement.objectId];
     if (!unit || unit.courseId !== courseId) continue;
     const pEnd = placement.endDate ?? placement.date;
@@ -212,6 +230,46 @@ export function getUnitsForCourse(domain: WorkspaceDomainState, courseId: string
   return Object.values(domain.units)
     .filter((unit) => unit.courseId === courseId)
     .sort((a, b) => a.createdAt - b.createdAt);
+}
+
+function unitEnd(unit: PlacementView) {
+  return unit.endDate ?? unit.startDate;
+}
+
+function unitsOverlap(a: PlacementView, b: PlacementView) {
+  return a.startDate <= unitEnd(b) && b.startDate <= unitEnd(a);
+}
+
+function unitContainsDate(unit: PlacementView, date?: ISODate) {
+  if (!date) return false;
+  return unit.startDate <= date && date <= unitEnd(unit);
+}
+
+function unitSpanLength(unit: PlacementView) {
+  return Date.parse(`${unitEnd(unit)}T00:00:00`) - Date.parse(`${unit.startDate}T00:00:00`);
+}
+
+/**
+ * A section teaches one unit track. Sequential units (no overlap) all stay;
+ * bars share a row in different columns. Concurrent overlapping ranges keep
+ * the covering/current unit so junk extra placements do not stack as a
+ * second curriculum.
+ */
+export function preferCoveringUnits(units: PlacementView[], preferDate?: ISODate): PlacementView[] {
+  const sorted = [...units].sort((a, b) => {
+    const span = unitSpanLength(b) - unitSpanLength(a);
+    if (span !== 0) return span;
+    const aCovers = unitContainsDate(a, preferDate) ? 1 : 0;
+    const bCovers = unitContainsDate(b, preferDate) ? 1 : 0;
+    if (aCovers !== bCovers) return bCovers - aCovers;
+    return a.startDate.localeCompare(b.startDate);
+  });
+  const kept: PlacementView[] = [];
+  for (const unit of sorted) {
+    if (kept.some((existing) => unitsOverlap(existing, unit))) continue;
+    kept.push(unit);
+  }
+  return kept.sort((a, b) => a.startDate.localeCompare(b.startDate));
 }
 
 /**
@@ -286,7 +344,7 @@ export function getPlacementsIntersectingRange(
 ): PlacementView[] {
   const views: PlacementView[] = [];
   for (const placement of Object.values(domain.placements)) {
-    if (placement.storage === 'drawer') continue;
+    if (placement.storage === 'drawer' || placement.storage === 'desk') continue;
     const pEnd = placement.endDate ?? placement.date;
     if (pEnd < start || placement.date > end) continue;
     const onStart = getPlacementsForDate(domain, placement.date).find((view) => view.placementId === placement.id);

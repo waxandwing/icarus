@@ -29,8 +29,11 @@ import {
   secondsForBlock,
   startPass,
   STUDENTS,
+  studentsAtTable,
+  unseatedStudents,
   updateFlowBlock,
 } from './classroom';
+import { BOARD_HELLO, isBoardHello, isBoardSnapshot, snapshotForBoard } from './boardSync';
 
 describe('ArcTable classroom session helpers', () => {
   it('treats five minutes and under as cleanup unless the current block is itself cleanup', () => {
@@ -136,5 +139,33 @@ describe('ArcTable classroom session helpers', () => {
     expect(resolveAccessibilityToggle(null, false)).toBe(false);
     expect(resolveAccessibilityToggle(false, true)).toBe(false);
     expect(resolveAccessibilityToggle(true, false)).toBe(true);
+  });
+
+  it('does not send blob media URLs to the student board copy', () => {
+    const snap = snapshotForBoard({
+      seconds: 90,
+      running: true,
+      currentIndex: 0,
+      flow: [{ ...DEFAULT_FLOW[0], media: { name: 'slide.png', url: 'blob:http://localhost/1', kind: 'image' } }],
+      roomState: 'live',
+      studentBlackout: false,
+      prefs: DEFAULT_TABLE_PREFS,
+      roster: STUDENTS,
+      absentIds: [],
+      activePass: null,
+    });
+    expect(isBoardSnapshot(snap)).toBe(true);
+    expect(snap.flow[0]?.media?.url).toBe('');
+    expect(snap.flow[0]?.media?.name).toBe('slide.png');
+    expect(isBoardHello(BOARD_HELLO)).toBe(true);
+    expect(isBoardHello(snap)).toBe(false);
+  });
+
+  it('lists seated names by table and anyone whose group is not a table', () => {
+    expect(studentsAtTable(STUDENTS, 1).map((student) => student.name)).toEqual(['Amira K.', 'Ben R.']);
+    expect(unseatedStudents(STUDENTS)).toEqual([]);
+    const withStanding = [...STUDENTS, { id: 'maya', name: 'Maya Chen', group: 0 }];
+    expect(unseatedStudents(withStanding).map((student) => student.name)).toEqual(['Maya Chen']);
+    expect(studentsAtTable(withStanding, 1)).toHaveLength(2);
   });
 });

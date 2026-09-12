@@ -144,8 +144,17 @@ export function CreateItemDialog({
 
         {type !== 'unit' && (
           <div className={formStyles.field}>
-            <label htmlFor="ci-body">Notes (optional)</label>
-            <textarea id="ci-body" value={body} onChange={(e) => setBody(e.target.value)} />
+            <label htmlFor="ci-body">{type === 'lesson' ? 'Lesson parts (optional)' : 'Notes (optional)'}</label>
+            <textarea
+              id="ci-body"
+              value={body}
+              onChange={(e) => setBody(e.target.value)}
+              placeholder={
+                type === 'lesson'
+                  ? 'Optional: ## Warm Up or 1. Demo — each heading becomes a table block.'
+                  : undefined
+              }
+            />
           </div>
         )}
 

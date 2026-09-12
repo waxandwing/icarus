@@ -189,7 +189,7 @@ button.day {
 }
 
 .day[data-in-month='true'][data-kind='no-school'] {
-  background: color-mix(in srgb, var(--arc-charcoal) 12%, var(--arc-paper-white));
+  background: var(--arc-noshool-wash);
 }
 
 @media (max-width: 980px) {

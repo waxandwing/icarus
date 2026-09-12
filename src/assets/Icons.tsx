@@ -4,14 +4,20 @@
  * achieved with intentionally uneven bezier control points, not a filter.
  */
 
-export function ImportantCircle({ size = 28 }: { size?: number }) {
+export function ImportantCircle({ className }: { className?: string }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 40 40" aria-hidden="true" focusable="false">
+    <svg
+      className={className}
+      viewBox="0 0 40 40"
+      preserveAspectRatio="none"
+      aria-hidden="true"
+      focusable="false"
+    >
       <path
         d="M20.5 4.5c8 .3 14.8 6 15 13.7.2 8-6.6 15.3-15.3 15.8C11.6 34.4 4.9 28 4.6 20 4.3 12 10.9 5 19 4.6"
         fill="none"
         stroke="var(--arc-red)"
-        strokeWidth="2.6"
+        strokeWidth="2.2"
         strokeLinecap="round"
       />
     </svg>

@@ -3,9 +3,9 @@
   background: var(--arc-mustard);
   color: var(--arc-ink);
   border: 1px solid color-mix(in srgb, var(--arc-ink) 18%, var(--arc-mustard));
-  border-left: none;
+  border-right: none;
   border-radius: 0 10px 10px 0;
-  padding: 18px 9px 18px 6px;
+  padding: 18px 9px 18px 8px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -14,7 +14,8 @@
   min-width: 44px;
   min-height: 44px;
   flex-shrink: 0;
-  z-index: 5;
+  z-index: 7;
+  margin-right: -2px;
 }
 
 :global([data-high-contrast='true']) .tab {

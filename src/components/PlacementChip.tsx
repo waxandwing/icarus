@@ -1,7 +1,9 @@
-import type { KeyboardEvent } from 'react';
+import { useRef, useState, type KeyboardEvent, type PointerEvent as ReactPointerEvent } from 'react';
 import { FixedMark, ImportantCircle } from '../assets/Icons';
 import type { PlacementView } from '../projections/selectors';
 import { useWorkspaceStore } from '../state/store';
+import { applyPlannerObjectDrop } from '../surfaces/drag/applyObjectDrop';
+import { plannerDropTarget, writeUnplacedDrag } from '../surfaces/drag/unplacedPayload';
 import styles from './PlacementChip.module.css';
 
 const TYPE_NOUN: Record<PlacementView['objectType'], string> = {
@@ -17,13 +19,37 @@ function objectLabel(view: PlacementView) {
   }${view.fixed ? ', fixed date' : ''}`;
 }
 
+const DRAG_THRESHOLD = 8;
+
 function useObjectSelect(view: PlacementView) {
   const selection = useWorkspaceStore((s) => s.ui.selection);
   const select = useWorkspaceStore((s) => s.select);
+  const openUnitOrg = useWorkspaceStore((s) => s.openUnitOrg);
+  const placeUnitOnDate = useWorkspaceStore((s) => s.placeUnitOnDate);
+  const placeLessonOnDate = useWorkspaceStore((s) => s.placeLessonOnDate);
+  const nestLessonInUnit = useWorkspaceStore((s) => s.nestLessonInUnit);
+  const nestLessonOnBlankMagnet = useWorkspaceStore((s) => s.nestLessonOnBlankMagnet);
+  const stowUnitOnDesk = useWorkspaceStore((s) => s.stowUnitOnDesk);
+  const stowUnitInDrawer = useWorkspaceStore((s) => s.stowUnitInDrawer);
+  const stowLessonOnDesk = useWorkspaceStore((s) => s.stowLessonOnDesk);
+  const stowLessonInDrawer = useWorkspaceStore((s) => s.stowLessonInDrawer);
   const isSelected = selection?.objectId === view.objectId && selection?.objectType === view.objectType;
+  const [ghost, setGhost] = useState<{ x: number; y: number } | null>(null);
+  const drag = useRef<{ pointerId: number; startX: number; startY: number; moved: boolean } | null>(null);
+  const justDragged = useRef(false);
 
-  function handleClick() {
+  function handleClick(e: { detail: number }) {
+    if (e.detail > 1) return;
+    if (justDragged.current) {
+      justDragged.current = false;
+      return;
+    }
     select(isSelected ? null : { objectType: view.objectType, objectId: view.objectId });
+  }
+
+  function handleDoubleClick() {
+    if (view.objectType !== 'unit') return;
+    openUnitOrg(view.objectId);
   }
 
   function handleKeyDown(e: KeyboardEvent<HTMLButtonElement>) {
@@ -33,9 +59,71 @@ function useObjectSelect(view: PlacementView) {
   function handleDragStart(e: React.DragEvent) {
     e.dataTransfer.setData('text/arc-placement-id', view.placementId);
     e.dataTransfer.effectAllowed = 'move';
+    if (view.objectType === 'unit' || view.objectType === 'lesson') {
+      writeUnplacedDrag(e, { type: view.objectType, id: view.objectId });
+    }
   }
 
-  return { isSelected, handleClick, handleKeyDown, handleDragStart };
+  function onPointerDown(e: ReactPointerEvent<HTMLButtonElement>) {
+    if (e.button !== 0) return;
+    drag.current = { pointerId: e.pointerId, startX: e.clientX, startY: e.clientY, moved: false };
+  }
+
+  function onPointerMove(e: ReactPointerEvent<HTMLButtonElement>) {
+    const session = drag.current;
+    if (!session || session.pointerId !== e.pointerId) return;
+    if (!session.moved && Math.hypot(e.clientX - session.startX, e.clientY - session.startY) < DRAG_THRESHOLD) {
+      return;
+    }
+    if (!session.moved) {
+      session.moved = true;
+      try {
+        e.currentTarget.setPointerCapture(e.pointerId);
+      } catch {
+        /* optional */
+      }
+    }
+    setGhost({ x: e.clientX, y: e.clientY });
+  }
+
+  function onPointerUp(e: ReactPointerEvent<HTMLButtonElement>) {
+    const session = drag.current;
+    if (session?.pointerId === e.pointerId) {
+      try {
+        e.currentTarget.releasePointerCapture(e.pointerId);
+      } catch {
+        /* already released */
+      }
+    }
+    drag.current = null;
+    setGhost(null);
+    if (!session?.moved) return;
+    justDragged.current = true;
+    if (view.objectType !== 'unit' && view.objectType !== 'lesson') return;
+    const target = plannerDropTarget(e.clientX, e.clientY, e.currentTarget);
+    applyPlannerObjectDrop({ type: view.objectType, id: view.objectId }, target, {
+      placeUnitOnDate,
+      placeLessonOnDate,
+      nestLessonInUnit,
+      nestLessonOnBlankMagnet,
+      stowUnitOnDesk,
+      stowUnitInDrawer,
+      stowLessonOnDesk,
+      stowLessonInDrawer,
+    });
+  }
+
+  return {
+    isSelected,
+    handleClick,
+    handleDoubleClick,
+    handleKeyDown,
+    handleDragStart,
+    onPointerDown,
+    onPointerMove,
+    onPointerUp,
+    ghost,
+  };
 }
 
 function displayUnitTitle(title: string) {
@@ -55,7 +143,17 @@ export function UnitBar({
   showTitle?: boolean;
   density?: 'spread' | 'compact';
 }) {
-  const { isSelected, handleClick, handleKeyDown, handleDragStart } = useObjectSelect(view);
+  const {
+    isSelected,
+    handleClick,
+    handleDoubleClick,
+    handleKeyDown,
+    handleDragStart,
+    onPointerDown,
+    onPointerMove,
+    onPointerUp,
+    ghost,
+  } = useObjectSelect(view);
   const title = displayUnitTitle(view.title);
 
   return (
@@ -66,20 +164,37 @@ export function UnitBar({
       data-continue-left={Boolean(continueLeft)}
       data-continue-right={Boolean(continueRight)}
       data-density={density}
+      data-arc-unit-id={view.objectId}
       draggable
       onDragStart={handleDragStart}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
+      onPointerCancel={onPointerUp}
       onClick={handleClick}
+      onDoubleClick={handleDoubleClick}
       onKeyDown={handleKeyDown}
       aria-pressed={isSelected}
       aria-label={objectLabel(view)}
       title={view.title}
     >
-      {showTitle && <span className={styles.unitKicker}>Unit</span>}
-      {showTitle ? <span className={styles.unitTitle}>{title}</span> : <span className={styles.unitTitle}>&nbsp;</span>}
-      {view.important && <ImportantCircle size={16} />}
+      <span className={styles.unitCopy}>
+        {showTitle && <span className={styles.unitKicker}>Unit</span>}
+        {showTitle ? <span className={styles.unitTitle}>{title}</span> : <span className={styles.unitTitle}>&nbsp;</span>}
+        {view.important && (
+          <span className={styles.importantHalo} aria-hidden="true">
+            <ImportantCircle className={styles.importantRing} />
+          </span>
+        )}
+      </span>
       {view.fixed && (
         <span className={styles.fixedBadge} title="Fixed date">
           <FixedMark />
+        </span>
+      )}
+      {ghost && (
+        <span className={styles.dragGhost} style={{ left: ghost.x, top: ghost.y }} aria-hidden="true">
+          {title}
         </span>
       )}
     </button>
@@ -95,7 +210,17 @@ export function PlacementChip({
   date: string;
   density?: 'slip' | 'compact';
 }) {
-  const { isSelected, handleClick, handleKeyDown, handleDragStart } = useObjectSelect(view);
+  const {
+    isSelected,
+    handleClick,
+    handleDoubleClick,
+    handleKeyDown,
+    handleDragStart,
+    onPointerDown,
+    onPointerMove,
+    onPointerUp,
+    ghost,
+  } = useObjectSelect(view);
 
   if (view.objectType === 'unit') {
     const showTitle = view.isRangeStart || date === view.startDate;
@@ -121,7 +246,12 @@ export function PlacementChip({
       data-density={density}
       draggable
       onDragStart={handleDragStart}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
+      onPointerCancel={onPointerUp}
       onClick={handleClick}
+      onDoubleClick={handleDoubleClick}
       onKeyDown={handleKeyDown}
       aria-pressed={isSelected}
       aria-label={label}
@@ -130,15 +260,22 @@ export function PlacementChip({
       {view.deliveryState && view.deliveryState !== 'not-started' && (
         <span className={styles.deliveryDot} data-state={view.deliveryState} />
       )}
-      <span className={styles.title}>{view.title}</span>
-      {view.important && (
-        <span className={styles.importantBadge}>
-          <ImportantCircle size={16} />
-        </span>
-      )}
+      <span className={styles.titleWrap}>
+        <span className={styles.title}>{view.title}</span>
+        {view.important && (
+          <span className={styles.importantHalo} aria-hidden="true">
+            <ImportantCircle className={styles.importantRing} />
+          </span>
+        )}
+      </span>
       {view.fixed && (
         <span className={styles.fixedBadge} title="Fixed date" aria-label="Fixed date">
           <FixedMark />
+        </span>
+      )}
+      {ghost && (
+        <span className={styles.dragGhost} style={{ left: ghost.x, top: ghost.y }} aria-hidden="true">
+          {view.title}
         </span>
       )}
     </button>

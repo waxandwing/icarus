@@ -78,15 +78,15 @@
 }
 
 .panel[data-placement='bottom'] {
-  width: 100%;
-  max-width: 100%;
+  width: 0;
+  max-width: 0;
   min-width: 0;
   max-height: 0;
 }
 
 .panel[data-placement='bottom'][data-open='true'] {
-  max-width: 100%;
-  width: 100%;
+  max-width: min(920px, 90vw);
+  width: min(920px, 90vw);
   min-width: 0;
   max-height: min(240px, 36vh);
 }

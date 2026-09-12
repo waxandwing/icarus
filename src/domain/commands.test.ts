@@ -295,6 +295,49 @@ describe('Unit magnets stay units', () => {
     expect(moved?.objectId).toBe(unit.id);
   });
 
+  it('creates a unit from a named brand magnet, not a lesson or decorative magnet', () => {
+    let state = emptyState();
+    state = apply(state, (d) => cmd.createCourse(d, { name: 'Biology', colorToken: 'sage' })).next;
+    const created = apply(state, (d) =>
+      cmd.createUnitFromMagnet(d, { colorToken: 'blue', date: '2026-09-14', title: 'Genetics' }),
+    );
+    state = created.next;
+    expect(created.result.kind).toBe('unit');
+    expect(state.units[created.result.id].title).toBe('Genetics');
+    expect(Object.values(state.magnets)).toHaveLength(0);
+    expect(Object.values(state.lessons)).toHaveLength(0);
+  });
+
+  it('writes a unit onto a desk magnet without scheduling it yet', () => {
+    let state = emptyState();
+    state = apply(state, (d) => cmd.createCourse(d, { name: 'Biology', colorToken: 'sage' })).next;
+    const created = apply(state, (d) => cmd.createUnitOnDesk(d, { colorToken: 'sage', title: 'Ecology' }));
+    state = created.next;
+    expect(created.result.kind).toBe('unit');
+    expect(state.units[created.result.id].location).toBe('desk');
+    expect(Object.values(state.placements)).toHaveLength(0);
+  });
+
+  it('converts a fridge magnet into a unit span on the calendar', () => {
+    let state = emptyState();
+    state = apply(state, (d) => cmd.createCourse(d, { name: 'Biology', colorToken: 'sage' })).next;
+    const magnetCreated = apply(state, (d) =>
+      cmd.createMagnet(d, { magnetKind: 'idea', title: 'Photosynthesis' }),
+    );
+    state = magnetCreated.next;
+    const placed = apply(state, (d) =>
+      cmd.placeMagnetAsUnit(d, { magnetId: magnetCreated.result.id, date: '2026-09-15' }),
+    );
+    state = placed.next;
+    expect(placed.result.kind).toBe('unit');
+    expect(state.units[placed.result.id].title).toBe('Photosynthesis');
+    expect(state.magnets[magnetCreated.result.id]).toBeUndefined();
+    const placement = Object.values(state.placements).find((p) => p.objectId === placed.result.id);
+    expect(placement?.objectType).toBe('unit');
+    expect(placement?.date).toBe('2026-09-15');
+    expect(placement?.endDate).toBe('2026-09-24');
+  });
+
   it('creates a unit from a brand magnet, not a lesson or task', () => {
     let state = emptyState();
     state = apply(state, (d) => cmd.createCourse(d, { name: 'Biology', colorToken: 'sage' })).next;
@@ -317,6 +360,17 @@ describe('Unit magnets stay units', () => {
     expect(state.notes[note.id].location).toBe('desk');
     expect(state.notes[note.id].deskX).toBeDefined();
     expect(state.notes[note.id].deskY).toBeDefined();
+  });
+
+  it('slides a desk note once without requiring a title edit', () => {
+    let state = emptyState();
+    const created = apply(state, (d) => cmd.createNote(d, { title: 'Fire drill', location: 'desk' }));
+    state = created.next;
+    const note = created.result;
+    state = apply(state, (d) => cmd.slideDeskNote(d, { noteId: note.id, deskX: 42, deskY: 18 })).next;
+    expect(state.notes[note.id].deskX).toBe(42);
+    expect(state.notes[note.id].deskY).toBe(18);
+    expect(state.history[0].type).toBe('slideDeskNote');
   });
 
   it('stows a unit in the Fridge drawer without destroying it or turning it into a task', () => {
@@ -378,6 +432,135 @@ describe('Unit magnets stay units', () => {
     expect(restoredLesson?.date).toBe('2026-09-23');
   });
 
+  it('parks a unit on the desk as a magnet and carries nested lessons off the spread', () => {
+    let state = emptyState();
+    const course = apply(state, (d) => cmd.createCourse(d, { name: 'Biology', colorToken: 'sage' }));
+    state = course.next;
+    const unit = apply(state, (d) =>
+      cmd.createUnit(d, {
+        courseId: course.result.id,
+        title: 'Genetics',
+        colorToken: 'blue',
+        startDate: '2026-09-08',
+        endDate: '2026-09-18',
+      }),
+    );
+    state = unit.next;
+    const section = apply(state, (d) => cmd.createSection(d, { courseId: course.result.id, name: 'Period 2' }));
+    state = section.next;
+    const first = apply(state, (d) =>
+      cmd.createLesson(d, {
+        courseId: course.result.id,
+        unitId: unit.result.id,
+        sectionId: section.result.id,
+        title: 'Punnett squares',
+        date: '2026-09-09',
+      }),
+    );
+    state = first.next;
+    const second = apply(state, (d) =>
+      cmd.createLesson(d, {
+        courseId: course.result.id,
+        unitId: unit.result.id,
+        sectionId: section.result.id,
+        title: 'Dihybrid cross',
+        date: '2026-09-10',
+        allowCollision: true,
+      }),
+    );
+    state = second.next;
+
+    state = apply(state, (d) => cmd.stowUnitOnDesk(d, { unitId: unit.result.id })).next;
+    expect(state.units[unit.result.id].location).toBe('desk');
+    const parkedUnit = Object.values(state.placements).find(
+      (p) => p.objectType === 'unit' && p.objectId === unit.result.id,
+    );
+    expect(parkedUnit?.storage).toBe('desk');
+    const parkedLessons = Object.values(state.placements).filter((p) => p.objectType === 'lesson');
+    expect(parkedLessons).toHaveLength(2);
+    expect(parkedLessons.every((p) => p.storage === 'desk')).toBe(true);
+    expect(state.lessons[first.result.id].unitId).toBe(unit.result.id);
+    expect(state.lessons[second.result.id].unitId).toBe(unit.result.id);
+  });
+
+  it('nests stacked lessons under a desk magnet and brings them back onto the week', () => {
+    let state = emptyState();
+    const course = apply(state, (d) => cmd.createCourse(d, { name: 'Biology', colorToken: 'sage' }));
+    state = course.next;
+    const magnet = apply(state, (d) => cmd.createUnitOnDesk(d, { colorToken: 'sage', title: 'Ecology' }));
+    state = magnet.next;
+    const section = apply(state, (d) => cmd.createSection(d, { courseId: course.result.id, name: 'Period 2' }));
+    state = section.next;
+    const first = apply(state, (d) =>
+      cmd.createLesson(d, {
+        courseId: course.result.id,
+        sectionId: section.result.id,
+        title: 'Food webs',
+        date: '2026-09-08',
+      }),
+    );
+    state = first.next;
+    const second = apply(state, (d) =>
+      cmd.createLesson(d, {
+        courseId: course.result.id,
+        sectionId: section.result.id,
+        title: 'Energy pyramid',
+        date: '2026-09-09',
+        allowCollision: true,
+      }),
+    );
+    state = second.next;
+    state = apply(state, (d) => cmd.nestLessonInUnit(d, { lessonId: first.result.id, unitId: magnet.result.id })).next;
+    state = apply(state, (d) => cmd.nestLessonInUnit(d, { lessonId: second.result.id, unitId: magnet.result.id })).next;
+    expect(state.lessons[first.result.id].unitId).toBe(magnet.result.id);
+    expect(state.lessons[second.result.id].unitId).toBe(magnet.result.id);
+    expect(Object.values(state.placements).filter((p) => p.objectType === 'lesson').every((p) => p.storage === 'desk')).toBe(
+      true,
+    );
+
+    state = apply(state, (d) => cmd.placeUnitOnDate(d, { unitId: magnet.result.id, date: '2026-09-21' })).next;
+    expect(state.units[magnet.result.id].location).toBe('calendar');
+    const kids = Object.values(state.placements).filter((p) => p.objectType === 'lesson');
+    expect(kids).toHaveLength(2);
+    expect(kids.every((p) => p.storage === 'calendar' || p.storage === undefined)).toBe(true);
+    expect(kids.map((p) => p.date).sort()).toEqual(['2026-09-21', '2026-09-22']);
+  });
+
+  it('moves a unit along the spread and carries nested lesson dates', () => {
+    let state = emptyState();
+    const course = apply(state, (d) => cmd.createCourse(d, { name: 'Biology', colorToken: 'sage' }));
+    state = course.next;
+    const unit = apply(state, (d) =>
+      cmd.createUnit(d, {
+        courseId: course.result.id,
+        title: 'Cells',
+        colorToken: 'blue',
+        startDate: '2026-09-08',
+        endDate: '2026-09-12',
+      }),
+    );
+    state = unit.next;
+    const section = apply(state, (d) => cmd.createSection(d, { courseId: course.result.id, name: 'Period 2' }));
+    state = section.next;
+    const lesson = apply(state, (d) =>
+      cmd.createLesson(d, {
+        courseId: course.result.id,
+        unitId: unit.result.id,
+        sectionId: section.result.id,
+        title: 'Membrane',
+        date: '2026-09-09',
+      }),
+    );
+    state = lesson.next;
+    const placement = Object.values(state.placements).find(
+      (p) => p.objectType === 'unit' && p.objectId === unit.result.id,
+    );
+    state = apply(state, (d) => cmd.move(d, { placementId: placement!.id, date: '2026-09-15' })).next;
+    const movedLesson = Object.values(state.placements).find((p) => p.objectType === 'lesson');
+    expect(movedLesson?.date).toBe('2026-09-16');
+    expect(state.lessons[lesson.result.id].unitId).toBe(unit.result.id);
+  });
+
   it('creates a unit in the drawer from a blank magnet, not a note or task', () => {
     let state = emptyState();
     state = apply(state, (d) => cmd.createCourse(d, { name: 'Biology', colorToken: 'sage' })).next;
@@ -411,5 +594,49 @@ describe('Unit magnets stay units', () => {
     state = apply(state, (d) => cmd.toggleYearCross(d, { date: '2026-09-11' })).next;
     expect(state.calendar.teacherOutDates['2026-09-11']).toBeUndefined();
     expect(state.calendar.crossedDates['2026-09-11']).toBeUndefined();
+  });
+});
+
+describe('lesson structure defaults', () => {
+  it('writes class parts into a new lesson that has no headings', () => {
+    let state = emptyState();
+    const courseCreated = apply(state, (d) => cmd.createCourse(d, { name: '2D Art', colorToken: 'terracotta' }));
+    state = courseCreated.next;
+    const course = courseCreated.result;
+    state = apply(state, (d) =>
+      cmd.editCourse(d, {
+        id: course.id,
+        patch: {
+          lessonStructure: [{ title: 'Bell work', minutes: 5, prompt: 'Daily doodle' }],
+        },
+      }),
+    ).next;
+    const lessonCreated = apply(state, (d) =>
+      cmd.createLesson(d, { courseId: course.id, title: 'Collage', date: '2026-09-10' }),
+    );
+    expect(lessonCreated.result.body).toContain('## Bell work');
+    expect(lessonCreated.result.body).toContain('Daily doodle');
+  });
+
+  it('does not overwrite a lesson that already has numbered parts', () => {
+    let state = emptyState();
+    const courseCreated = apply(state, (d) => cmd.createCourse(d, { name: '2D Art', colorToken: 'terracotta' }));
+    state = courseCreated.next;
+    state = apply(state, (d) =>
+      cmd.editCourse(d, {
+        id: courseCreated.result.id,
+        patch: { lessonStructure: [{ title: 'Bell work', minutes: 5, prompt: 'Daily doodle' }] },
+      }),
+    ).next;
+    const lessonCreated = apply(state, (d) =>
+      cmd.createLesson(d, {
+        courseId: courseCreated.result.id,
+        title: 'Collage',
+        body: '1. Hook: look at the still life.\n2. Draw',
+        date: '2026-09-10',
+      }),
+    );
+    expect(lessonCreated.result.body).toContain('Hook');
+    expect(lessonCreated.result.body).not.toContain('Daily doodle');
   });
 });

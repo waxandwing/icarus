@@ -96,11 +96,14 @@ export function moveFlowBlock(flow: FlowBlock[], index: number, direction: -1 | 
 
 export type PassKind = 'bathroom' | 'nurse' | 'office';
 
+export type ClassColor = 'mustard' | 'terracotta' | 'blue' | 'sage' | 'pink' | 'lavender';
+
 export type TablePrefs = {
   className: string;
   periodName: string;
   roomName: string;
   teacherName: string;
+  classColor: ClassColor;
   autoAdvance: boolean;
   alarmOnCleanup: boolean;
   studentPass: boolean;
@@ -123,6 +126,7 @@ export const DEFAULT_TABLE_PREFS: TablePrefs = {
   periodName: 'Period 3',
   roomName: 'Room 214',
   teacherName: '',
+  classColor: 'mustard',
   autoAdvance: false,
   alarmOnCleanup: true,
   studentPass: true,
@@ -245,6 +249,16 @@ export const GROUPS = [
   { id: 3, name: 'Table C', count: 6 },
   { id: 4, name: 'Table D', count: 6 },
 ] as const;
+
+const TABLE_IDS = new Set<number>(GROUPS.map((group) => group.id));
+
+export function studentsAtTable(roster: ClassroomStudent[], groupId: number): ClassroomStudent[] {
+  return roster.filter((student) => student.group === groupId);
+}
+
+export function unseatedStudents(roster: ClassroomStudent[]): ClassroomStudent[] {
+  return roster.filter((student) => !TABLE_IDS.has(student.group));
+}
 
 export const STUDENTS: ClassroomStudent[] = [
   { id: 'amira', name: 'Amira K.', group: 1 },

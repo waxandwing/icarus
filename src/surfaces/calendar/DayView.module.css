@@ -16,6 +16,8 @@
 }
 
 .startDay {
+  display: inline-flex;
+  align-items: center;
   border: none;
   background: transparent;
   padding: 0;
@@ -25,6 +27,7 @@
   line-height: 1.1;
   color: var(--arc-forest);
   min-height: 44px;
+  text-decoration: none;
 }
 
 .startDay:hover,
@@ -37,7 +40,7 @@
   margin: 0;
   font-size: 13px;
   color: var(--arc-charcoal);
-  max-width: 36ch;
+  max-width: 48ch;
 }
 
 .classes {
@@ -71,6 +74,18 @@
   font-weight: 500;
   letter-spacing: -0.02em;
   margin: 0;
+}
+
+.classOpen {
+  display: block;
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 0;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
 }
 
 .classHead p {
@@ -123,9 +138,14 @@
 }
 
 .dayKindBanner {
-  padding: var(--arc-space-2) 0;
+  padding: 10px 12px;
   font-weight: 600;
   font-size: 15px;
+  border-radius: 10px;
+}
+
+.dayKindBanner[data-kind='no-school'] {
+  background: var(--arc-noshool-wash);
 }
 
 .row {

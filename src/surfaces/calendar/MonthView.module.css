@@ -35,16 +35,12 @@
   opacity: 0.42;
 }
 
-.dateHead[data-kind='weekend'] {
+.dateHead[data-kind='weekend']:not([data-today='true']) {
   background: var(--arc-weekend-wash);
 }
 
-.dateHead[data-kind='no-school'] {
-  background: repeating-linear-gradient(
-    135deg,
-    transparent 0 8px,
-    rgba(44, 46, 46, 0.04) 8px 16px
-  );
+.dateHead[data-kind='no-school']:not([data-today='true']) {
+  background: var(--arc-noshool-wash);
 }
 
 .dateHead[data-dragover='true'] {
@@ -102,5 +98,6 @@
 
 .spanSlot {
   min-width: 0;
-  padding: 0 3px;
+  padding: 0;
+  background: color-mix(in srgb, var(--token-color, transparent) 82%, transparent);
 }

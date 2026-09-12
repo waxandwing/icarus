@@ -219,6 +219,30 @@
   border-bottom: 0;
 }
 
+.structure {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0 0 12px;
+}
+
+.partRow {
+  display: grid;
+  gap: 6px;
+  padding: 8px 0 10px;
+  border-bottom: 1px solid var(--arc-line);
+}
+
+.partPrompt {
+  grid-column: 1 / -1;
+}
+
+.partMoves {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
 .toggleRow {
   position: relative;
   display: flex;

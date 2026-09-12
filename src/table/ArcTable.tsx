@@ -9,6 +9,7 @@ import {
   GROUPS,
   STUDENTS,
   type AlarmVoice,
+  type DisplayMode,
   type DisplayOverride,
   type ArcLink,
   type ClassroomStudent,
@@ -46,9 +47,33 @@ import {
   roomStatusLabel,
   secondsForBlock,
   startPass,
+  studentsAtTable,
+  unseatedStudents,
   updateFlowBlock,
 } from './classroom';
-import { isStudentDisplay, openStudentBoard, returnToPlanner } from './launch';
+import { BOARD_HELLO, TABLE_BOARD_CHANNEL, isBoardHello, isBoardSnapshot, snapshotForBoard } from './boardSync';
+import {
+  BOARD_SHAPES,
+  type BoardShapeId,
+  BOARD_PATTERN_LENGTH,
+  shapeLabel,
+} from './boardShapes';
+import {
+  applyPublishPolicy,
+  isBoardUnlocked,
+  isInstructionalLocalDay,
+  publishBoard,
+  rotateBoardPattern,
+  setAutoRunToday,
+  subscribeBoardSession,
+  tryUnlockBoard,
+  unpublishBoard,
+  type BoardSession,
+} from './boardSession';
+import { copyStudentBoardUrl, isStudentDisplay, openStudentBoard, studentBoardUrl } from './launch';
+import { planFromWorkspace, readTableDayFocus } from './dayPlan';
+import { writeTableDeskFacts } from './tableDeskFacts';
+import { useWorkspaceStore } from '../state/store';
 
 export function ArcTable() {
   const [tool, setTool] = useState<ToolView>('home');
@@ -63,20 +88,37 @@ export function ArcTable() {
   const [activePass, setActivePass] = useState<PassRecord | null>(null);
   const [passLog, setPassLog] = useState<PassRecord[]>([]);
   const [arcLink, setArcLink] = useState<ArcLink>({ connected: false, lastAttemptAt: null });
-  const [flow, setFlow] = useState<FlowBlock[]>(() => DEFAULT_FLOW.map((block) => ({ ...block })));
-  const [currentIndex, setCurrentIndex] = useState(CURRENT_FLOW_INDEX);
+  const [flow, setFlow] = useState<FlowBlock[]>(() => {
+    if (isStudentDisplay()) return DEFAULT_FLOW.map((block) => ({ ...block }));
+    const plan = planFromWorkspace(useWorkspaceStore.getState().domain, readTableDayFocus());
+    return plan.blocks.map((block) => ({ ...block }));
+  });
+  const [currentIndex, setCurrentIndex] = useState(() => {
+    if (isStudentDisplay()) return CURRENT_FLOW_INDEX;
+    return 0;
+  });
   const [alarmVoice, setAlarmVoice] = useState<AlarmVoice>('chime');
   const [customAlarmUrl, setCustomAlarmUrl] = useState<string | null>(null);
   const [recordingAlarm, setRecordingAlarm] = useState(false);
   const [demoStream, setDemoStream] = useState<MediaStream | null>(null);
   const [demoVideoUrl, setDemoVideoUrl] = useState<string | null>(null);
   const [cameraError, setCameraError] = useState<string | null>(null);
-  const [prefs, setPrefs] = useState<TablePrefs>(DEFAULT_TABLE_PREFS);
+  const [prefs, setPrefs] = useState<TablePrefs>(() => {
+    if (isStudentDisplay()) return DEFAULT_TABLE_PREFS;
+    const plan = planFromWorkspace(useWorkspaceStore.getState().domain, readTableDayFocus());
+    if (!plan.blocks.length) return DEFAULT_TABLE_PREFS;
+    return {
+      ...DEFAULT_TABLE_PREFS,
+      className: plan.headline,
+      periodName: plan.periodLabel || DEFAULT_TABLE_PREFS.periodName,
+    };
+  });
   const [absentIds, setAbsentIds] = useState<string[]>([]);
   const [settingsPane, setSettingsPane] = useState<'class' | 'flow' | 'timer' | 'board' | 'pass' | 'demo' | 'media' | 'access' | 'roster'>('class');
   const alarmRecorder = useRef<MediaRecorder | null>(null);
   const alarmChunks = useRef<Blob[]>([]);
   const alarmPlayed = useRef(false);
+  const boardChannel = useRef<BroadcastChannel | null>(null);
   const [displayOverride, setDisplayOverride] = useState<DisplayOverride>('auto');
   const [viewportWidth, setViewportWidth] = useState(() => window.innerWidth);
   const [now, setNow] = useState(() => new Date());
@@ -94,8 +136,22 @@ export function ArcTable() {
   const [pickedId, setPickedId] = useState<string | null>(null);
   const [note, setNote] = useState('');
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [boardCopied, setBoardCopied] = useState(false);
+  const [boardFollowing, setBoardFollowing] = useState(false);
+  const [boardSession, setBoardSession] = useState<BoardSession>(() => applyPublishPolicy());
+  const [patternUnlocked, setPatternUnlocked] = useState(() => !isStudentDisplay() || isBoardUnlocked());
+  const [patternDraft, setPatternDraft] = useState<BoardShapeId[]>([]);
+  const [patternError, setPatternError] = useState(false);
+  const copyBoardTimer = useRef<number>(0);
   const stageRef = useRef<HTMLElement>(null);
-  const current: FlowBlock = flow[currentIndex] ?? flow[0] ?? DEFAULT_FLOW[0];
+  const emptyDayBlock: FlowBlock = {
+    id: 'empty-day',
+    title: 'Teaching day',
+    minutes: 0,
+    kind: 'block',
+    prompt: 'Start my day from an instructional day to send that lesson, by part, to this table.',
+  };
+  const current: FlowBlock = flow[currentIndex] ?? flow[0] ?? emptyDayBlock;
   const upcoming = nextBlock(flow, currentIndex);
   const cleanup = isCleanup(seconds, current);
   const displayMode = resolveDisplayMode(displayOverride, viewportWidth);
@@ -104,6 +160,18 @@ export function ArcTable() {
   const passOverdue = activePass ? isPassOverdue(activePass.outAt, now.getTime(), passAlertSeconds) : false;
   const passElapsed = activePass ? elapsedSeconds(activePass.outAt, now.getTime()) : 0;
   const progress = ((currentIndex + 0.55) / Math.max(flow.length, 1)) * 100;
+
+  useEffect(() => {
+    const next = applyPublishPolicy();
+    setBoardSession(next);
+    if (next.autoRunDate) {
+      setPrefs((value) => (value.autoAdvance ? value : { ...value, autoAdvance: true }));
+    }
+    return subscribeBoardSession((session) => {
+      setBoardSession(session);
+      if (!isBoardUnlocked(session)) setPatternUnlocked(false);
+    });
+  }, []);
 
   useEffect(() => {
     document.title = 'ArcTable — live classroom';
@@ -146,9 +214,86 @@ export function ArcTable() {
 
   useEffect(() => {
     if (!running) return;
+    if (isStudentDisplay() && boardFollowing) return;
     const id = window.setInterval(() => setSeconds((value) => Math.max(0, value - 1)), 1000);
     return () => window.clearInterval(id);
-  }, [running]);
+  }, [running, boardFollowing]);
+
+  const boardLive = {
+    seconds,
+    running,
+    currentIndex,
+    flow,
+    roomState,
+    studentBlackout,
+    prefs,
+    roster,
+    absentIds,
+    activePass,
+  };
+  const boardLiveRef = useRef(boardLive);
+  boardLiveRef.current = boardLive;
+
+  useEffect(() => {
+    if (isStudentDisplay()) return;
+    const plan = planFromWorkspace(useWorkspaceStore.getState().domain, readTableDayFocus());
+    if (!plan.sectionId) return;
+    writeTableDeskFacts({
+      sectionId: plan.sectionId,
+      rosterCount: roster.length,
+      outName: activePass?.studentName,
+      outKind: activePass?.kind,
+    });
+  }, [roster, activePass]);
+
+  useEffect(() => {
+    if (typeof BroadcastChannel === 'undefined') return;
+    const channel = new BroadcastChannel(TABLE_BOARD_CHANNEL);
+    boardChannel.current = channel;
+    const dedicatedBoard = isStudentDisplay();
+    if (dedicatedBoard) {
+      channel.onmessage = (event: MessageEvent) => {
+        if (!isBoardSnapshot(event.data)) return;
+        const snap = event.data;
+        setBoardFollowing(true);
+        setSeconds(snap.seconds);
+        setRunning(snap.running);
+        setCurrentIndex(snap.currentIndex);
+        setFlow(snap.flow);
+        setRoomState(snap.roomState);
+        setStudentBlackout(snap.studentBlackout);
+        setPrefs(snap.prefs);
+        setRoster(snap.roster);
+        setAbsentIds(snap.absentIds);
+        setActivePass(snap.activePass);
+      };
+      channel.postMessage(BOARD_HELLO);
+    } else {
+      channel.onmessage = (event: MessageEvent) => {
+        if (!isBoardHello(event.data)) return;
+        channel.postMessage(snapshotForBoard(boardLiveRef.current));
+      };
+    }
+    return () => {
+      channel.close();
+      boardChannel.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (isStudentDisplay()) return;
+    boardChannel.current?.postMessage(snapshotForBoard(boardLive));
+  }, [seconds, running, currentIndex, flow, roomState, studentBlackout, prefs, roster, absentIds, activePass]);
+
+  const copyBoardUrl = async () => {
+    const ok = await copyStudentBoardUrl();
+    if (!ok) return;
+    setBoardCopied(true);
+    window.clearTimeout(copyBoardTimer.current);
+    copyBoardTimer.current = window.setTimeout(() => setBoardCopied(false), 2200);
+  };
+
+  useEffect(() => () => window.clearTimeout(copyBoardTimer.current), []);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -378,31 +523,94 @@ export function ArcTable() {
   const time = useMemo(() => formatTimer(seconds), [seconds]);
 
   const endClass = () => {
+    setBoardSession(unpublishBoard());
     setSeconds(DEFAULT_PERIOD_SECONDS);
     setRunning(false);
     setTool('home');
     setRoomState('live');
     setStudentBlackout(false);
-    setStudentView(false);
+    if (!isStudentDisplay()) setStudentView(false);
     setPassState('available');
     setActivePass(null);
     setPickedId(null);
   };
 
+  const dedicatedBoard = isStudentDisplay();
+
+  const tapPattern = (id: BoardShapeId) => {
+    const next = [...patternDraft, id].slice(0, BOARD_PATTERN_LENGTH);
+    setPatternDraft(next);
+    setPatternError(false);
+    if (next.length < BOARD_PATTERN_LENGTH) return;
+    if (tryUnlockBoard(next, boardSession)) {
+      setPatternUnlocked(true);
+      setPatternDraft([]);
+      return;
+    }
+    setPatternError(true);
+    setPatternDraft([]);
+  };
+
+  if (dedicatedBoard && !patternUnlocked) {
+    return (
+      <main className={styles.page} data-mode="student" data-display={displayMode} ref={stageRef}>
+        <div className={styles.bezel}>
+          <section className={styles.student}>
+            <header className={styles.studentHeader}>
+              <Lockup size="student" />
+            </header>
+            <div className={styles.studentMain}>
+              <PatternGate
+                draft={patternDraft}
+                error={patternError}
+                onTap={tapPattern}
+                onClear={() => {
+                  setPatternDraft([]);
+                  setPatternError(false);
+                }}
+              />
+            </div>
+          </section>
+        </div>
+      </main>
+    );
+  }
+
+  if (dedicatedBoard && !boardSession.published) {
+    return (
+      <main className={styles.page} data-mode="student" data-display={displayMode} ref={stageRef}>
+        <div className={styles.bezel}>
+          <section className={styles.student}>
+            <header className={styles.studentHeader}>
+              <Lockup size="student" />
+            </header>
+            <div className={styles.studentMain}>
+              <div className={styles.studentStage}>
+                <h1>WAITING</h1>
+                <p className={styles.waitingCopy}>
+                  This live URL is waiting. The teacher publishes ArcTable from the laptop when class starts.
+                </p>
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+    );
+  }
+
   if (studentView && studentBlackout) {
     return (
       <main className={styles.blackout} data-mode="student" data-display={displayMode} ref={stageRef}>
         <p className={styles.visuallyHidden}>Student display is fully black.</p>
-        <button
-          type="button"
-          className={styles.ghostOnBlack}
-          onClick={() => {
-            if (isStudentDisplay()) return;
-            setStudentView(false);
-          }}
-        >
-          Teacher controls
-        </button>
+        {!dedicatedBoard && (
+          <button
+            type="button"
+            className={styles.ghostOnBlack}
+            onClick={() => setStudentView(false)}
+          >
+            Teacher controls
+          </button>
+        )}
       </main>
     );
   }
@@ -466,6 +674,22 @@ export function ArcTable() {
           onRemoveStudent={(id) => setRoster((list) => removeStudentById(list, id))}
           onSyncArc={syncFromArc}
           onClose={() => setSettingsOpen(false)}
+          boardUrl={studentBoardUrl()}
+          boardCopied={boardCopied}
+          published={boardSession.published}
+          autoRunOn={Boolean(boardSession.autoRunDate)}
+          autoRunAllowed={isInstructionalLocalDay()}
+          pattern={boardSession.pattern}
+          onPublish={() => setBoardSession(publishBoard())}
+          onUnpublish={() => setBoardSession(unpublishBoard())}
+          onAutoRun={(enabled) => {
+            const next = setAutoRunToday(enabled);
+            setBoardSession(next);
+            if (next.autoRunDate) setPrefs((value) => ({ ...value, autoAdvance: true }));
+          }}
+          onRotatePattern={() => setBoardSession(rotateBoardPattern())}
+          onOpenStudentBoard={openStudentBoard}
+          onCopyBoardUrl={() => void copyBoardUrl()}
         />
       )}
 
@@ -487,8 +711,9 @@ export function ArcTable() {
             activePass={activePass}
             passElapsed={passElapsed}
             absentIds={absentIds}
+            dedicated={dedicatedBoard}
             onExit={() => {
-              if (isStudentDisplay()) return;
+              if (dedicatedBoard) return;
               setStudentView(false);
             }}
             onConnected={() => setRoomState('live')}
@@ -514,8 +739,13 @@ export function ArcTable() {
             setNote={setNote}
             studentBlackout={studentBlackout}
             roomState={roomState}
+            boardCopied={boardCopied}
+            onCopyBoardUrl={() => void copyBoardUrl()}
+            displayOverride={displayOverride}
+            displayMode={displayMode}
+            onDisplayOverride={setDisplayOverride}
             onPreview={() => {
-              if (isStudentDisplay()) return;
+              if (dedicatedBoard) return;
               openStudentBoard();
             }}
             onHold={() => {
@@ -550,6 +780,9 @@ export function ArcTable() {
               setRunning(true);
             }}
             onEndClass={endClass}
+            boardPublished={boardSession.published}
+            autoRunToday={Boolean(boardSession.autoRunDate)}
+            onPublish={() => setBoardSession(publishBoard())}
             onOpenSettings={() => setSettingsOpen(true)}
             isFullscreen={isFullscreen}
             onToggleFullscreen={toggleFullscreen}
@@ -608,6 +841,9 @@ function TeacherDisplay({
   setNote,
   studentBlackout,
   roomState,
+  displayOverride,
+  displayMode,
+  onDisplayOverride,
   onPreview,
   onHold,
   onBlackout,
@@ -616,6 +852,9 @@ function TeacherDisplay({
   onToggleRun,
   onCleanup,
   onEndClass,
+  boardPublished,
+  autoRunToday,
+  onPublish,
   onOpenSettings,
   isFullscreen,
   onToggleFullscreen,
@@ -647,6 +886,8 @@ function TeacherDisplay({
   onCheckOut,
   onCheckIn,
   onOpenRoster,
+  boardCopied,
+  onCopyBoardUrl,
 }: {
 
   time: string;
@@ -665,6 +906,9 @@ function TeacherDisplay({
   setNote: (value: string) => void;
   studentBlackout: boolean;
   roomState: RoomState;
+  displayOverride: DisplayOverride;
+  displayMode: DisplayMode;
+  onDisplayOverride: (value: DisplayOverride) => void;
   onPreview: () => void;
   onHold: () => void;
   onBlackout: () => void;
@@ -673,6 +917,9 @@ function TeacherDisplay({
   onToggleRun: () => void;
   onCleanup: () => void;
   onEndClass: () => void;
+  boardPublished: boolean;
+  autoRunToday: boolean;
+  onPublish: () => void;
   onOpenSettings: () => void;
   isFullscreen: boolean;
   onToggleFullscreen: () => void;
@@ -704,27 +951,19 @@ function TeacherDisplay({
   onCheckOut: (studentId: string, kind: PassKind) => void;
   onCheckIn: () => void;
   onOpenRoster: () => void;
+  boardCopied: boolean;
+  onCopyBoardUrl: () => void;
 }) {
   return (
-    <section className={styles.teacher}>
-      <span className={styles.teacherAccent} aria-hidden="true" />
+    <section className={styles.teacher} data-class-color={prefs.classColor}>
       <header className={styles.teacherHeader}>
-        {roomState === 'reconnecting' && (
-          <div className={styles.liveBanner} role="status">
-            <span>Testing the student connection. You are not stuck. Escape also exits.</span>
-            <button type="button" className={styles.primaryButton} onClick={onConnected}>
-              Display connected
-            </button>
-          </div>
-        )}
-        {passOverdue && activePass && (
-          <div className={styles.passAlert} role="alert">
-            <span>{activePass.studentName} has been out {formatElapsed(passElapsed)} ({activePass.kind}). Over {prefs.passAlertMinutes} minutes.</span>
-            <button type="button" className={styles.primaryButton} onClick={onCheckIn}>Mark returned</button>
-          </div>
-        )}
         <div className={styles.headerBar}>
-        <Lockup />
+        <Lockup classTitle={prefs.className} periodName={prefs.periodName} linkToPlanner />
+        <DisplaySwitcher
+          displayOverride={displayOverride}
+          displayMode={displayMode}
+          onDisplayOverride={onDisplayOverride}
+        />
         <div className={styles.dateNav}>
           <button type="button" className={styles.iconButton} aria-label="Previous day">
             <Chevron direction="left" />
@@ -736,8 +975,12 @@ function TeacherDisplay({
         </div>
         <div className={styles.headerActions}>
           <span className={styles.liveClock}>{formatClock(now)}</span>
-          <button type="button" className={styles.iconButton} aria-label="Preview student display" onClick={onPreview}>
+          <button type="button" className={`${styles.headerTextButton} ${styles.headerBoardLink}`} onClick={onPreview}>
             <BoardIcon />
+            Student board
+          </button>
+          <button type="button" className={`${styles.headerTextButton} ${styles.headerCopyLink}`} onClick={onCopyBoardUrl}>
+            {boardCopied ? 'Copied board URL' : 'Copy board URL'}
           </button>
           <button
             type="button"
@@ -755,6 +998,24 @@ function TeacherDisplay({
       </header>
 
       <div className={styles.teacherBody}>
+        {(roomState === 'reconnecting' || (passOverdue && activePass)) && (
+          <div className={styles.headerAlerts}>
+            {roomState === 'reconnecting' && (
+              <div className={styles.liveBanner} role="status">
+                <span>Testing the student connection. You are not stuck. Escape also exits.</span>
+                <button type="button" className={styles.primaryButton} onClick={onConnected}>
+                  Display connected
+                </button>
+              </div>
+            )}
+            {passOverdue && activePass && (
+              <div className={styles.passAlert} role="alert">
+                <span>{activePass.studentName} has been out {formatElapsed(passElapsed)} ({activePass.kind}). Over {prefs.passAlertMinutes} minutes.</span>
+                <button type="button" className={styles.primaryButton} onClick={onCheckIn}>Mark returned</button>
+              </div>
+            )}
+          </div>
+        )}
         <aside className={styles.today}>
           <p className={styles.kicker}>Today</p>
           <ol className={styles.flowList}>
@@ -948,8 +1209,15 @@ function TeacherDisplay({
           </strong>
         </button>
         <output className={styles.roomStatus} aria-live="polite">
+          Live URL: {boardPublished ? (autoRunToday ? 'LIVE today' : 'LIVE') : 'WAITING'}
+          {' · '}
           Student screen: {roomStatusLabel(studentBlackout, roomState)}
         </output>
+        {!boardPublished && (
+          <button type="button" className={styles.footerAction} onClick={onPublish}>
+            Publish class
+          </button>
+        )}
         {roomState === 'reconnecting' && (
           <button type="button" className={styles.footerAction} onClick={onConnected}>
             Display connected
@@ -1027,16 +1295,7 @@ function ToolDetail({
 
   return (
     <div className={styles.toolDetail}>
-      {tool === 'groups' && (
-        <ul className={styles.plainList}>
-          {GROUPS.map((group) => (
-            <li key={group.id}>
-              <strong>{group.name}</strong>
-              <span>{roster.filter((student) => student.group === group.id).length}</span>
-            </li>
-          ))}
-        </ul>
-      )}
+      {tool === 'groups' && <ClassRoll roster={roster} />}
       {tool === 'picker' && (
         <>
           <p className={styles.detailCopy}>Cross out anyone who is not here. Pass holders and absences stay out of the pool. Add names in Settings → Roster, or sync from Arc when that link exists.</p>
@@ -1110,6 +1369,37 @@ function ToolDetail({
       )}
       <button type="button" className={styles.textButton} onClick={onBack}>Back to tools</button>
     </div>
+  );
+}
+
+function ClassRoll({ roster }: { roster: ClassroomStudent[] }) {
+  const standing = unseatedStudents(roster);
+  return (
+    <ul className={styles.tableRoll}>
+      {GROUPS.map((group) => {
+        const seated = studentsAtTable(roster, group.id);
+        return (
+          <li key={group.id}>
+            <div className={styles.tableRollHead}>
+              <strong>{group.name}</strong>
+              <span>{seated.length}</span>
+            </div>
+            <p className={styles.tableRollNames}>
+              {seated.length > 0 ? seated.map((student) => student.name).join(' · ') : '—'}
+            </p>
+          </li>
+        );
+      })}
+      {standing.length > 0 && (
+        <li>
+          <div className={styles.tableRollHead}>
+            <strong>Not at a table</strong>
+            <span>{standing.length}</span>
+          </div>
+          <p className={styles.tableRollNames}>{standing.map((student) => student.name).join(' · ')}</p>
+        </li>
+      )}
+    </ul>
   );
 }
 
@@ -1204,6 +1494,7 @@ function StudentDisplay({
   activePass,
   passElapsed,
   absentIds,
+  dedicated,
   onExit,
   onConnected,
   onToggleFullscreen,
@@ -1225,6 +1516,7 @@ function StudentDisplay({
   activePass: PassRecord | null;
   passElapsed: number;
   absentIds: string[];
+  dedicated: boolean;
   onExit: () => void;
   onConnected: () => void;
   onToggleFullscreen: () => void;
@@ -1236,21 +1528,16 @@ function StudentDisplay({
   const hasMaterials = Boolean(current.media || demoStream || demoVideoUrl);
 
   return (
-    <section className={styles.student}>
-      <span className={`${styles.shape} ${styles.shapeMustard}`} aria-hidden="true" />
-      <span className={`${styles.shape} ${styles.shapeClay}`} aria-hidden="true" />
-      <span className={`${styles.shape} ${styles.shapeSlate}`} aria-hidden="true" />
+    <section className={styles.student} data-class-color={prefs.classColor}>
       <header className={styles.studentHeader}>
-        <Lockup />
+        <Lockup classTitle={prefs.className} periodName={prefs.periodName} size="student" />
         <p>
-          {prefs.className}
-          {prefs.teacherName ? ` · ${prefs.teacherName}` : ''}
-          <span aria-hidden="true"> • </span>
-          {prefs.periodName}
-          <span aria-hidden="true"> • </span>
+          {prefs.teacherName ? `${prefs.teacherName} · ` : ''}
           <time dateTime={now.toISOString()}>{formatSessionDate(now)}</time>
         </p>
-        <button type="button" className={styles.textButton} onClick={onExit}>Teacher controls</button>
+        {!dedicated && (
+          <button type="button" className={styles.textButton} onClick={onExit}>Teacher controls</button>
+        )}
         <button
           type="button"
           className={styles.iconButton}
@@ -1355,30 +1642,155 @@ function StudentDisplay({
       {roomState === 'hold' && (
         <div className={styles.hold}>
           <p>Hold</p>
-          <button type="button" className={styles.secondaryButton} onClick={onExit}>Teacher controls</button>
+          {!dedicated && (
+            <button type="button" className={styles.secondaryButton} onClick={onExit}>Teacher controls</button>
+          )}
         </div>
       )}
       {roomState === 'reconnecting' && (
         <div className={styles.hold}>
           <p className={styles.holdTitle}>Reconnecting</p>
-          <p className={styles.settingsHint}>This is a connection test. Leave it with Display connected, Teacher controls, or Escape.</p>
-          <button type="button" className={styles.primaryButton} onClick={onConnected}>Display connected</button>
-          <button type="button" className={styles.secondaryButton} onClick={onExit}>Teacher controls</button>
+          <p className={styles.settingsHint}>
+            {dedicated
+              ? 'The teacher table is testing this connection. It will return when the laptop is live again.'
+              : 'This is a connection test. Leave it with Display connected, Teacher controls, or Escape.'}
+          </p>
+          {!dedicated && (
+            <>
+              <button type="button" className={styles.primaryButton} onClick={onConnected}>Display connected</button>
+              <button type="button" className={styles.secondaryButton} onClick={onExit}>Teacher controls</button>
+            </>
+          )}
         </div>
       )}
     </section>
   );
 }
 
-function Lockup() {
+function goToPlanner(event: { preventDefault: () => void }) {
+  event.preventDefault();
+  window.location.assign('/');
+}
+
+const TABLE_LOCKUP_SRC = '/assets/arc/arctable-lockup.png';
+
+function Lockup({
+  classTitle,
+  periodName,
+  linkToPlanner = false,
+  size = 'teacher',
+}: {
+  classTitle?: string;
+  periodName?: string;
+  linkToPlanner?: boolean;
+  size?: 'teacher' | 'student';
+}) {
+  const mark = (
+    <img
+      className={styles.lockupMark}
+      src={TABLE_LOCKUP_SRC}
+      alt="TABLE — An Arc Classroom Space"
+      data-size={size}
+    />
+  );
+  const identity = classTitle ? (
+    <span className={styles.classIdentity}>
+      <span className={styles.className}>{classTitle}</span>
+      {periodName ? <span className={styles.classPeriod}>{periodName}</span> : null}
+    </span>
+  ) : null;
+  if (!linkToPlanner) {
+    return (
+      <div className={styles.lockup}>
+        {mark}
+        {identity}
+      </div>
+    );
+  }
   return (
-    <button type="button" className={styles.lockup} onClick={() => returnToPlanner()} aria-label="Back to the planner">
-      <span className={styles.arcWord}>
-        ar<span className={styles.arcC}>c</span>
-      </span>
-      <span className={styles.lockupRule} aria-hidden="true" />
-      <span className={styles.tableWord}>TABLE</span>
-    </button>
+    <div className={styles.lockup}>
+      <a href="/" className={styles.lockupHome} aria-label="Back to Arc Planner" onClick={goToPlanner}>
+        {mark}
+      </a>
+      {identity}
+      <a href="/" className={styles.plannerLink} onClick={goToPlanner}>
+        Planner
+      </a>
+    </div>
+  );
+}
+
+function PatternGate({
+  draft,
+  error,
+  onTap,
+  onClear,
+}: {
+  draft: BoardShapeId[];
+  error: boolean;
+  onTap: (id: BoardShapeId) => void;
+  onClear: () => void;
+}) {
+  return (
+    <div className={styles.patternGate}>
+      <h1 className={styles.patternGateTitle}>Unlock class</h1>
+      <p className={styles.waitingCopy}>
+        Tap the Arc brand shapes in the pattern the teacher set. Class content stays hidden until the pattern matches and she publishes.
+      </p>
+      <div className={styles.patternTrack} aria-label="Entered pattern">
+        {Array.from({ length: BOARD_PATTERN_LENGTH }, (_, index) => (
+          <span key={index} className={styles.patternDot} data-filled={Boolean(draft[index])} data-shape={draft[index] ?? ''} />
+        ))}
+      </div>
+      {error ? <p className={styles.patternError}>That pattern does not match.</p> : null}
+      <div className={styles.patternPad} role="group" aria-label="Arc brand shapes">
+        {BOARD_SHAPES.map((shape) => (
+          <button
+            key={shape.id}
+            type="button"
+            className={styles.patternShape}
+            data-shape={shape.id}
+            aria-label={shapeLabel(shape.id)}
+            onClick={() => onTap(shape.id)}
+          >
+            {shape.label}
+          </button>
+        ))}
+      </div>
+      <button type="button" className={styles.textButton} onClick={onClear}>
+        Clear
+      </button>
+    </div>
+  );
+}
+
+function DisplaySwitcher({
+  displayOverride,
+  displayMode,
+  onDisplayOverride,
+}: {
+  displayOverride: DisplayOverride;
+  displayMode: DisplayMode;
+  onDisplayOverride: (value: DisplayOverride) => void;
+}) {
+  const modes: DisplayMode[] = ['board', 'laptop', 'compact'];
+  return (
+    <div className={styles.displaySwitcher} role="group" aria-label="Preview display size">
+      {modes.map((mode) => {
+        const active = displayOverride === mode || (displayOverride === 'auto' && displayMode === mode);
+        return (
+          <button
+            key={mode}
+            type="button"
+            data-active={active ? 'true' : 'false'}
+            aria-pressed={active}
+            onClick={() => onDisplayOverride(mode)}
+          >
+            {mode === 'board' ? 'Board' : mode === 'laptop' ? 'Laptop' : 'Compact'}
+          </button>
+        );
+      })}
+    </div>
   );
 }
 

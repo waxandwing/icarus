@@ -3,7 +3,7 @@ import { addCalendarDays, isInstructionalDay } from '../calendar/dates';
 import * as cmd from './commands';
 import type { WorkspaceDomainState } from './types';
 
-const CURRENT_SCHEMA_VERSION = 1;
+const CURRENT_SCHEMA_VERSION = 2;
 
 function emptyState(): WorkspaceDomainState {
   return {
@@ -78,7 +78,7 @@ export function createInitialState(): WorkspaceDomainState {
       courseId: course.id,
       title: 'Unit 1 \u00b7 Cell Structure',
       colorToken: 'blue',
-      startDate: '2026-09-08',
+      startDate: '2026-09-07',
       endDate: '2026-09-25',
     });
     cmd.createUnit(draft, {
@@ -104,7 +104,19 @@ export function createInitialState(): WorkspaceDomainState {
       unitId: unit1.id,
       sectionId: section.id,
       title: 'Membrane transport lab',
-      body: 'Egg osmosis demo \u2014 set up before period starts.',
+      body: [
+        '## Warm Up',
+        'Name three organelles.',
+        '',
+        '## Demo',
+        'Egg osmosis \u2014 set up before period starts.',
+        '',
+        '## Studio',
+        'Diagram how water moves across the membrane.',
+        '',
+        '## Critique',
+        'Share one observation from your egg.',
+      ].join('\n'),
       date: '2026-09-10',
     });
 

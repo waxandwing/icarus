@@ -2,6 +2,8 @@
 
 Kelly: Arc is not a SaaS site. Judge every screen as a **bound teaching planbook** with edge furniture. If the calendar disappeared and a dashboard remained, it is no longer Arc.
 
+**Constant design audit:** Cursor agents always apply `.cursor/rules/arc-bound-planner.mdc` on UI/UX work. Do not add a timed `/loop` for this unless Kelly asks. Optional reminder: `npm run design-audit`.
+
 This pass locks the model, ranks why the current UI fails it, and gives implementable gold for the main surfaces. No product-model fork is required to start. Open design questions (exact Fridge pull-tab anatomy, always-on vs collapsible Task Bar, class isolation, After School lane, final Note artifact) stay paused.
 
 **Nested IA (Kelly, locked — forthcoming Arc idea renders are authority; do not invent a competing tree):**

@@ -16,7 +16,8 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  min-height: min(560px, calc(100vh - 132px));
+  height: calc(100vh - 108px);
+  min-height: 480px;
   max-height: calc(100vh - 108px);
   background: var(--arc-page);
   border-radius: 16px;
@@ -127,6 +128,7 @@
   font-family: var(--arc-font-hand);
   font-size: 16px;
   font-weight: 500;
+  text-decoration: none;
 }
 
 .startDayButton:hover,

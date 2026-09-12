@@ -1,4 +1,6 @@
 import styles from './ArcTable.module.css';
+import type { BoardShapeId } from './boardShapes';
+import { shapeLabel } from './boardShapes';
 import type {
   AlarmVoice,
   ArcLink,
@@ -67,6 +69,18 @@ export function SettingsDialog({
   onRemoveStudent,
   onSyncArc,
   onClose,
+  boardUrl,
+  boardCopied,
+  published,
+  autoRunOn,
+  autoRunAllowed,
+  pattern,
+  onPublish,
+  onUnpublish,
+  onAutoRun,
+  onRotatePattern,
+  onOpenStudentBoard,
+  onCopyBoardUrl,
 }: {
   displayOverride: DisplayOverride;
   displayMode: DisplayMode;
@@ -110,6 +124,18 @@ export function SettingsDialog({
   onRemoveStudent: (id: string) => void;
   onSyncArc: () => void;
   onClose: () => void;
+  boardUrl: string;
+  boardCopied: boolean;
+  published: boolean;
+  autoRunOn: boolean;
+  autoRunAllowed: boolean;
+  pattern: BoardShapeId[];
+  onPublish: () => void;
+  onUnpublish: () => void;
+  onAutoRun: (enabled: boolean) => void;
+  onRotatePattern: () => void;
+  onOpenStudentBoard: () => void;
+  onCopyBoardUrl: () => void;
 }) {
   return (
     <div className={styles.settingsScrim} onClick={onClose}>
@@ -146,6 +172,20 @@ export function SettingsDialog({
             <label className={styles.settingsField}>
               Class name
               <input value={prefs.className} onChange={(event) => onPrefs({ className: event.target.value })} />
+            </label>
+            <label className={styles.settingsField}>
+              Class color
+              <select
+                value={prefs.classColor}
+                onChange={(event) => onPrefs({ classColor: event.target.value as TablePrefs['classColor'] })}
+              >
+                <option value="mustard">Mustard</option>
+                <option value="terracotta">Terracotta</option>
+                <option value="blue">Blue</option>
+                <option value="sage">Sage</option>
+                <option value="pink">Pink</option>
+                <option value="lavender">Lavender</option>
+              </select>
             </label>
             <label className={styles.settingsField}>
               Period
@@ -299,6 +339,56 @@ export function SettingsDialog({
 
         {settingsPane === 'board' && (
           <>
+            <p className={styles.settingsHint}>
+              This laptop is the teacher table. The working smartboard path is HDMI (or AirPlay) of the student window opened from this browser. BroadcastChannel only follows in the same browser profile — it is not a cross-WiFi relay. Slides and camera stay on this machine.
+            </p>
+            <p className={styles.detailCopy}>{boardUrl}</p>
+            <p className={styles.settingsHint}>
+              Live URL is {published ? 'LIVE' : 'WAITING'}. Students see class content only after you publish and they tap the shape pattern.
+            </p>
+            <div className={styles.settingsActions}>
+              {published ? (
+                <button type="button" className={styles.secondaryButton} onClick={onUnpublish}>
+                  Unpublish
+                </button>
+              ) : (
+                <button type="button" className={styles.secondaryButton} onClick={onPublish}>
+                  Publish class
+                </button>
+              )}
+              <button type="button" className={styles.secondaryButton} onClick={onOpenStudentBoard}>
+                Open student board
+              </button>
+              <button type="button" className={styles.secondaryButton} onClick={onCopyBoardUrl}>
+                {boardCopied ? 'Copied board URL' : 'Copy board URL'}
+              </button>
+            </div>
+            <label className={styles.toggleRow}>
+              <span>
+                <strong>Auto-run today</strong>
+                <small>
+                  {autoRunAllowed
+                    ? 'Stay published for this local calendar day and auto-advance blocks. Off on weekends and no-school days.'
+                    : 'Not available on weekend or no-school days.'}
+                </small>
+              </span>
+              <input
+                type="checkbox"
+                checked={autoRunOn}
+                disabled={!autoRunAllowed && !autoRunOn}
+                onChange={() => onAutoRun(!autoRunOn)}
+              />
+            </label>
+            <p className={styles.kicker}>Privacy pattern</p>
+            <p className={styles.settingsHint}>Students unlock the board by tapping these Arc brand shapes, in order. There is no typed class code.</p>
+            <ol className={styles.patternPreview}>
+              {pattern.map((id, index) => (
+                <li key={`${id}-${index}`} data-shape={id}>{shapeLabel(id)}</li>
+              ))}
+            </ol>
+            <button type="button" className={styles.textButton} onClick={onRotatePattern}>
+              New pattern
+            </button>
             <p className={styles.settingsHint}>What students can read from the far tables.</p>
             <label className={styles.toggleRow}>
               <span><strong>Show groups</strong></span>
@@ -399,6 +489,10 @@ export function SettingsDialog({
                 </button>
               )}
             </div>
+            <p className={styles.settingsHint}>
+              <strong>Connect Google Drive</strong>
+              {' — optional. Class works without it. This build has no Google sign-in, so lesson files stay on this device.'}
+            </p>
           </>
         )}
 

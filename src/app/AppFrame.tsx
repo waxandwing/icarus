@@ -9,6 +9,8 @@ import { SettingsPanel } from '../surfaces/settings/SettingsPanel';
 import { SettingsTab } from '../surfaces/settings/SettingsTab';
 import { TaskBarPanel } from '../surfaces/taskbar/TaskBarPanel';
 import { TaskBarTab } from '../surfaces/taskbar/TaskBarTab';
+import { SetupTray } from '../entry/SetupTray';
+import { readEntrySession } from '../entry/session';
 import { useWorkspaceStore } from '../state/store';
 import { useEffect, useState } from 'react';
 import styles from './AppFrame.module.css';
@@ -19,13 +21,14 @@ const TAB_IDS: Record<string, string> = {
   taskbar: 'arc-taskbar-tab',
 };
 
-/** Desk + bound planner. Tabs stay on-screen; open furniture shares the row with the book. */
+/** Desk + bound planner. Tabs hang off the cover; opening a folder does not resize the book. */
 export function AppFrame() {
   const openPanel = useWorkspaceStore((s) => s.ui.openPanel);
   const deskFocus = useWorkspaceStore((s) => s.ui.deskFocus);
   const cleanUp = useWorkspaceStore((s) => s.cleanUp);
   const [editingId, setEditingId] = useState<{ type: string; id: string } | null>(null);
   const [creatingFor, setCreatingFor] = useState<{ date: string; unitId?: string; sectionId?: string } | null>(null);
+  const [setupOpen, setSetupOpen] = useState(() => !readEntrySession().setupDismissed);
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
@@ -35,6 +38,10 @@ export function AppFrame() {
         const tabId = TAB_IDS[state.ui.openPanel];
         state.openFurniture(null);
         if (tabId) requestAnimationFrame(() => document.getElementById(tabId)?.focus());
+      } else if (state.ui.organizingUnitId) {
+        state.closeUnitOrg();
+      } else if (state.ui.overviewSectionId) {
+        state.closeClassOverview();
       } else if (state.ui.selection) {
         state.select(null);
       } else if (state.ui.deskFocus) {
@@ -52,44 +59,44 @@ export function AppFrame() {
         Skip to calendar
       </a>
 
-      <div className={styles.desk}>
+      <div className={styles.desk} data-arc-desk>
         {!deskFocus && <DeskField />}
-        <div className={styles.stage}>
-          {!deskFocus && (
-            <aside className={styles.edgeLeft}>
-              <SettingsPanel />
-              <div className={styles.tabStack}>
-                <SettingsTab />
-              </div>
-            </aside>
-          )}
-
+        <div className={styles.stage} data-tasks-open={openPanel === 'taskbar' ? 'true' : 'false'}>
           <div className={styles.bookColumn}>
+            {!deskFocus && (
+              <aside className={styles.edgeLeft}>
+                <SettingsPanel />
+                <div className={styles.tabStack}>
+                  <SettingsTab />
+                </div>
+              </aside>
+            )}
+
             <CalendarShell
               onEdit={(type, id) => setEditingId({ type, id })}
               onCreate={(date, nest) => setCreatingFor({ date, ...nest })}
             />
-          </div>
 
-          {!deskFocus && (
-            <aside className={styles.edgeRight} data-open={openPanel === 'fridge'}>
-              <FridgeTab />
-              <FridgePanel />
-            </aside>
-          )}
+            {!deskFocus && (
+              <aside className={styles.edgeRight} data-open={openPanel === 'fridge'}>
+                <FridgeTab />
+                <FridgePanel />
+              </aside>
+            )}
+
+            {!deskFocus && (
+              <div className={styles.taskDock}>
+                <TaskBarTab />
+                <TaskBarPanel />
+              </div>
+            )}
+          </div>
         </div>
 
         {!deskFocus && (
-          <>
-            <div className={styles.taskDock}>
-              <TaskBarTab />
-              <TaskBarPanel />
-            </div>
-
-            <button type="button" className={styles.cleanUp} onClick={() => cleanUp()}>
-              Clean up workspace
-            </button>
-          </>
+          <button type="button" className={styles.cleanUp} onClick={() => cleanUp()}>
+            Clean up workspace
+          </button>
         )}
       </div>
 
@@ -105,6 +112,7 @@ export function AppFrame() {
         <EditDialog objectType={editingId.type} objectId={editingId.id} onClose={() => setEditingId(null)} />
       )}
       <ShiftDialog />
+      {setupOpen && <SetupTray onDismiss={() => setSetupOpen(false)} />}
     </div>
   );
 }

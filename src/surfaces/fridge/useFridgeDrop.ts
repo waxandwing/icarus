@@ -8,6 +8,7 @@ export function useFridgeDrop() {
   const createUnitInDrawer = useWorkspaceStore((s) => s.createUnitInDrawer);
   const moveNoteToFridge = useWorkspaceStore((s) => s.moveNoteToFridge);
   const moveMagnetToFridge = useWorkspaceStore((s) => s.moveMagnetToFridge);
+  const stowLessonInDrawer = useWorkspaceStore((s) => s.stowLessonInDrawer);
   const openFurniture = useWorkspaceStore((s) => s.openFurniture);
   const [over, setOver] = useState(false);
 
@@ -27,6 +28,7 @@ export function useFridgeDrop() {
         createUnitInDrawer,
         moveNoteToFridge,
         moveMagnetToFridge,
+        stowLessonInDrawer,
       });
       openFurniture('fridge');
     },

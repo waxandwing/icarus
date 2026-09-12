@@ -29,6 +29,7 @@
   --arc-page: #f9f4e9;
   --arc-today-wash: #f7f0d9;
   --arc-weekend-wash: color-mix(in srgb, var(--arc-blue) 22%, var(--arc-page));
+  --arc-noshool-wash: color-mix(in srgb, var(--arc-lavender) 42%, var(--arc-paper-white));
 
   /* Elevation / lines */
   --arc-line: rgba(44, 46, 46, 0.14);
@@ -101,6 +102,7 @@
     --arc-fold: #dddddd;
     --arc-today-wash: #f0f0f0;
     --arc-weekend-wash: #e4e4e4;
+    --arc-noshool-wash: #d8d4e0;
     --arc-shadow-soft: none;
     --arc-shadow-lifted: none;
   }
@@ -122,6 +124,7 @@
   --arc-fold: #dddddd;
   --arc-today-wash: #f0f0f0;
   --arc-weekend-wash: #e4e4e4;
+  --arc-noshool-wash: #d8d4e0;
   --arc-shadow-soft: none;
   --arc-shadow-lifted: none;
 }

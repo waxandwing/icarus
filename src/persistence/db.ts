@@ -57,13 +57,34 @@ function migrate(raw: PersistedWorkspace): PersistedWorkspace {
   const units = { ...domain.units };
   for (const [id, unit] of Object.entries(units)) {
     if (!('location' in unit) || !(unit as { location?: string }).location) {
-      const parked = Object.values(domain.placements ?? {}).some(
-        (p) => p.objectType === 'unit' && p.objectId === id && p.storage === 'drawer',
+      const parked = Object.values(domain.placements ?? {}).find(
+        (p) => p.objectType === 'unit' && p.objectId === id && (p.storage === 'drawer' || p.storage === 'desk'),
       );
-      units[id] = { ...unit, location: parked ? 'drawer' : 'calendar' };
+      units[id] = {
+        ...unit,
+        location: parked?.storage === 'drawer' ? 'drawer' : parked?.storage === 'desk' ? 'desk' : 'calendar',
+      };
     }
   }
   domain.units = units;
+  const courses = { ...domain.courses };
+  for (const [id, course] of Object.entries(courses)) {
+    courses[id] = {
+      ...course,
+      lessonStructure: Array.isArray(course.lessonStructure) ? course.lessonStructure : [],
+      lessonFrame: course.lessonFrame === 'ubd' || course.lessonFrame === 'marzano' ? course.lessonFrame : 'none',
+    };
+  }
+  domain.courses = courses;
+  const sections = { ...domain.sections };
+  for (const [id, section] of Object.entries(sections)) {
+    sections[id] = {
+      ...section,
+      lessonStructure: Array.isArray(section.lessonStructure) ? section.lessonStructure : [],
+      dayMarks: section.dayMarks && typeof section.dayMarks === 'object' ? section.dayMarks : {},
+    };
+  }
+  domain.sections = sections;
   return { ...raw, domain };
 }
 

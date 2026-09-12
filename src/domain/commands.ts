@@ -16,12 +16,14 @@ import type {
   Placement,
   PlacementStorage,
   Section,
+  SectionDayMark,
   TaskColumn,
   TeacherOutReason,
   Unit,
   Visibility,
   WorkspaceDomainState,
 } from './types';
+import { filledLessonBody } from './lessonStructure';
 
 type D = Draft<WorkspaceDomainState>;
 
@@ -42,6 +44,8 @@ export function createCourse(
     name: payload.name,
     colorToken: payload.colorToken,
     createdAt: Date.now(),
+    lessonStructure: [],
+    lessonFrame: 'none',
   };
   draft.courses[course.id] = course;
   pushHistory(draft, 'createCourse', `Created course "${course.name}"`);
@@ -64,6 +68,8 @@ export function createSection(draft: D, payload: { courseId: string; name: strin
     courseId: payload.courseId,
     name: payload.name,
     createdAt: Date.now(),
+    lessonStructure: [],
+    dayMarks: {},
   };
   draft.sections[section.id] = section;
   pushHistory(draft, 'createSection', `Created section "${section.name}"`);
@@ -75,6 +81,27 @@ export function editSection(draft: D, payload: { id: string; patch: Partial<Sect
   if (!section) throw new DomainError('Section not found.');
   Object.assign(section, payload.patch);
   pushHistory(draft, 'editSection', `Edited section "${section.name}"`);
+}
+
+export function setSectionDayMark(
+  draft: D,
+  payload: { sectionId: string; date: ISODate; complete?: boolean; note?: string },
+): SectionDayMark {
+  const section = draft.sections[payload.sectionId];
+  if (!section) throw new DomainError('Section not found.');
+  if (!section.dayMarks) section.dayMarks = {};
+  const prev = section.dayMarks[payload.date] ?? { complete: false, note: '' };
+  const next: SectionDayMark = {
+    complete: payload.complete ?? prev.complete,
+    note: payload.note ?? prev.note,
+  };
+  if (!next.complete && !next.note.trim()) {
+    delete section.dayMarks[payload.date];
+    return { complete: false, note: '' };
+  }
+  section.dayMarks[payload.date] = next;
+  pushHistory(draft, 'setSectionDayMark', `Marked ${section.name} on ${payload.date}`);
+  return next;
 }
 
 /* --------------------------------- Units ----------------------------------- */
@@ -115,17 +142,27 @@ export function createUnit(
   return unit as Unit;
 }
 
+function requireActiveCourse(draft: D) {
+  const course = Object.values(draft.courses).find((c) => !c.archived);
+  if (!course) throw new DomainError('Create a course in Settings first.');
+  return course;
+}
+
+function nextUnitTitle(draft: D, explicit?: string) {
+  const named = explicit?.trim();
+  if (named) return named;
+  return `Unit ${Object.keys(draft.units).length + 1}`;
+}
+
 /** A brand magnet dropped on a day becomes a Unit — never a task or a lesson. */
 export function createUnitFromMagnet(
   draft: D,
-  payload: { colorToken: PaletteToken; date: ISODate },
+  payload: { colorToken: PaletteToken; date: ISODate; title?: string },
 ): Unit {
-  const course = Object.values(draft.courses).find((c) => !c.archived);
-  if (!course) throw new DomainError('Create a course in Settings first.');
-  const n = Object.keys(draft.units).length + 1;
+  const course = requireActiveCourse(draft);
   return createUnit(draft, {
     courseId: course.id,
-    title: `Unit ${n}`,
+    title: nextUnitTitle(draft, payload.title),
     colorToken: payload.colorToken,
     startDate: payload.date,
     endDate: addCalendarDays(payload.date, 9),
@@ -136,12 +173,48 @@ function calendarDayDelta(from: ISODate, to: ISODate): number {
   return Math.round((fromISODate(to).getTime() - fromISODate(from).getTime()) / 86400000);
 }
 
+export function isParkedPlacement(placement: { storage?: PlacementStorage } | undefined): boolean {
+  return placement?.storage === 'drawer' || placement?.storage === 'desk';
+}
+
 function setNestedLessonStorage(draft: D, unitId: string, storage: PlacementStorage) {
   for (const p of Object.values(draft.placements)) {
     if (p.objectType !== 'lesson') continue;
     const lesson = draft.lessons[p.objectId];
     if (lesson?.unitId === unitId) p.storage = storage;
   }
+}
+
+function shiftNestedLessonDates(draft: D, unitId: string, fromStart: ISODate, toStart: ISODate) {
+  const delta = calendarDayDelta(fromStart, toStart);
+  if (delta === 0) return;
+  for (const p of Object.values(draft.placements)) {
+    if (p.objectType !== 'lesson') continue;
+    const lesson = draft.lessons[p.objectId];
+    if (lesson?.unitId !== unitId) continue;
+    p.date = addCalendarDays(p.date, delta);
+    if (p.endDate) p.endDate = addCalendarDays(p.endDate, delta);
+  }
+}
+
+function findObjectPlacement(draft: D, objectType: PlaceableType, objectId: string) {
+  return Object.values(draft.placements).find((p) => p.objectType === objectType && p.objectId === objectId);
+}
+
+function parkUnit(draft: D, payload: { unitId: string; location: 'desk' | 'drawer' }): void {
+  const unit = draft.units[payload.unitId];
+  if (!unit) throw new DomainError('Unit not found.');
+  unit.location = payload.location;
+  const existing = findObjectPlacement(draft, 'unit', unit.id);
+  if (existing) existing.storage = payload.location;
+  setNestedLessonStorage(draft, unit.id, payload.location);
+  pushHistory(
+    draft,
+    payload.location === 'desk' ? 'stowUnit' : 'stowUnit',
+    payload.location === 'desk'
+      ? `Parked unit "${unit.title}" on the desk`
+      : `Stored unit "${unit.title}" in the drawer`,
+  );
 }
 
 /** Same unit, new dates. Does not clone, does not flatten into a lesson or task. */
@@ -153,20 +226,8 @@ export function placeUnitOnDate(draft: D, payload: { unitId: string; date: ISODa
   );
   unit.location = 'calendar';
   if (existing) {
-    const fromDrawer = existing.storage === 'drawer';
-    const oldStart = existing.date;
     existing.storage = 'calendar';
-    if (fromDrawer) {
-      const delta = calendarDayDelta(oldStart, payload.date);
-      for (const p of Object.values(draft.placements)) {
-        if (p.objectType !== 'lesson') continue;
-        const lesson = draft.lessons[p.objectId];
-        if (lesson?.unitId !== payload.unitId) continue;
-        p.storage = 'calendar';
-        p.date = addCalendarDays(p.date, delta);
-        if (p.endDate) p.endDate = addCalendarDays(p.endDate, delta);
-      }
-    }
+    setNestedLessonStorage(draft, payload.unitId, 'calendar');
     move(draft, { placementId: existing.id, date: payload.date });
     return;
   }
@@ -177,6 +238,30 @@ export function placeUnitOnDate(draft: D, payload: { unitId: string; date: ISODa
     endDate: addCalendarDays(payload.date, 9),
     fixed: false,
   });
+  const kids = Object.values(draft.lessons)
+    .filter((lesson) => lesson.unitId === payload.unitId)
+    .sort((a, b) => a.createdAt - b.createdAt);
+  const remembered = kids
+    .map((lesson) => findObjectPlacement(draft, 'lesson', lesson.id))
+    .filter((p): p is NonNullable<typeof p> => Boolean(p));
+  if (remembered.length > 0) {
+    const oldStart = remembered.reduce((min, p) => (p.date < min ? p.date : min), remembered[0].date);
+    setNestedLessonStorage(draft, payload.unitId, 'calendar');
+    shiftNestedLessonDates(draft, payload.unitId, oldStart, payload.date);
+  }
+  let slot = remembered.length;
+  for (const lesson of kids) {
+    if (findObjectPlacement(draft, 'lesson', lesson.id)) continue;
+    place(draft, {
+      objectType: 'lesson',
+      objectId: lesson.id,
+      date: addCalendarDays(payload.date, slot),
+      sectionId: lesson.sectionId,
+      fixed: false,
+      allowCollision: true,
+    });
+    slot += 1;
+  }
   pushHistory(draft, 'placeUnit', `Placed unit "${unit.title}"`);
 }
 
@@ -185,36 +270,73 @@ export function placeUnitOnDate(draft: D, payload: { unitId: string; date: ISODa
  * Same unit, remembered dates — not a task, idea, or deleted object.
  */
 export function stowUnitInDrawer(draft: D, payload: { unitId: string }): void {
-  const unit = draft.units[payload.unitId];
-  if (!unit) throw new DomainError('Unit not found.');
-  unit.location = 'drawer';
-  for (const p of Object.values(draft.placements)) {
-    if (p.objectType === 'unit' && p.objectId === payload.unitId) {
-      p.storage = 'drawer';
-    }
-  }
-  setNestedLessonStorage(draft, payload.unitId, 'drawer');
-  pushHistory(draft, 'stowUnit', `Stored unit "${unit.title}" in the drawer`);
+  parkUnit(draft, { unitId: payload.unitId, location: 'drawer' });
 }
 
-/** Blank brand magnet dropped on the Fridge becomes a unit waiting in the drawer. */
-export function createUnitInDrawer(draft: D, payload: { colorToken: PaletteToken }): Unit {
-  const course = Object.values(draft.courses).find((c) => !c.archived);
-  if (!course) throw new DomainError('Create a course in Settings first.');
-  const n = Object.keys(draft.units).length + 1;
+/** A unit dragged off the spread becomes a desk magnet and takes its nested lessons. */
+export function stowUnitOnDesk(draft: D, payload: { unitId: string }): void {
+  parkUnit(draft, { unitId: payload.unitId, location: 'desk' });
+}
+
+function mintUnplacedUnit(
+  draft: D,
+  payload: { colorToken: PaletteToken; title?: string; location: 'desk' | 'drawer' },
+): Unit {
+  const course = requireActiveCourse(draft);
   const unit: Unit = {
     id: createId('unit'),
     kind: 'unit',
     courseId: course.id,
-    title: `Unit ${n}`,
+    title: nextUnitTitle(draft, payload.title),
     colorToken: payload.colorToken,
     important: false,
     createdAt: Date.now(),
-    location: 'drawer',
+    location: payload.location,
   };
   draft.units[unit.id] = unit;
-  pushHistory(draft, 'stowUnit', `Stored unit "${unit.title}" in the drawer`);
   return unit as Unit;
+}
+
+/** Blank brand magnet dropped on the Fridge becomes a unit waiting in the drawer. */
+export function createUnitInDrawer(draft: D, payload: { colorToken: PaletteToken; title?: string }): Unit {
+  const unit = mintUnplacedUnit(draft, { ...payload, location: 'drawer' });
+  pushHistory(draft, 'stowUnit', `Stored unit "${unit.title}" in the drawer`);
+  return unit;
+}
+
+/** Writing on a desk magnet mints a Unit that still lives on the desk until it is placed. */
+export function createUnitOnDesk(draft: D, payload: { colorToken: PaletteToken; title?: string }): Unit {
+  const unit = mintUnplacedUnit(draft, { ...payload, location: 'desk' });
+  pushHistory(draft, 'createUnit', `Wrote unit "${unit.title}" on a magnet`);
+  return unit;
+}
+
+const MAGNET_KIND_COLOR: Record<MagnetKind, PaletteToken> = {
+  idea: 'mustard',
+  voice: 'blue',
+  resource: 'sage',
+  reminder: 'terracotta',
+};
+
+/** A Fridge/desk Magnet object dropped on a day becomes a Unit span, not a decorative chip. */
+export function placeMagnetAsUnit(
+  draft: D,
+  payload: { magnetId: string; date: ISODate },
+): Unit {
+  const magnet = draft.magnets[payload.magnetId];
+  if (!magnet) throw new DomainError('Magnet not found.');
+  const unit = createUnitFromMagnet(draft, {
+    colorToken: MAGNET_KIND_COLOR[magnet.magnetKind],
+    date: payload.date,
+    title: magnet.title,
+  });
+  for (const [pid, placement] of Object.entries(draft.placements)) {
+    if (placement.objectType === 'magnet' && placement.objectId === magnet.id) {
+      delete draft.placements[pid];
+    }
+  }
+  delete draft.magnets[magnet.id];
+  return unit;
 }
 
 export function editUnit(draft: D, payload: { id: string; patch: Partial<Unit> }) {
@@ -229,7 +351,7 @@ function unitHasScheduledChildren(draft: D, unitId: string): boolean {
     (lesson) =>
       lesson.unitId === unitId &&
       Object.values(draft.placements).some(
-        (p) => p.objectType === 'lesson' && p.objectId === lesson.id && p.storage !== 'drawer',
+        (p) => p.objectType === 'lesson' && p.objectId === lesson.id && !isParkedPlacement(p),
       ),
   );
 }
@@ -261,7 +383,10 @@ export function createLesson(
     unitId: payload.unitId,
     sectionId: payload.sectionId,
     title: payload.title,
-    body: payload.body,
+    body: filledLessonBody(
+      { body: payload.body, courseId: payload.courseId, sectionId: payload.sectionId },
+      draft,
+    ),
     important: false,
     crossedOut: false,
     visibility: payload.visibility ?? 'teacher-private',
@@ -285,6 +410,87 @@ export function editLesson(draft: D, payload: { id: string; patch: Partial<Lesso
   if (!lesson) throw new DomainError('Lesson not found.');
   Object.assign(lesson, payload.patch);
   pushHistory(draft, 'editLesson', `Edited lesson "${lesson.title}"`);
+}
+
+function parkLesson(draft: D, payload: { lessonId: string; location: 'desk' | 'drawer' }): void {
+  const lesson = draft.lessons[payload.lessonId];
+  if (!lesson) throw new DomainError('Lesson not found.');
+  lesson.unitId = undefined;
+  const existing = findObjectPlacement(draft, 'lesson', lesson.id);
+  if (existing) existing.storage = payload.location;
+  else {
+    const created = place(draft, {
+      objectType: 'lesson',
+      objectId: lesson.id,
+      date: draft.calendar.startDate,
+      sectionId: lesson.sectionId,
+      fixed: false,
+      allowCollision: true,
+    });
+    created.storage = payload.location;
+  }
+  pushHistory(
+    draft,
+    'stowLesson',
+    payload.location === 'desk'
+      ? `Parked lesson "${lesson.title}" on the desk`
+      : `Stored lesson "${lesson.title}" in the drawer`,
+  );
+}
+
+/** A standalone lesson dragged off the spread becomes a desk slip, not a note. */
+export function stowLessonOnDesk(draft: D, payload: { lessonId: string }): void {
+  parkLesson(draft, { lessonId: payload.lessonId, location: 'desk' });
+}
+
+export function stowLessonInDrawer(draft: D, payload: { lessonId: string }): void {
+  parkLesson(draft, { lessonId: payload.lessonId, location: 'drawer' });
+}
+
+/** Drop a lesson on a unit magnet or unit bar — it becomes a stacked sub-lesson. */
+export function nestLessonInUnit(draft: D, payload: { lessonId: string; unitId: string }): void {
+  const lesson = draft.lessons[payload.lessonId];
+  if (!lesson) throw new DomainError('Lesson not found.');
+  const unit = draft.units[payload.unitId];
+  if (!unit) throw new DomainError('Unit not found.');
+  lesson.unitId = payload.unitId;
+  const lessonPlacement = findObjectPlacement(draft, 'lesson', lesson.id);
+  if (unit.location === 'desk' || unit.location === 'drawer') {
+    if (lessonPlacement) lessonPlacement.storage = unit.location;
+  } else if (lessonPlacement && isParkedPlacement(lessonPlacement)) {
+    lessonPlacement.storage = 'calendar';
+  }
+  pushHistory(draft, 'nestLesson', `Nested "${lesson.title}" under "${unit.title}"`);
+}
+
+/** Drop a lesson on a blank brand magnet — mint a desk unit and stack the lesson under it. */
+export function nestLessonOnBlankMagnet(
+  draft: D,
+  payload: { lessonId: string; colorToken: PaletteToken },
+): Unit {
+  const unit = createUnitOnDesk(draft, { colorToken: payload.colorToken });
+  nestLessonInUnit(draft, { lessonId: payload.lessonId, unitId: unit.id });
+  return unit;
+}
+
+export function placeLessonOnDate(draft: D, payload: { lessonId: string; date: ISODate }): void {
+  const lesson = draft.lessons[payload.lessonId];
+  if (!lesson) throw new DomainError('Lesson not found.');
+  const existing = findObjectPlacement(draft, 'lesson', lesson.id);
+  if (existing) {
+    existing.storage = 'calendar';
+    move(draft, { placementId: existing.id, date: payload.date, allowCollision: true });
+    return;
+  }
+  place(draft, {
+    objectType: 'lesson',
+    objectId: lesson.id,
+    date: payload.date,
+    sectionId: lesson.sectionId,
+    fixed: false,
+    allowCollision: true,
+  });
+  pushHistory(draft, 'placeLesson', `Placed lesson "${lesson.title}"`);
 }
 
 export function copyLesson(draft: D, payload: { id: string; date: ISODate }): Lesson {
@@ -359,6 +565,15 @@ function scatterDeskNote(note: Note, draft: D) {
   note.deskX = spot.x;
   note.deskY = spot.y;
   note.deskRotate = spot.r;
+}
+
+/** Reposition a desk post-it. Call once on pointerup — not while dragging. */
+export function slideDeskNote(draft: D, payload: { noteId: string; deskX: number; deskY: number }): void {
+  const note = draft.notes[payload.noteId];
+  if (!note) throw new DomainError('Note not found.');
+  note.deskX = Math.min(92, Math.max(1, payload.deskX));
+  note.deskY = Math.min(88, Math.max(2, payload.deskY));
+  pushHistory(draft, 'slideDeskNote', `Slid note "${note.title}" on the desk`);
 }
 
 export function editNote(draft: D, payload: { id: string; patch: Partial<Note> }) {
@@ -436,7 +651,7 @@ export function place(
     );
   }
   const order = Object.values(draft.placements).filter(
-    (p) => p.date === payload.date && p.storage !== 'drawer',
+    (p) => p.date === payload.date && !isParkedPlacement(p),
   ).length;
   const placement: Placement = {
     id: createId('placement'),
@@ -481,7 +696,7 @@ function hasCollision(
       p.objectType === 'lesson' &&
       p.sectionId === sectionId &&
       p.date === date &&
-      p.storage !== 'drawer',
+      !isParkedPlacement(p),
   );
 }
 
@@ -504,6 +719,7 @@ export function move(
       'This section already has a lesson placed on that day. Confirm the replacement to continue.',
     );
   }
+  const oldDate = placement.date;
   if (placement.objectType === 'unit' && placement.endDate && payload.endDate === undefined) {
     const span = Math.round(
       (fromISODate(placement.endDate).getTime() - fromISODate(placement.date).getTime()) / 86400000,
@@ -513,6 +729,13 @@ export function move(
   } else {
     placement.date = payload.date;
     if (payload.endDate !== undefined) placement.endDate = payload.endDate;
+  }
+  if (placement.objectType === 'unit') {
+    placement.storage = 'calendar';
+    const unit = draft.units[placement.objectId];
+    if (unit) unit.location = 'calendar';
+    setNestedLessonStorage(draft, placement.objectId, 'calendar');
+    shiftNestedLessonDates(draft, placement.objectId, oldDate, placement.date);
   }
   pushHistory(draft, 'move', `Moved an item to ${payload.date}`);
 }
@@ -853,7 +1076,7 @@ export function previewShift(
 ): ShiftPreviewItem[] {
   const items: ShiftPreviewItem[] = [];
   for (const placement of Object.values(state.placements)) {
-    if (placement.storage === 'drawer') continue;
+    if (isParkedPlacement(placement)) continue;
     if (placement.sectionId !== payload.sectionId) continue;
     if (placement.fixed) continue;
     if (compareISO(placement.date, payload.fromDate) < 0) continue;
