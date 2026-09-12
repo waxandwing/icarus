@@ -26,6 +26,7 @@ export function WeekView({ onCreate }: ViewProps) {
   const placeNoteOnCalendar = useWorkspaceStore((s) => s.placeNoteOnCalendar);
   const placeUnitOnDate = useWorkspaceStore((s) => s.placeUnitOnDate);
   const createUnitFromMagnet = useWorkspaceStore((s) => s.createUnitFromMagnet);
+  const placeMagnetOnCalendar = useWorkspaceStore((s) => s.placeMagnetOnCalendar);
 
   const days = useMemo(
     () => getWeekDays(anchor, weekStartsOn, showWeekends),
@@ -56,7 +57,13 @@ export function WeekView({ onCreate }: ViewProps) {
   const cellRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const [dragOver, setDragOver] = useState<string | null>(null);
 
-  const dropActions = { movePlacement, placeNoteOnCalendar, placeUnitOnDate, createUnitFromMagnet };
+  const dropActions = {
+    movePlacement,
+    placeNoteOnCalendar,
+    placeUnitOnDate,
+    createUnitFromMagnet,
+    placeMagnetOnCalendar,
+  };
 
   function focusCell(row: string, date: string) {
     setFocused({ row, date });

@@ -33,18 +33,29 @@ function getDb() {
  * add a branch here whenever the persisted shape changes, so existing local
  * workspaces upgrade in place instead of silently losing data.
  */
+export function shouldSeedSampleYearCrosses(domain: {
+  isSampleWorkspace?: boolean;
+  calendar?: object;
+}): boolean {
+  if (!domain.isSampleWorkspace || !domain.calendar) return false;
+  return (
+    !('crossedDates' in domain.calendar) ||
+    (domain.calendar as { crossedDates?: unknown }).crossedDates == null
+  );
+}
+
 function migrate(raw: PersistedWorkspace): PersistedWorkspace {
   const domain = { ...raw.domain };
   if (domain.isSampleWorkspace === undefined) domain.isSampleWorkspace = false;
   if (!domain.schemaVersion || domain.schemaVersion < CURRENT_SCHEMA_VERSION) {
     domain.schemaVersion = CURRENT_SCHEMA_VERSION;
   }
-  const existingMarks = Object.keys(domain.calendar?.crossedDates ?? {}).length > 0;
+  const seedMarks = shouldSeedSampleYearCrosses(domain);
   domain.calendar = {
     ...domain.calendar,
     crossedDates: domain.calendar?.crossedDates ?? {},
   };
-  if (!existingMarks && domain.isSampleWorkspace) {
+  if (seedMarks) {
     markSampleYearCrosses(domain.calendar);
   }
   const units = { ...domain.units };

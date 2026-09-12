@@ -10,6 +10,7 @@ export function applyCalendarDrop(
     placeNoteOnCalendar: (id: string, date: string) => void;
     placeUnitOnDate: (unitId: string, date: string) => void;
     createUnitFromMagnet: (colorToken: PaletteToken, date: string) => void;
+    placeMagnetOnCalendar: (id: string, date: string) => void;
   },
 ) {
   e.preventDefault();
@@ -37,6 +38,10 @@ export function applyCalendarDrop(
     }
     if (payload.type === 'note' && payload.id) {
       actions.placeNoteOnCalendar(payload.id, date);
+      return;
+    }
+    if (payload.type === 'magnet' && payload.id) {
+      actions.placeMagnetOnCalendar(payload.id, date);
     }
   } catch {
     // ignore malformed drag payloads
