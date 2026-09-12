@@ -112,7 +112,7 @@ export function DayView({ onCreate }: ViewProps) {
                 ))}
 
               {inProgress.length > 0 && (
-                <p className={styles.hold}>Holding your place in {inProgress[0].title}.</p>
+                <p className={styles.hold}>In progress: {inProgress[0].title}</p>
               )}
 
               {groups.map(({ unit, lessons: kids }) => (
@@ -185,7 +185,7 @@ export function DayView({ onCreate }: ViewProps) {
         <section className={styles.teacherNotes} aria-label="Teacher notes">
           <h3>Teacher notes</h3>
           {notes.map((n) => (
-            <PlacementChip key={n.placementId} view={n} date={anchor} />
+            <PlacementChip key={n.placementId} view={n} date={anchor} density="page" />
           ))}
           <form
             className={styles.noteForm}
@@ -203,7 +203,7 @@ export function DayView({ onCreate }: ViewProps) {
               id="teacher-note"
               value={teacherDraft}
               onChange={(e) => setTeacherDraft(e.target.value)}
-              placeholder={'Add a note\u2026'}
+              placeholder={'Write on this page\u2026'}
             />
             <button type="submit" className={styles.saveNote}>
               Save note
@@ -215,14 +215,12 @@ export function DayView({ onCreate }: ViewProps) {
           <h3>Next up</h3>
           {nextUp ? (
             <p>
-              {nextUp.kind === 'resume'
-                ? 'Continue where you left off'
-                : formatFriendly(nextUp.date, 'EEEE')}
-              {' \u00b7 '}
+              {nextUp.kind === 'resume' ? 'Resume' : formatFriendly(nextUp.date, 'EEEE')}
+              {' \u2014 '}
               {nextUp.title}
             </p>
           ) : (
-            <p>Nothing waiting after this day.</p>
+            <p>Nothing placed after this day.</p>
           )}
         </section>
       </aside>

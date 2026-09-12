@@ -93,7 +93,7 @@ export function PlacementChip({
 }: {
   view: PlacementView;
   date: string;
-  density?: 'slip' | 'compact';
+  density?: 'slip' | 'compact' | 'page';
 }) {
   const { isSelected, handleClick, handleKeyDown, handleDragStart } = useObjectSelect(view);
 

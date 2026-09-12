@@ -4,14 +4,15 @@
   color: var(--arc-ink);
   border: 1px solid color-mix(in srgb, var(--arc-ink) 18%, var(--arc-mustard));
   border-left: none;
-  border-radius: 0 10px 10px 0;
-  padding: 18px 9px 18px 6px;
+  border-radius: 0 4px 4px 0;
+  padding: 20px 8px 20px 5px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 8px;
   cursor: pointer;
-  min-width: 36px;
+  width: 34px;
+  min-width: 34px;
   min-height: 44px;
   flex-shrink: 0;
   z-index: 5;
@@ -26,7 +27,7 @@
   writing-mode: vertical-rl;
   text-orientation: mixed;
   font-weight: 800;
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.16em;
 }
 

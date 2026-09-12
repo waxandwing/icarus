@@ -32,7 +32,7 @@ export function SampleDataBanner() {
           Clear sample data
         </button>
         <button type="button" className={styles.button} onClick={() => updateSettings({ sampleBannerDismissed: true })}>
-          Keep exploring
+          Keep this example
         </button>
       </div>
     </div>

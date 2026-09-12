@@ -1,14 +1,14 @@
 .wrap {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 10px;
   min-height: 100%;
 }
 
 .countdown {
-  margin: 0;
+  margin: 0 2px 4px;
   font-family: var(--arc-font-hand);
-  font-size: 22px;
+  font-size: 24px;
   line-height: 1.2;
   color: var(--arc-ink);
 }
@@ -16,17 +16,18 @@
 .months {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 14px 12px;
+  gap: 18px 16px;
+  flex: 1;
 }
 
 .monthCard {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: 12px 10px 14px;
-  border: 1px solid var(--arc-line);
-  border-radius: 12px;
-  background: color-mix(in srgb, var(--arc-paper-white) 70%, var(--arc-paper));
+  gap: 4px;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
   text-align: left;
   color: inherit;
 }
@@ -39,7 +40,7 @@
   width: 100%;
   border: none;
   background: transparent;
-  padding: 0;
+  padding: 0 0 4px;
   color: inherit;
   cursor: pointer;
   text-align: left;
@@ -58,9 +59,9 @@
 }
 
 .monthYear {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
   color: var(--arc-charcoal);
 }
 
@@ -68,13 +69,13 @@
 .weekRow {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 2px;
+  gap: 1px;
 }
 
 .dowRow {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--arc-charcoal);
   text-align: center;
@@ -85,11 +86,11 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 22px;
+  min-height: 26px;
   border: none;
   padding: 0;
-  border-radius: 4px;
-  font-size: 11px;
+  border-radius: 2px;
+  font-size: 13px;
   font-variant-numeric: tabular-nums;
   color: inherit;
   background: transparent;
@@ -101,16 +102,16 @@ button.day {
 
 .xMark {
   position: absolute;
-  inset: -2px;
-  width: calc(100% + 4px);
-  height: calc(100% + 4px);
+  inset: -4px;
+  width: calc(100% + 8px);
+  height: calc(100% + 8px);
   object-fit: contain;
   pointer-events: none;
   mix-blend-mode: multiply;
 }
 
 .day[data-crossed='true'] {
-  color: color-mix(in srgb, var(--arc-ink) 55%, transparent);
+  color: color-mix(in srgb, var(--arc-ink) 42%, transparent);
 }
 
 .day[data-in-month='false'] {
@@ -119,26 +120,26 @@ button.day {
 
 .day[data-in-month='true'][data-kind='instructional'][data-quarter='1'],
 .day[data-in-month='true'][data-kind='early-release'][data-quarter='1'] {
-  background: color-mix(in srgb, var(--arc-mustard) 72%, var(--arc-paper-white));
+  background: color-mix(in srgb, var(--arc-mustard) 55%, var(--arc-paper-white));
 }
 
 .day[data-in-month='true'][data-kind='instructional'][data-quarter='2'],
 .day[data-in-month='true'][data-kind='early-release'][data-quarter='2'] {
-  background: color-mix(in srgb, var(--arc-blue) 72%, var(--arc-paper-white));
+  background: color-mix(in srgb, var(--arc-blue) 55%, var(--arc-paper-white));
 }
 
 .day[data-in-month='true'][data-kind='instructional'][data-quarter='3'],
 .day[data-in-month='true'][data-kind='early-release'][data-quarter='3'] {
-  background: color-mix(in srgb, var(--arc-terracotta) 62%, var(--arc-paper-white));
+  background: color-mix(in srgb, var(--arc-terracotta) 48%, var(--arc-paper-white));
 }
 
 .day[data-in-month='true'][data-kind='instructional'][data-quarter='4'],
 .day[data-in-month='true'][data-kind='early-release'][data-quarter='4'] {
-  background: color-mix(in srgb, var(--arc-lavender) 78%, var(--arc-paper-white));
+  background: color-mix(in srgb, var(--arc-lavender) 62%, var(--arc-paper-white));
 }
 
 .day[data-in-month='true'][data-kind='no-school'] {
-  background: color-mix(in srgb, var(--arc-charcoal) 12%, var(--arc-paper-white));
+  background: color-mix(in srgb, var(--arc-charcoal) 10%, var(--arc-paper-white));
 }
 
 @media (max-width: 980px) {

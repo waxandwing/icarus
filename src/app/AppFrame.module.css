@@ -8,7 +8,7 @@
 
 .pattern {
   position: absolute;
-  left: 4px;
+  left: 8px;
   top: 0;
   bottom: 0;
   width: 32px;
@@ -37,7 +37,7 @@
   position: relative;
   min-height: 100vh;
   box-sizing: border-box;
-  padding: 16px 96px 28px 88px;
+  padding: 10px 88px 16px 80px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -45,7 +45,7 @@
 
 .stage {
   position: relative;
-  width: min(1280px, 100%);
+  width: min(1360px, 100%);
 }
 
 .bookColumn {

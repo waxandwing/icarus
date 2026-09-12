@@ -175,11 +175,12 @@
 .later {
   width: 100%;
   border: none;
-  border-radius: 12px;
-  background: color-mix(in srgb, var(--arc-blue) 78%, var(--arc-paper-white));
-  padding: 14px 14px 12px;
+  border-radius: 0;
+  background: transparent;
+  padding: 4px 0 8px;
   cursor: pointer;
   text-align: left;
+  border-bottom: 1px solid var(--arc-line);
 }
 
 .later span:first-child {
@@ -227,24 +228,24 @@
   position: relative;
   z-index: 2;
   border: none;
-  border-radius: 10px;
+  border-radius: 6px;
   padding: 10px 10px 12px;
   background: var(--token-color);
   color: var(--arc-ink);
   text-align: left;
   cursor: pointer;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.38),
-    0 7px 0 color-mix(in srgb, var(--token-color) 62%, #1c1c1c);
+    0 1px 0 color-mix(in srgb, var(--token-color) 45%, #1c1c1c),
+    0 4px 8px rgba(44, 46, 46, 0.14);
 }
 
 .drawerSlip {
   position: relative;
   z-index: 1;
   width: calc(100% - 12px);
-  margin: -6px auto 0;
+  margin: -10px auto 0;
   border: none;
-  padding: 8px;
+  padding: 12px 8px 8px;
   background: #f6e9a8;
   font-family: var(--arc-font-hand);
   font-size: 14px;

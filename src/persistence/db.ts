@@ -39,12 +39,12 @@ function migrate(raw: PersistedWorkspace): PersistedWorkspace {
   if (!domain.schemaVersion || domain.schemaVersion < CURRENT_SCHEMA_VERSION) {
     domain.schemaVersion = CURRENT_SCHEMA_VERSION;
   }
-  const hadYearMarks = Boolean(raw.domain.calendar?.crossedDates);
+  const existingMarks = Object.keys(domain.calendar?.crossedDates ?? {}).length > 0;
   domain.calendar = {
     ...domain.calendar,
     crossedDates: domain.calendar?.crossedDates ?? {},
   };
-  if (!hadYearMarks && domain.isSampleWorkspace) {
+  if (!existingMarks && domain.isSampleWorkspace) {
     markSampleYearCrosses(domain.calendar);
   }
   const units = { ...domain.units };

@@ -122,6 +122,7 @@ export function getDrawerItems(domain: WorkspaceDomainState) {
   return [...units, ...notes, ...magnets].sort((a, b) => b.createdAt - a.createdAt);
 }
 
+/** Brand magnets parked around the book. Drawer units stay in the Fridge. */
 export function getDeskUnits(domain: WorkspaceDomainState) {
   return Object.values(domain.units)
     .filter((unit) => unit.location !== 'drawer')

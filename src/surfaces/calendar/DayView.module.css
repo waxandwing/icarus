@@ -1,33 +1,35 @@
 .layout {
   display: grid;
-  grid-template-columns: minmax(0, 1.45fr) minmax(220px, 0.7fr);
-  gap: 22px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0;
   min-height: 100%;
-  align-items: start;
+  align-items: stretch;
 }
 
 .classes {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 0;
+  padding: 4px 28px 8px 4px;
 }
 
 .classCard {
   position: relative;
-  padding: 18px 20px 16px 28px;
-  border: 1px solid var(--arc-line);
-  border-radius: 16px;
-  background: color-mix(in srgb, var(--arc-paper-white) 88%, var(--arc-paper));
+  padding: 16px 8px 18px 22px;
+  border: none;
+  border-bottom: 1px solid var(--arc-line);
+  border-radius: 0;
+  background: transparent;
 }
 
 .classCard::before {
   content: '';
   position: absolute;
   left: 0;
-  top: 18px;
+  top: 20px;
   bottom: 18px;
-  width: 6px;
-  border-radius: 0 4px 4px 0;
+  width: 5px;
+  border-radius: 0;
   background: var(--token-color);
 }
 
@@ -165,54 +167,64 @@
 .side {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 28px;
+  padding: 8px 4px 8px 32px;
 }
 
 .teacherNotes,
 .nextUp {
-  border-radius: 16px;
-  padding: 18px 18px 16px;
+  border-radius: 0;
+  padding: 0;
+  background: transparent;
 }
 
 .teacherNotes {
-  background: var(--arc-paper);
-  min-height: 220px;
+  flex: 1;
+  min-height: 240px;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 27px,
+    color-mix(in srgb, var(--arc-blue) 28%, transparent) 28px
+  );
+  background-position: 0 36px;
 }
 
 .teacherNotes h3,
 .nextUp h3 {
-  font-family: var(--arc-font-sans);
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  font-family: var(--arc-font-serif);
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  text-transform: none;
   margin: 0 0 10px;
-  color: var(--arc-charcoal);
-}
-
-.nextUp {
-  background: color-mix(in srgb, var(--arc-blue) 78%, var(--arc-paper-white));
+  color: var(--arc-forest);
 }
 
 .nextUp p,
 .teacherNotes p {
   margin: 0;
-  font-size: 15px;
+  font-size: 22px;
+  line-height: 1.25;
+  font-family: var(--arc-font-hand);
 }
 
 .noteForm {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-top: 12px;
+  gap: 4px;
+  margin-top: 4px;
 }
 
 .noteForm textarea {
-  min-height: 88px;
+  min-height: 112px;
   resize: vertical;
   border: none;
   background: transparent;
   padding: 0;
+  font-family: var(--arc-font-hand);
+  font-size: 22px;
+  line-height: 28px;
 }
 
 .saveNote {
@@ -226,10 +238,22 @@
   font-weight: 500;
   color: var(--arc-ink);
   min-height: 36px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 @media (max-width: 820px) {
   .layout {
     grid-template-columns: 1fr;
+  }
+
+  .classes {
+    padding-right: 4px;
+  }
+
+  .side {
+    padding-left: 4px;
+    padding-top: 16px;
+    border-top: 1px solid var(--arc-line);
   }
 }

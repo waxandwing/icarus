@@ -28,9 +28,9 @@
 }
 
 .weekday {
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 700;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--arc-charcoal);
 }
@@ -53,7 +53,7 @@
 }
 
 .kindLabel {
-  font-size: 12px;
+  font-size: 14px;
   color: var(--arc-charcoal);
 }
 
@@ -124,7 +124,7 @@
 .looseLabel {
   grid-column: 1 / -1;
   margin: 0 8px 4px;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -196,7 +196,7 @@
 
 .notesLabel {
   padding: 12px 12px 12px 4px;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;

@@ -4,9 +4,9 @@
 }
 
 .weekdayHeader {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 700;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--arc-charcoal);
   padding: 0 8px 8px;

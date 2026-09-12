@@ -142,7 +142,7 @@ export function FridgePanel() {
           {'\u2715'}
         </button>
         <div className={styles.paper}>
-          <h2 className={styles.heading}>Later</h2>
+          <h2 className={styles.heading}>Fridge</h2>
           <FridgeInterior key={isOpen ? 'open' : 'shut'} />
         </div>
       </div>

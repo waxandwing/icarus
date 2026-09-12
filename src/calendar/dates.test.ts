@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   addSchoolDays,
   formatWeekRange,
+  fromISODate,
   getMonthGrid,
   getWeekDays,
   monthsInInclusiveRange,
@@ -48,7 +49,7 @@ describe('Year Map / Month Monday alignment (Desktop Interaction Blueprint \u00a
       expect(week.length).toBeLessThanOrEqual(5);
       const mondayIndices = week
         .map((cell, i) => ({ cell, i }))
-        .filter(({ cell }) => new Date(cell.date).getDay() === 1)
+        .filter(({ cell }) => fromISODate(cell.date).getDay() === 1)
         .map(({ i }) => i);
       expect(mondayIndices).toEqual([0]);
     }

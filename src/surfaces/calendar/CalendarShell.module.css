@@ -7,8 +7,8 @@
 .cover {
   position: relative;
   background: var(--arc-cover);
-  border-radius: 22px;
-  padding: 8px 10px 10px 10px;
+  border-radius: 18px;
+  padding: 6px 8px 8px 8px;
   box-shadow: 0 18px 40px rgba(28, 64, 48, 0.2);
 }
 
@@ -16,9 +16,9 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  min-height: 680px;
+  min-height: min(760px, calc(100vh - 48px));
   background: var(--arc-page);
-  border-radius: 16px;
+  border-radius: 12px;
   overflow: hidden;
 }
 
@@ -60,7 +60,7 @@
   grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
   gap: var(--arc-space-4);
   align-items: end;
-  padding: 12px 20px 6px;
+  padding: 8px 16px 4px;
 }
 
 .brand {
@@ -85,7 +85,7 @@
 
 .monthName {
   font-family: var(--arc-font-serif);
-  font-size: 34px;
+  font-size: 30px;
   font-weight: 500;
   letter-spacing: -0.03em;
   line-height: 0.95;
@@ -114,7 +114,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 2px 18px 16px;
+  padding: 0 16px 10px;
 }
 
 .page > * {
@@ -128,7 +128,7 @@
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: var(--arc-space-3);
   align-items: baseline;
-  padding: 6px 20px 10px;
+  padding: 4px 16px 8px;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.1em;
