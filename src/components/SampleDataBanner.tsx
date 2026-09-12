@@ -17,7 +17,9 @@ export function SampleDataBanner() {
 
   return (
     <div className={styles.banner} role="status">
-      <span>This is an example plan so you can explore Arc \u2014 it isn&apos;t your real schedule.</span>
+      <span>
+        This is an example plan so you can explore Arc {'\u2014'} it isn&apos;t your real schedule.
+      </span>
       <div className={styles.actions}>
         <button
           type="button"

@@ -34,8 +34,8 @@ Views may keep ephemeral presentation state—open menus, hover, temporary draft
 ## Canonical entities
 
 - SchoolCalendar: confirmed instructional and non-instructional dates, schedules, evidence, and confidence.
-- Course: shared curriculum identity.
-- Section: a particular teaching instance of a Course.
+- Course: shared curriculum identity, including an optional lesson-structure recipe (ordered parts + optional UbD/Marzano frame choice).
+- Section: a particular teaching instance of a Course (may override the recipe; may keep a one-day completion check + note).
 - Unit: belongs to Course + calendar.
 - Lesson: shared under Course/Unit.
 - Note: lightweight canonical note; only Notes may enter Must/Should/Could.

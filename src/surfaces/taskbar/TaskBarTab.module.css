@@ -1,37 +1,83 @@
 .tab {
-  position: fixed;
-  left: 50%;
-  bottom: 0;
-  transform: translateX(-50%);
-  background: var(--arc-kraft);
-  border: 1px solid var(--arc-line-strong);
-  border-bottom: none;
-  border-radius: var(--arc-radius-lg) var(--arc-radius-lg) 0 0;
-  padding: 8px 20px;
+  position: relative;
+  background: var(--arc-blue);
+  border: 1px solid color-mix(in srgb, var(--arc-ink) 16%, var(--arc-blue));
+  border-right: none;
+  border-radius: 10px 0 0 10px;
+  padding: 18px 6px 18px 9px;
   display: flex;
+  flex-direction: column;
   align-items: center;
   gap: 8px;
   cursor: pointer;
-  box-shadow: var(--arc-shadow-soft);
-  z-index: 35;
   color: var(--arc-ink);
-  font-weight: 700;
-  font-size: 13px;
-  letter-spacing: 0.04em;
+  min-width: 44px;
+  min-height: 44px;
+  flex-shrink: 0;
+  z-index: 5;
 }
-.tab:hover {
-  padding-bottom: 12px;
+
+:global([data-high-contrast='true']) .tab {
+  border: 2px solid #000;
+  border-right: none;
+}
+
+.tab[data-open='true'] {
+  background: var(--arc-kraft);
+  border-color: color-mix(in srgb, var(--arc-ink) 16%, var(--arc-kraft));
+}
+
+.label {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  font-weight: 800;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  transform: rotate(180deg);
 }
 
 .badge {
   background: var(--arc-terracotta);
   color: var(--arc-paper-white);
   border-radius: 999px;
-  font-size: 10px;
-  min-width: 16px;
-  height: 16px;
+  font-size: 11px;
+  min-width: 18px;
+  height: 18px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   padding: 0 4px;
+}
+
+.tab[data-placement='bottom'] {
+  writing-mode: horizontal-tb;
+  flex-direction: row;
+  border-radius: 0 0 10px 10px;
+  border-right: 1px solid color-mix(in srgb, var(--arc-ink) 16%, var(--arc-blue));
+  border-top: none;
+  padding: 8px 14px;
+  min-width: 96px;
+  align-self: center;
+}
+
+.tab[data-placement='bottom'] .label {
+  writing-mode: horizontal-tb;
+  transform: none;
+  letter-spacing: 0.12em;
+}
+
+:global([data-high-contrast='true']) .tab[data-placement='bottom'] {
+  border: 2px solid #000;
+}
+
+@media (max-width: 720px) {
+  .tab:not([data-placement='bottom']) {
+    border-right: 1px solid var(--arc-line-strong);
+    border-radius: var(--arc-radius);
+    flex-direction: row;
+  }
+  .tab:not([data-placement='bottom']) .label {
+    writing-mode: horizontal-tb;
+    transform: none;
+  }
 }

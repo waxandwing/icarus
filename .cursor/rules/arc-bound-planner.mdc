@@ -1,0 +1,23 @@
+---
+description: Audit every UI/UX change as a bound analog teacher planbook, not SaaS.
+alwaysApply: true
+---
+
+# Arc is a bound planbook
+
+Kelly: Arc is a bound analog teacher planner. It is not a SaaS site. Audit **every** UI/UX change against this before shipping.
+
+## Pass / fail
+
+- **The product is the open calendar spread.** If the calendar disappeared and a dashboard remained, it is no longer Arc.
+- **Furniture hangs off the book.** Settings, Fridge, and Task Bar attach to the planner’s outer edges (wall space). No overlay drawers, no scrim, no left rail, no squeezing or dimming the pages.
+- **Analog craft, not costume.** Material belongs to bound edge, paper, grain, gutter, and tabs — not a photo of a notebook with a web app pasted in the middle.
+- **Objects read as planbook grammar.** Unit = spanning bar; Lesson = nested slip under that unit; Note = scrap. Not chips, pills, card grids, or a project list.
+
+## Do not
+
+- Invent a home dashboard, feed, Classes tab, or settings shell as the primary canvas.
+- Copy Linear/Stripe drawer chrome, segmented pill kits, or generic admin templates.
+- Add a background `/loop` design-audit unless Kelly asked for it. This rule is the constant audit.
+
+Full gold: `docs/arc-planner-direction.md`.

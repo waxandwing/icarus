@@ -1,4 +1,3 @@
-import { SettingsGlyph } from '../../assets/Icons';
 import { useWorkspaceStore } from '../../state/store';
 import styles from './SettingsTab.module.css';
 
@@ -16,7 +15,6 @@ export function SettingsTab() {
       aria-expanded={isOpen}
       aria-controls="arc-settings-panel"
     >
-      <SettingsGlyph size={18} />
       <span className={styles.label}>Settings</span>
     </button>
   );

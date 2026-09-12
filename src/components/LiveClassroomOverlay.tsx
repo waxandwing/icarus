@@ -13,10 +13,10 @@ function LiveClassroomContent({ sectionId, lessonId }: { sectionId: string; less
   const section = domain.sections[sectionId];
   if (!lesson) return null;
 
-  // Revalidate canonical context before any writeback: a completed/skipped
-  // outcome must fail closed rather than relaunch (Master Operating Document \u00a73).
   const currentState = domain.delivery[sectionId]?.[lessonId]?.state ?? 'not-started';
   const alreadyFinal = currentState === 'completed' || currentState === 'skipped';
+  const midDot = '\u00b7';
+  const emDash = '\u2014';
 
   function outcome(state: 'completed' | 'skipped') {
     const result = setDelivery(sectionId, lessonId, state);
@@ -30,8 +30,10 @@ function LiveClassroomContent({ sectionId, lessonId }: { sectionId: string; less
 
   if (alreadyFinal) {
     return (
-      <div className={styles.overlay} role="dialog" aria-modal="true" aria-label="Live Classroom">
-        <span className={styles.eyebrow}>Live Classroom \u00b7 {section?.name}</span>
+      <div className={styles.sheet} role="region" aria-label="Live Classroom">
+        <span className={styles.eyebrow}>
+          Live Classroom {midDot} {section?.name}
+        </span>
         <h2 className={styles.title}>{lesson.title}</h2>
         <p className={styles.body}>
           This lesson already has a final outcome ({currentState}) and can&apos;t be relaunched.
@@ -44,22 +46,21 @@ function LiveClassroomContent({ sectionId, lessonId }: { sectionId: string; less
   }
 
   return (
-    <div className={styles.overlay} role="dialog" aria-modal="true" aria-label="Live Classroom">
-      <span className={styles.eyebrow}>Live Classroom \u00b7 {section?.name}</span>
+    <div className={styles.sheet} role="region" aria-label="Live Classroom">
+      <span className={styles.eyebrow}>
+        Live Classroom {midDot} {section?.name}
+      </span>
       <h2 className={styles.title}>{lesson.title}</h2>
       {lesson.body && <p className={styles.body}>{lesson.body}</p>}
 
       {showResumeField ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, width: 'min(420px, 90vw)' }}>
-          <label htmlFor="resume-note" style={{ fontSize: 13, textAlign: 'left' }}>
-            Resume note \u2014 where should you pick back up?
-          </label>
+        <div className={styles.resume}>
+          <label htmlFor="resume-note">Resume note {emDash} where should you pick back up?</label>
           <textarea
             id="resume-note"
             autoFocus
             value={resumeNote}
             onChange={(e) => setResumeNote(e.target.value)}
-            style={{ minHeight: 70, borderRadius: 8, padding: 8, fontSize: 14 }}
           />
           <div className={styles.actions}>
             <button
@@ -114,7 +115,5 @@ export function LiveClassroomOverlay() {
 
   if (!live.open || !live.sectionId || !live.lessonId) return null;
 
-  // Keying by section+lesson gives each launch a fresh resume-note draft
-  // without needing an effect to reset local state on close.
   return <LiveClassroomContent key={`${live.sectionId}-${live.lessonId}`} sectionId={live.sectionId} lessonId={live.lessonId} />;
 }

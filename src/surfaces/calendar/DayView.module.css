@@ -1,85 +1,293 @@
-.wrap {
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(180px, 0.65fr);
+  gap: 16px;
+  min-height: 100%;
+  align-items: start;
+}
+
+.startDayRow {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 12px 18px;
+  margin-bottom: 4px;
+}
+
+.startDay {
+  display: inline-flex;
+  align-items: center;
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  font-family: var(--arc-font-hand);
+  font-size: 28px;
+  line-height: 1.1;
+  color: var(--arc-forest);
+  min-height: 44px;
+  text-decoration: none;
+}
+
+.startDay:hover,
+.startDay:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.startDayHint {
+  margin: 0;
+  font-size: 13px;
+  color: var(--arc-charcoal);
+  max-width: 48ch;
+}
+
+.classes {
   display: flex;
   flex-direction: column;
-  gap: var(--arc-space-4);
+  gap: 14px;
 }
 
-.continuity {
-  background: var(--arc-paper);
+.classCard {
+  position: relative;
+  padding: 18px 20px 16px 28px;
   border: 1px solid var(--arc-line);
-  border-radius: var(--arc-radius);
-  padding: var(--arc-space-3);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--arc-paper-white) 88%, var(--arc-paper));
 }
 
-.continuity h3 {
-  font-size: 13px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: var(--arc-space-2);
+.classCard::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 18px;
+  bottom: 18px;
+  width: 6px;
+  border-radius: 0 4px 4px 0;
+  background: var(--token-color);
+}
+
+.classHead h3 {
+  font-family: var(--arc-font-serif);
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.classOpen {
+  display: block;
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 0;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+}
+
+.classHead p {
+  margin: 2px 0 0;
+  font-size: 14px;
   color: var(--arc-charcoal);
 }
 
-.dayKindBanner {
-  padding: var(--arc-space-2) var(--arc-space-3);
-  border-radius: var(--arc-radius);
-  background: var(--arc-kraft);
-  color: var(--arc-ink);
-  font-weight: 600;
-  font-size: 14px;
+.headline {
+  margin: 10px 0 0;
+  font-size: 16px;
+  font-weight: 700;
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+  color: inherit;
+  font-family: inherit;
 }
 
-.list {
+.hold {
+  margin: 8px 0 0;
+  font-size: 14px;
+  color: var(--arc-terracotta);
+}
+
+.unitNest {
+  margin: 12px 0 0;
+}
+
+.unitChildren {
   display: flex;
   flex-direction: column;
-  gap: var(--arc-space-2);
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.nestAdd {
+  align-self: stretch;
+  border: none;
+  border-bottom: 1px dashed var(--arc-line-strong);
+  background: transparent;
+  color: var(--arc-charcoal);
+  cursor: pointer;
+  font-size: 16px;
+  padding: 8px 0;
+  min-height: 36px;
+  text-align: left;
+}
+
+.dayKindBanner {
+  padding: 10px 12px;
+  font-weight: 600;
+  font-size: 15px;
+  border-radius: 10px;
+}
+
+.dayKindBanner[data-kind='no-school'] {
+  background: var(--arc-noshool-wash);
 }
 
 .row {
   display: flex;
-  align-items: center;
-  gap: var(--arc-space-2);
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
 }
 
-.row > :first-child {
-  flex: 1;
-}
-
-.startClassButton {
-  border: 1px solid var(--arc-ink);
-  background: var(--arc-ink);
-  color: var(--arc-paper-white);
-  border-radius: var(--arc-radius);
-  padding: 5px 10px;
-  font-size: 13px;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.finalBadge {
-  font-size: 12px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+.lessonNote {
+  margin: 0;
+  font-size: 14px;
   color: var(--arc-charcoal);
-  padding: 5px 10px;
-  white-space: nowrap;
+}
+
+.writtenLine {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 10px;
+}
+
+.writtenSep {
+  color: var(--arc-charcoal);
+}
+
+.textAction {
+  border: none;
+  background: transparent;
+  color: var(--arc-ink);
+  padding: 4px 0;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  min-height: 36px;
+}
+
+.textAction:hover,
+.saveNote:hover,
+.nestAdd:hover {
+  color: var(--arc-forest);
+}
+
+.textAction:focus-visible,
+.saveNote:focus-visible,
+.nestAdd:focus-visible {
+  outline: 2px solid var(--arc-ink);
+  outline-offset: 3px;
 }
 
 .addRow {
   display: flex;
-  justify-content: center;
-  padding: var(--arc-space-3);
-  border: 1px dashed var(--arc-line-strong);
-  border-radius: var(--arc-radius);
+  justify-content: flex-start;
+  padding: var(--arc-space-3) 0;
+  border: none;
+  border-bottom: 1px dashed var(--arc-line-strong);
   background: transparent;
   cursor: pointer;
   gap: var(--arc-space-2);
   align-items: center;
   color: var(--arc-charcoal);
+  font-size: 16px;
 }
 
 .empty {
   color: var(--arc-charcoal);
-  font-style: italic;
-  padding: var(--arc-space-2) 0;
+  margin: 8px 0 0;
+}
+
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.teacherNotes,
+.nextUp {
+  border-radius: 16px;
+  padding: 18px 18px 16px;
+}
+
+.teacherNotes {
+  background: var(--arc-paper);
+  min-height: 220px;
+}
+
+.teacherNotes h3,
+.nextUp h3 {
+  font-family: var(--arc-font-sans);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin: 0 0 10px;
+  color: var(--arc-charcoal);
+}
+
+.nextUp {
+  background: color-mix(in srgb, var(--arc-blue) 78%, var(--arc-paper-white));
+}
+
+.nextUp p,
+.teacherNotes p {
+  margin: 0;
+  font-size: 15px;
+}
+
+.noteForm {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.noteForm textarea {
+  min-height: 88px;
+  resize: vertical;
+  border: none;
+  background: transparent;
+  padding: 0;
+}
+
+.saveNote {
+  align-self: flex-start;
+  border: none;
+  background: transparent;
+  padding: 4px 0;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--arc-ink);
+  min-height: 36px;
+}
+
+@media (max-width: 1100px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .teacherNotes {
+    min-height: 0;
+  }
 }

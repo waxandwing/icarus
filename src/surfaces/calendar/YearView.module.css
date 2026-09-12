@@ -1,0 +1,205 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 100%;
+}
+
+.countdown {
+  margin: 0;
+  font-family: var(--arc-font-hand);
+  font-size: 22px;
+  line-height: 1.2;
+  color: var(--arc-ink);
+}
+
+.legend {
+  margin: -8px 0 0;
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--arc-charcoal);
+  max-width: 52ch;
+}
+
+.months {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 14px 12px;
+}
+
+.monthCard {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 10px 14px;
+  border: 1px solid var(--arc-line);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--arc-paper-white) 70%, var(--arc-paper));
+  text-align: left;
+  color: inherit;
+}
+
+.monthHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 0;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.monthHead:hover .monthName,
+.monthHead:focus-visible .monthName {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.monthName {
+  font-family: var(--arc-font-serif);
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.monthYear {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--arc-charcoal);
+}
+
+.dowRow,
+.weekRow {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.dowRow {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--arc-charcoal);
+  text-align: center;
+}
+
+.day {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 22px;
+  border: none;
+  padding: 0;
+  border-radius: 4px;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: inherit;
+  background: transparent;
+}
+
+button.day {
+  cursor: pointer;
+}
+
+.xMark {
+  position: absolute;
+  inset: -3px;
+  width: calc(100% + 6px);
+  height: calc(100% + 6px);
+  object-fit: contain;
+  pointer-events: none;
+  mix-blend-mode: multiply;
+}
+
+.xMark[data-ink='charcoal'] {
+  filter: grayscale(1) contrast(1.2) brightness(0.42);
+}
+
+.xMark[data-ink='forest'] {
+  filter: grayscale(1) sepia(0.7) hue-rotate(72deg) saturate(1.35) brightness(0.55);
+}
+
+.xMark[data-ink='terracotta'] {
+  filter: grayscale(1) sepia(0.9) hue-rotate(-18deg) saturate(1.45) brightness(0.62);
+}
+
+.xMark[data-ink='kraft'] {
+  filter: grayscale(1) sepia(1) hue-rotate(12deg) saturate(1.1) brightness(0.58);
+}
+
+.xMark[data-ink='navy'] {
+  filter: grayscale(1) sepia(0.45) hue-rotate(175deg) saturate(1.25) brightness(0.5);
+}
+
+.outMark {
+  position: absolute;
+  inset: -2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--arc-font-hand);
+  font-size: 13px;
+  line-height: 1;
+  pointer-events: none;
+  color: var(--arc-forest);
+}
+
+.outMark[data-kind='sick'] {
+  color: var(--arc-terracotta);
+}
+
+.outMark[data-kind='sub'] {
+  color: var(--arc-blue);
+}
+
+.day[data-crossed='true'],
+.day[data-out='sick'],
+.day[data-out='sub'] {
+  color: color-mix(in srgb, var(--arc-ink) 55%, transparent);
+}
+
+.day[data-in-month='false'] {
+  background: transparent;
+}
+
+.day[data-in-month='true'][data-kind='instructional'][data-quarter='1'],
+.day[data-in-month='true'][data-kind='early-release'][data-quarter='1'] {
+  background: color-mix(in srgb, var(--arc-mustard) 72%, var(--arc-paper-white));
+}
+
+.day[data-in-month='true'][data-kind='instructional'][data-quarter='2'],
+.day[data-in-month='true'][data-kind='early-release'][data-quarter='2'] {
+  background: color-mix(in srgb, var(--arc-blue) 72%, var(--arc-paper-white));
+}
+
+.day[data-in-month='true'][data-kind='instructional'][data-quarter='3'],
+.day[data-in-month='true'][data-kind='early-release'][data-quarter='3'] {
+  background: color-mix(in srgb, var(--arc-terracotta) 62%, var(--arc-paper-white));
+}
+
+.day[data-in-month='true'][data-kind='instructional'][data-quarter='4'],
+.day[data-in-month='true'][data-kind='early-release'][data-quarter='4'] {
+  background: color-mix(in srgb, var(--arc-lavender) 78%, var(--arc-paper-white));
+}
+
+.day[data-in-month='true'][data-kind='no-school'] {
+  background: var(--arc-noshool-wash);
+}
+
+@media (max-width: 980px) {
+  .months {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .months {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

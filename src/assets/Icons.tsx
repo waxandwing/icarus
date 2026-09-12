@@ -4,14 +4,20 @@
  * achieved with intentionally uneven bezier control points, not a filter.
  */
 
-export function ImportantCircle({ size = 28 }: { size?: number }) {
+export function ImportantCircle({ className }: { className?: string }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 40 40" aria-hidden="true" focusable="false">
+    <svg
+      className={className}
+      viewBox="0 0 40 40"
+      preserveAspectRatio="none"
+      aria-hidden="true"
+      focusable="false"
+    >
       <path
         d="M20.5 4.5c8 .3 14.8 6 15 13.7.2 8-6.6 15.3-15.3 15.8C11.6 34.4 4.9 28 4.6 20 4.3 12 10.9 5 19 4.6"
         fill="none"
         stroke="var(--arc-red)"
-        strokeWidth="2.6"
+        strokeWidth="2.2"
         strokeLinecap="round"
       />
     </svg>
@@ -68,6 +74,50 @@ export function DrawerGlyph({ size = 20 }: { size?: number }) {
       <rect x="3.5" y="6" width="17" height="13" rx="2" stroke="currentColor" strokeWidth="1.6" />
       <line x1="9.5" y1="12.5" x2="14.5" y2="12.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
       <path d="M3.5 6l3-3h11l3 3" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+export function FixedMark({ size = 12 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+      <path
+        d="M8 2.2v9.2M5.2 5.1l2.8-2.6 2.8 2.6"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <circle cx="8" cy="13.2" r="1.1" fill="currentColor" />
+    </svg>
+  );
+}
+
+export function ExpandGlyph({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false">
+      <path
+        d="M3 6.2V3h3.2M13 6.2V3h-3.2M3 9.8V13h3.2M13 9.8V13h-3.2"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+export function CompressGlyph({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false">
+      <path
+        d="M6.2 3H3v3.2M9.8 3H13v3.2M6.2 13H3V9.8M9.8 13H13V9.8"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }

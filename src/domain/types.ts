@@ -10,6 +10,9 @@ export type ISODate = string; // "YYYY-MM-DD"
 
 export type DayKind = 'instructional' | 'no-school' | 'early-release' | 'weekend';
 
+/** Teacher was not in the room on an instructional day. Sub covered vs out sick. */
+export type TeacherOutReason = 'sick' | 'sub';
+
 export type Confidence = 'confirmed' | 'tentative';
 
 export interface SchoolCalendarDay {
@@ -27,6 +30,29 @@ export interface SchoolCalendar {
   showWeekends: boolean;
   weekStartsOn: 'monday' | 'sunday';
   source: string;
+  /** Teacher-crossed instructional days on the Year lens (hand-drawn X marks). */
+  crossedDates: Record<ISODate, true>;
+  /** Instructional days the teacher was not in school (sick or a sub covered). */
+  teacherOutDates: Record<ISODate, TeacherOutReason>;
+}
+
+/** How this class’s period is usually sequenced. Empty = no refill. Not a UbD/Marzano CMS. */
+export type LessonFrame = 'none' | 'ubd' | 'marzano';
+
+export type LessonPartKind = 'block' | 'demo' | 'cleanup';
+
+export interface LessonPartDefault {
+  title: string;
+  minutes: number;
+  kind?: LessonPartKind;
+  /** Default prompt (e.g. Bell work → “Daily doodle”). Refills when a lesson has no ## / numbered parts. */
+  prompt?: string;
+}
+
+/** One day’s scrap for a section — not scores, not a gradebook. */
+export interface SectionDayMark {
+  complete: boolean;
+  note: string;
 }
 
 export interface Course {
@@ -35,6 +61,9 @@ export interface Course {
   colorToken: PaletteToken;
   createdAt: number;
   archived?: boolean;
+  /** Ordered period recipe. Sections inherit unless they set their own non-empty list. */
+  lessonStructure: LessonPartDefault[];
+  lessonFrame: LessonFrame;
 }
 
 export interface Section {
@@ -43,7 +72,13 @@ export interface Section {
   name: string;
   createdAt: number;
   archived?: boolean;
+  /** Non-empty overrides the course recipe. Empty inherits. */
+  lessonStructure: LessonPartDefault[];
+  lessonFrame?: LessonFrame;
+  dayMarks: Record<ISODate, SectionDayMark>;
 }
+
+export type UnitLocation = 'calendar' | 'desk' | 'drawer';
 
 export interface Unit {
   id: string;
@@ -54,6 +89,8 @@ export interface Unit {
   notes?: string;
   important: boolean;
   createdAt: number;
+  /** Calendar, desk magnet, or Fridge drawer — never a task, idea, or destroyed object. */
+  location: UnitLocation;
 }
 
 export interface Lesson {
@@ -71,7 +108,7 @@ export interface Lesson {
 }
 
 export type TaskColumn = 'must' | 'should' | 'could';
-export type NoteLocation = 'calendar' | 'fridge' | 'drawer' | 'taskbar';
+export type NoteLocation = 'calendar' | 'fridge' | 'drawer' | 'taskbar' | 'desk';
 
 export interface Note {
   id: string;
@@ -83,6 +120,10 @@ export interface Note {
   location: NoteLocation;
   taskColumn?: TaskColumn;
   fridgeSlot?: number;
+  /** Percent of the desk, when the note is a post-it around the planner. */
+  deskX?: number;
+  deskY?: number;
+  deskRotate?: number;
   createdAt: number;
 }
 
@@ -102,6 +143,8 @@ export interface Magnet {
 
 export type PlaceableType = 'unit' | 'lesson' | 'note' | 'magnet';
 
+export type PlacementStorage = 'calendar' | 'drawer' | 'desk';
+
 export interface Placement {
   id: string;
   objectType: PlaceableType;
@@ -112,6 +155,11 @@ export interface Placement {
   order: number;
   /** Fixed anchors never move through a shift unless explicitly changed. */
   fixed: boolean;
+  /**
+   * Drawer storage parks the same placement off the spread.
+   * Dates are remembered; the object is not destroyed or recast.
+   */
+  storage?: PlacementStorage;
 }
 
 export type DeliveryState = 'not-started' | 'in-progress' | 'completed' | 'skipped';

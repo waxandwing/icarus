@@ -34,7 +34,9 @@ export class ErrorBoundary extends Component<Props, State> {
         <div className={styles.splash} role="alert">
           <ArcMark size={56} />
           <p>Something went sideways loading Arc.</p>
-          <p style={{ fontSize: 13, opacity: 0.75 }}>Your saved plan is untouched \u2014 reloading should fix this.</p>
+          <p style={{ fontSize: 13, opacity: 0.75 }}>
+            Your saved plan is untouched {'\u2014'} reloading should fix this.
+          </p>
           <button
             type="button"
             onClick={() => window.location.reload()}

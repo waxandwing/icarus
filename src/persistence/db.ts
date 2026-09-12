@@ -1,5 +1,5 @@
 import { type IDBPDatabase, openDB } from 'idb';
-import { CURRENT_SCHEMA_VERSION } from '../domain/seed';
+import { CURRENT_SCHEMA_VERSION, markSampleYearCrosses } from '../domain/seed';
 import type { WorkspaceDomainState } from '../domain/types';
 
 const DB_NAME = 'arc-workspace';
@@ -39,6 +39,52 @@ function migrate(raw: PersistedWorkspace): PersistedWorkspace {
   if (!domain.schemaVersion || domain.schemaVersion < CURRENT_SCHEMA_VERSION) {
     domain.schemaVersion = CURRENT_SCHEMA_VERSION;
   }
+  const hadYearMarks = Boolean(raw.domain.calendar?.crossedDates);
+  domain.calendar = {
+    ...domain.calendar,
+    crossedDates: domain.calendar?.crossedDates ?? {},
+    teacherOutDates: domain.calendar?.teacherOutDates ?? {},
+  };
+  if (!hadYearMarks && domain.isSampleWorkspace) {
+    markSampleYearCrosses(domain.calendar);
+  } else if (domain.isSampleWorkspace && Object.keys(domain.calendar.teacherOutDates).length === 0) {
+    const outs = { ...domain.calendar.teacherOutDates, '2026-09-04': 'sick' as const, '2026-09-08': 'sub' as const };
+    const crossed = { ...domain.calendar.crossedDates };
+    delete crossed['2026-09-04'];
+    delete crossed['2026-09-08'];
+    domain.calendar = { ...domain.calendar, teacherOutDates: outs, crossedDates: crossed };
+  }
+  const units = { ...domain.units };
+  for (const [id, unit] of Object.entries(units)) {
+    if (!('location' in unit) || !(unit as { location?: string }).location) {
+      const parked = Object.values(domain.placements ?? {}).find(
+        (p) => p.objectType === 'unit' && p.objectId === id && (p.storage === 'drawer' || p.storage === 'desk'),
+      );
+      units[id] = {
+        ...unit,
+        location: parked?.storage === 'drawer' ? 'drawer' : parked?.storage === 'desk' ? 'desk' : 'calendar',
+      };
+    }
+  }
+  domain.units = units;
+  const courses = { ...domain.courses };
+  for (const [id, course] of Object.entries(courses)) {
+    courses[id] = {
+      ...course,
+      lessonStructure: Array.isArray(course.lessonStructure) ? course.lessonStructure : [],
+      lessonFrame: course.lessonFrame === 'ubd' || course.lessonFrame === 'marzano' ? course.lessonFrame : 'none',
+    };
+  }
+  domain.courses = courses;
+  const sections = { ...domain.sections };
+  for (const [id, section] of Object.entries(sections)) {
+    sections[id] = {
+      ...section,
+      lessonStructure: Array.isArray(section.lessonStructure) ? section.lessonStructure : [],
+      dayMarks: section.dayMarks && typeof section.dayMarks === 'object' ? section.dayMarks : {},
+    };
+  }
+  domain.sections = sections;
   return { ...raw, domain };
 }
 

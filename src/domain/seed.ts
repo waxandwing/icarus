@@ -1,9 +1,9 @@
 import { produce } from 'immer';
-import { addCalendarDays } from '../calendar/dates';
+import { addCalendarDays, isInstructionalDay } from '../calendar/dates';
 import * as cmd from './commands';
 import type { WorkspaceDomainState } from './types';
 
-const CURRENT_SCHEMA_VERSION = 1;
+const CURRENT_SCHEMA_VERSION = 2;
 
 function emptyState(): WorkspaceDomainState {
   return {
@@ -13,6 +13,8 @@ function emptyState(): WorkspaceDomainState {
       startDate: '2026-08-24',
       endDate: '2027-06-11',
       days: {},
+      crossedDates: {},
+      teacherOutDates: {},
       showWeekends: false,
       weekStartsOn: 'monday',
       source: 'manual',
@@ -76,7 +78,7 @@ export function createInitialState(): WorkspaceDomainState {
       courseId: course.id,
       title: 'Unit 1 \u00b7 Cell Structure',
       colorToken: 'blue',
-      startDate: '2026-09-08',
+      startDate: '2026-09-07',
       endDate: '2026-09-25',
     });
     cmd.createUnit(draft, {
@@ -102,7 +104,19 @@ export function createInitialState(): WorkspaceDomainState {
       unitId: unit1.id,
       sectionId: section.id,
       title: 'Membrane transport lab',
-      body: 'Egg osmosis demo \u2014 set up before period starts.',
+      body: [
+        '## Warm Up',
+        'Name three organelles.',
+        '',
+        '## Demo',
+        'Egg osmosis \u2014 set up before period starts.',
+        '',
+        '## Studio',
+        'Diagram how water moves across the membrane.',
+        '',
+        '## Critique',
+        'Share one observation from your egg.',
+      ].join('\n'),
       date: '2026-09-10',
     });
 
@@ -127,21 +141,14 @@ export function createInitialState(): WorkspaceDomainState {
     });
     cmd.createNote(draft, {
       title: 'Reorder microscope slides',
-      location: 'fridge',
+      location: 'desk',
+    });
+    cmd.createNote(draft, {
+      title: 'Ask about extra petri dishes',
+      location: 'desk',
     });
 
-    cmd.createMagnet(draft, {
-      magnetKind: 'idea',
-      title: 'Try a Socratic seminar for genetics review',
-    });
-    cmd.createMagnet(draft, {
-      magnetKind: 'resource',
-      title: 'PBS cell video (9 min)',
-    });
-    cmd.createMagnet(draft, {
-      magnetKind: 'reminder',
-      title: 'Parent night is the 24th',
-    });
+    markSampleYearCrosses(draft.calendar);
 
     draft.history = [];
     // Marked explicitly so the UI can tell the teacher this is example content
@@ -150,4 +157,23 @@ export function createInitialState(): WorkspaceDomainState {
   });
 }
 
+/** Cross instructional days through 10 Sep 2026 so the Year lens looks lived-in. */
+export function markSampleYearCrosses(
+  calendar: WorkspaceDomainState['calendar'],
+  through: string = '2026-09-10',
+) {
+  if (!calendar.crossedDates) calendar.crossedDates = {};
+  if (!calendar.teacherOutDates) calendar.teacherOutDates = {};
+  calendar.teacherOutDates['2026-09-04'] = 'sick';
+  calendar.teacherOutDates['2026-09-08'] = 'sub';
+  let cursor = calendar.startDate;
+  while (cursor <= through) {
+    if (isInstructionalDay(calendar, cursor) && !calendar.teacherOutDates[cursor]) {
+      calendar.crossedDates[cursor] = true;
+    }
+    cursor = addCalendarDays(cursor, 1);
+  }
+}
+
 export { CURRENT_SCHEMA_VERSION };
+

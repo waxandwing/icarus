@@ -1,43 +1,61 @@
 .tab {
-  position: fixed;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  background: var(--arc-blue);
-  color: var(--arc-paper-white);
-  border: 1px solid var(--arc-line-strong);
+  position: relative;
+  background: var(--arc-mustard);
+  color: var(--arc-ink);
+  border: 1px solid color-mix(in srgb, var(--arc-ink) 18%, var(--arc-mustard));
   border-right: none;
-  border-radius: var(--arc-radius-lg) 0 0 var(--arc-radius-lg);
-  padding: 16px 8px;
+  border-radius: 0 10px 10px 0;
+  padding: 18px 9px 18px 8px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 8px;
   cursor: pointer;
-  box-shadow: var(--arc-shadow-soft);
-  z-index: 35;
+  min-width: 44px;
+  min-height: 44px;
+  flex-shrink: 0;
+  z-index: 7;
+  margin-right: -2px;
 }
-.tab:hover {
-  padding-right: 12px;
+
+:global([data-high-contrast='true']) .tab {
+  border: 2px solid #000;
+  border-left: none;
+}
+
+.tab[data-drop='true'] {
+  outline: 2px solid var(--arc-ink);
+  outline-offset: 1px;
 }
 
 .label {
   writing-mode: vertical-rl;
   text-orientation: mixed;
-  font-weight: 700;
-  font-size: 12px;
-  letter-spacing: 0.08em;
+  font-weight: 800;
+  font-size: 11px;
+  letter-spacing: 0.16em;
 }
 
 .badge {
   background: var(--arc-terracotta);
   color: var(--arc-paper-white);
   border-radius: 999px;
-  font-size: 10px;
-  min-width: 16px;
-  height: 16px;
+  font-size: 11px;
+  min-width: 18px;
+  height: 18px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   padding: 0 4px;
+}
+
+@media (max-width: 720px) {
+  .tab {
+    border-left: 1px solid var(--arc-line-strong);
+    border-radius: var(--arc-radius);
+    flex-direction: row;
+  }
+  .label {
+    writing-mode: horizontal-tb;
+  }
 }

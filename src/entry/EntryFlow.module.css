@@ -1,0 +1,324 @@
+.stage {
+  --paper-plate: color-mix(in srgb, var(--arc-paper) 58%, var(--arc-fold));
+  position: relative;
+  min-height: 100%;
+  min-height: 100dvh;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--arc-space-8) var(--arc-space-6);
+  background-color: var(--paper-plate);
+  background-image: url('/assets/arc/pattern-arc-geometric.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.landing {
+  --welcome-card-w: 560px;
+  --welcome-mark: 240px;
+  --welcome-mark-h: calc(var(--welcome-mark) * 280 / 256);
+  /* v8 frame is 900²; assembled mark bbox ~701×737. Scale that bbox into the slot. */
+  --motion-zoom: calc(900 / 701);
+  position: relative;
+  z-index: 1;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  width: min(var(--welcome-card-w), 100%);
+  height: auto;
+  padding: 40px 36px 32px;
+  overflow: visible;
+  background: var(--paper-plate);
+  border: 1px solid color-mix(in srgb, var(--arc-ink) 10%, var(--arc-paper));
+  border-radius: var(--arc-radius-lg);
+  box-shadow: var(--arc-shadow-soft);
+}
+
+.grain {
+  z-index: 0;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+
+.hero {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  width: 100%;
+}
+
+.landing .eyebrow,
+.landing .primary,
+.landing .beta {
+  font-family: 'Nunito Sans', Helvetica, Arial, sans-serif;
+}
+
+.landing .display,
+.landing .lede {
+  font-family: 'Fraunces', Georgia, 'Times New Roman', serif;
+}
+
+.landing .lede {
+  font-style: italic;
+}
+
+.markSlot {
+  position: relative;
+  z-index: 1;
+  width: var(--welcome-mark);
+  height: var(--welcome-mark-h);
+  flex-shrink: 0;
+  overflow: hidden;
+  background: transparent;
+}
+
+.opening,
+.settledFrame {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: calc(var(--welcome-mark) * var(--motion-zoom));
+  height: calc(var(--welcome-mark) * var(--motion-zoom));
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.openingVideo,
+.settledFrame {
+  display: block;
+  object-fit: contain;
+  object-position: center;
+  background: transparent;
+  mix-blend-mode: multiply;
+}
+
+.openingVideo {
+  width: 100%;
+  height: 100%;
+}
+
+.landing[data-phase='ready'] .opening {
+  opacity: 0;
+}
+
+.mark {
+  display: flex;
+  justify-content: center;
+}
+
+.copy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  text-align: center;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.landing[data-phase='ready'] .copy {
+  opacity: 1;
+  pointer-events: auto;
+  transition: opacity var(--arc-motion-slow) var(--arc-ease);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .copy,
+  .landing[data-phase='ready'] .copy {
+    opacity: 1;
+    pointer-events: auto;
+    transition: none;
+  }
+}
+
+:global(html[data-reduced-motion='true']) .copy,
+:global(html[data-reduced-motion='true']) .landing[data-phase='ready'] .copy {
+  opacity: 1;
+  pointer-events: auto;
+  transition: none;
+}
+
+.eyebrow {
+  margin: 0;
+  font-family: var(--arc-font-sans);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--arc-terracotta);
+}
+
+.display {
+  margin: 0;
+  font-family: var(--arc-font-serif);
+  font-weight: 500;
+  font-size: clamp(32px, 4.4vw, 44px);
+  line-height: 0.96;
+  letter-spacing: -0.04em;
+  color: var(--arc-ink);
+}
+
+.landing .display {
+  font-size: 36px;
+}
+
+.lede {
+  margin: 0;
+  font-family: var(--arc-font-serif);
+  font-size: 19px;
+  line-height: 1.38;
+  color: color-mix(in srgb, var(--arc-charcoal) 72%, var(--arc-sage));
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--arc-space-3);
+  justify-content: center;
+  margin-top: var(--arc-space-2);
+}
+
+.primary,
+.beta,
+.primaryWide,
+.enterCta {
+  border: none;
+  border-radius: var(--arc-radius);
+  min-height: 44px;
+  padding: 0 16px;
+  font-family: var(--arc-font-sans);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+}
+
+.primary,
+.primaryWide,
+.enterCta {
+  background: var(--arc-ink);
+  color: #fff;
+  box-shadow: 0 3px 8px rgba(43, 46, 46, 0.12);
+}
+
+.primary,
+.beta {
+  width: 220px;
+}
+
+.beta {
+  background: var(--arc-blue);
+  color: var(--arc-ink);
+  box-shadow: 0 3px 8px rgba(43, 46, 46, 0.12);
+}
+
+.primaryWide {
+  width: 100%;
+  max-width: 360px;
+}
+
+.enterCta {
+  width: 100%;
+  max-width: 360px;
+  min-height: 56px;
+  border-radius: 10px;
+  font-size: 16px;
+}
+
+.card {
+  position: relative;
+  z-index: 1;
+  width: min(440px, 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--arc-space-4);
+  padding: 40px;
+  border-radius: var(--arc-radius);
+  background: var(--paper-plate);
+  box-shadow: 0 6px 18px rgba(43, 46, 46, 0.12);
+  text-align: center;
+}
+
+.cardTitle {
+  margin: 0;
+  font-family: var(--arc-font-serif);
+  font-weight: 500;
+  font-size: 28px;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--arc-ink);
+}
+
+.cardBody {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--arc-charcoal);
+}
+
+.label {
+  align-self: flex-start;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--arc-charcoal);
+}
+
+.input {
+  width: 100%;
+  max-width: 360px;
+  height: 44px;
+  padding: 12px 14px;
+  border: 1px solid #c7bdad;
+  border-radius: var(--arc-radius);
+  background: #fff;
+  font-size: 14px;
+}
+
+.input::placeholder {
+  color: color-mix(in srgb, var(--arc-charcoal) 70%, var(--arc-sage));
+}
+
+.error {
+  margin: 0;
+  font-size: 13px;
+  color: var(--arc-red);
+}
+
+.textLink {
+  border: none;
+  background: none;
+  padding: 0;
+  min-height: 44px;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(44, 46, 46, 0.6);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.quiet,
+.hold {
+  margin: 0;
+  font-size: 12px;
+  color: rgba(44, 46, 46, 0.6);
+}
+
+.hold {
+  font-size: 12px;
+}
+
+@media (max-width: 720px) {
+  .landing {
+    padding: 32px 20px 28px;
+  }
+}
