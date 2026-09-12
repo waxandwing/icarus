@@ -112,6 +112,24 @@ export function addCalendarYears(iso: ISODate, amount: number): ISODate {
   return toISODate(addYears(fromISODate(iso), amount));
 }
 
+/** Inclusive check against the loaded school-year range. */
+export function isoInLoadedCalendar(iso: ISODate, start: ISODate, end: ISODate): boolean {
+  return iso >= start && iso <= end;
+}
+
+/**
+ * Year prev/next may only move the anchor when the shifted date still falls
+ * inside the loaded calendar. Do not invent a neighboring school year.
+ */
+export function yearShiftStaysLoaded(
+  anchor: ISODate,
+  direction: -1 | 1,
+  start: ISODate,
+  end: ISODate,
+): boolean {
+  return isoInLoadedCalendar(addCalendarYears(anchor, direction), start, end);
+}
+
 /**
  * Steps forward or backward across school days only (skipping weekends and
  * confirmed no-school days), the unit disruption shifts are measured in.
@@ -186,6 +204,8 @@ export function monthsInInclusiveRange(start: ISODate, end: ISODate): ISODate[] 
 /**
  * School-year window shaped like `templateStart`–`templateEnd`, shifted so it
  * contains `anchor`. Display-only — does not mutate the calendar.
+ * The Year lens must render the loaded `calendar.startDate`–`endDate` range,
+ * not a window shifted into an unloaded year.
  */
 export function schoolYearWindow(
   anchor: ISODate,

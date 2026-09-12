@@ -8,7 +8,6 @@ import {
   isInstructionalDay,
   monthsInInclusiveRange,
   schoolQuarter,
-  schoolYearWindow,
   todayISO,
 } from '../../calendar/dates';
 import { useWorkspaceStore } from '../../state/store';
@@ -30,14 +29,14 @@ function countdownCopy(remaining: number, lastDay: string, today: string) {
  * No left rail, no Caught up, no Quarter product view.
  */
 export function YearView() {
-  const anchor = useWorkspaceStore((s) => s.ui.anchorDate);
   const domain = useWorkspaceStore((s) => s.domain);
   const setView = useWorkspaceStore((s) => s.setView);
   const setAnchor = useWorkspaceStore((s) => s.setAnchorDate);
   const toggleYearCross = useWorkspaceStore((s) => s.toggleYearCross);
 
-  const window = schoolYearWindow(anchor, domain.calendar.startDate, domain.calendar.endDate);
-  const months = monthsInInclusiveRange(window.start, window.end);
+  const start = domain.calendar.startDate;
+  const end = domain.calendar.endDate;
+  const months = monthsInInclusiveRange(start, end);
   const today = todayISO();
   const remaining = countSchoolDaysLeft(domain.calendar, today);
   const crossed = domain.calendar.crossedDates ?? {};

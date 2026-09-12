@@ -11,7 +11,6 @@ import {
   formatYearSpan,
   getWeekDays,
   schoolWeekNumber,
-  schoolYearWindow,
 } from '../../calendar/dates';
 import { useWorkspaceStore } from '../../state/store';
 import type { CalendarViewMode } from '../../state/store';
@@ -70,8 +69,7 @@ export function CalendarShell({ onEdit, onCreate }: ViewProps) {
   const calendarEnd = useWorkspaceStore((s) => s.domain.calendar.endDate);
 
   const liveOpen = live.open;
-  const yearWindow = schoolYearWindow(anchor, calendarStart, calendarEnd);
-  const title = liveOpen ? 'Live Classroom' : headerTitle(view, anchor, yearWindow.start, yearWindow.end);
+  const title = liveOpen ? 'Live Classroom' : headerTitle(view, anchor, calendarStart, calendarEnd);
 
   return (
     <section className={styles.workspace} aria-label="Calendar">

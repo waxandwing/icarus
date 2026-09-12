@@ -11,6 +11,7 @@ import {
   schoolWeekNumber,
   schoolYearWindow,
   countSchoolDaysLeft,
+  yearShiftStaysLoaded,
 } from './dates';
 import type { SchoolCalendar } from '../domain/types';
 
@@ -116,6 +117,16 @@ describe('school year lens helpers', () => {
     // After Friday the 11th: Monday 14 is no-school, so Tue 15 + Wed 16.
     expect(countSchoolDaysLeft(shortYear, '2026-09-11')).toBe(2);
     expect(countSchoolDaysLeft(shortYear, '2026-09-16')).toBe(0);
+  });
+
+  it('does not treat a neighboring school year as loaded', () => {
+    expect(yearShiftStaysLoaded('2026-09-12', -1, '2026-08-24', '2027-06-11')).toBe(false);
+    expect(yearShiftStaysLoaded('2026-09-12', 1, '2026-08-24', '2027-06-11')).toBe(false);
+  });
+
+  it('allows a year shift that still lands inside a longer loaded range', () => {
+    expect(yearShiftStaysLoaded('2026-09-12', -1, '2025-08-25', '2027-06-11')).toBe(true);
+    expect(yearShiftStaysLoaded('2026-09-12', 1, '2025-08-25', '2027-06-11')).toBe(false);
   });
 });
 
