@@ -68,8 +68,9 @@
   min-height: 44px;
 }
 
-.block {
-  margin-bottom: 18px;
+.block[data-drop='true'] {
+  outline: 2px dashed var(--arc-ink);
+  outline-offset: 4px;
 }
 
 .block h3 {

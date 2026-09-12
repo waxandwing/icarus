@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { PlacementView } from './selectors';
 import { createInitialState } from '../domain/seed';
-import { getNextUp, nestLessonsInUnits } from './selectors';
+import { getNextUp, getFridgeItems, nestLessonsInUnits } from './selectors';
 
 function view(partial: Partial<PlacementView> & Pick<PlacementView, 'placementId' | 'objectType' | 'objectId'>): PlacementView {
   return {
@@ -69,5 +69,14 @@ describe('getNextUp', () => {
     expect(next?.kind).toBe('upcoming');
     expect(next?.title).toBe('Cell structure quiz');
     expect(next?.date).toBe('2026-09-15');
+  });
+});
+
+describe('getFridgeItems', () => {
+  it('includes magnets parked on the door, not only notes', () => {
+    const domain = createInitialState();
+    const titles = getFridgeItems(domain).map((item) => item.title);
+    expect(titles).toContain('Lab coats for osmosis');
+    expect(getFridgeItems(domain).some((item) => item.kind === 'magnet')).toBe(true);
   });
 });

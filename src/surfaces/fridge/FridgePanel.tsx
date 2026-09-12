@@ -2,6 +2,7 @@ import { useState, type CSSProperties } from 'react';
 import type { Magnet, Note, Unit } from '../../domain/types';
 import { getDrawerItems, getFridgeItems, getLessonsForUnit } from '../../projections/selectors';
 import { useWorkspaceStore } from '../../state/store';
+import { applyFridgeDrop } from './fridgeDrop';
 import { useFridgeDrop } from './useFridgeDrop';
 import styles from './FridgePanel.module.css';
 
@@ -20,35 +21,79 @@ function FridgeInterior() {
   const select = useWorkspaceStore((s) => s.select);
   const moveNoteToFridge = useWorkspaceStore((s) => s.moveNoteToFridge);
   const moveMagnetToFridge = useWorkspaceStore((s) => s.moveMagnetToFridge);
+  const moveNoteToDrawer = useWorkspaceStore((s) => s.moveNoteToDrawer);
+  const moveMagnetToDrawer = useWorkspaceStore((s) => s.moveMagnetToDrawer);
+  const stowUnitInDrawer = useWorkspaceStore((s) => s.stowUnitInDrawer);
+  const createUnitInDrawer = useWorkspaceStore((s) => s.createUnitInDrawer);
   const [showDrawer, setShowDrawer] = useState(true);
+  const [drawerOver, setDrawerOver] = useState(false);
 
   const fridgeItems = getFridgeItems(domain);
   const drawerItems = getDrawerItems(domain);
-  const papers = fridgeItems.filter((item): item is Note => item.kind === 'note');
+
+  const drawerDrop = {
+    domain,
+    stowUnitInDrawer,
+    createUnitInDrawer,
+    moveNoteToFridge,
+    moveMagnetToFridge,
+    moveNoteToDrawer,
+    moveMagnetToDrawer,
+    target: 'drawer' as const,
+  };
 
   return (
     <>
       <section className={styles.block}>
         <h3>On the door</h3>
         <div className={styles.paperRow}>
-          {papers.length === 0 && <p className={styles.empty}>Nothing parked here.</p>}
-          {papers.map((item, index) => (
-            <button
-              key={item.id}
-              type="button"
-              className={styles.scrap}
-              data-tilt={index % 2 === 0 ? 'left' : 'right'}
-              draggable
-              onDragStart={(e) => setMoveDrag(e, { type: 'note', id: item.id })}
-              onClick={() => select({ objectType: 'note', objectId: item.id })}
-            >
-              {item.title}
-            </button>
-          ))}
+          {fridgeItems.length === 0 && <p className={styles.empty}>Nothing parked here.</p>}
+          {fridgeItems.map((item, index) =>
+            item.kind === 'note' ? (
+              <button
+                key={item.id}
+                type="button"
+                className={styles.scrap}
+                data-tilt={index % 2 === 0 ? 'left' : 'right'}
+                draggable
+                onDragStart={(e) => setMoveDrag(e, { type: 'note', id: item.id })}
+                onClick={() => select({ objectType: 'note', objectId: item.id })}
+              >
+                {item.title}
+              </button>
+            ) : (
+              <button
+                key={item.id}
+                type="button"
+                className={styles.magnet}
+                data-kind={item.magnetKind}
+                draggable
+                onDragStart={(e) => setMoveDrag(e, { type: 'magnet', id: item.id })}
+                onClick={() => select({ objectType: 'magnet', objectId: item.id })}
+              >
+                <span className={styles.magnetTitle}>{item.title}</span>
+              </button>
+            ),
+          )}
         </div>
       </section>
 
-      <section className={styles.block}>
+      <section
+        className={styles.block}
+        data-drop={drawerOver}
+        onDragOver={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          e.dataTransfer.dropEffect = 'move';
+          setDrawerOver(true);
+        }}
+        onDragLeave={() => setDrawerOver(false)}
+        onDrop={(e) => {
+          e.stopPropagation();
+          setDrawerOver(false);
+          applyFridgeDrop(e, drawerDrop);
+        }}
+      >
         <button
           type="button"
           className={styles.later}

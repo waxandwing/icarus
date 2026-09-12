@@ -134,6 +134,10 @@ export function createInitialState(): WorkspaceDomainState {
       title: 'Ask about extra petri dishes',
       location: 'desk',
     });
+    cmd.createMagnet(draft, {
+      magnetKind: 'reminder',
+      title: 'Lab coats for osmosis',
+    });
 
     markSampleYearCrosses(draft.calendar);
 
