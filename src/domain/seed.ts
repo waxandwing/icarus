@@ -1,5 +1,5 @@
 import { produce } from 'immer';
-import { addCalendarDays } from '../calendar/dates';
+import { addCalendarDays, isInstructionalDay } from '../calendar/dates';
 import * as cmd from './commands';
 import type { WorkspaceDomainState } from './types';
 
@@ -13,6 +13,7 @@ function emptyState(): WorkspaceDomainState {
       startDate: '2026-08-24',
       endDate: '2027-06-11',
       days: {},
+      crossedDates: {},
       showWeekends: false,
       weekStartsOn: 'monday',
       source: 'manual',
@@ -127,21 +128,18 @@ export function createInitialState(): WorkspaceDomainState {
     });
     cmd.createNote(draft, {
       title: 'Reorder microscope slides',
-      location: 'fridge',
+      location: 'desk',
     });
-
-    cmd.createMagnet(draft, {
-      magnetKind: 'idea',
-      title: 'Try a Socratic seminar for genetics review',
-    });
-    cmd.createMagnet(draft, {
-      magnetKind: 'resource',
-      title: 'PBS cell video (9 min)',
+    cmd.createNote(draft, {
+      title: 'Ask about extra petri dishes',
+      location: 'desk',
     });
     cmd.createMagnet(draft, {
       magnetKind: 'reminder',
-      title: 'Parent night is the 24th',
+      title: 'Lab coats for osmosis',
     });
+
+    markSampleYearCrosses(draft.calendar);
 
     draft.history = [];
     // Marked explicitly so the UI can tell the teacher this is example content
@@ -150,4 +148,20 @@ export function createInitialState(): WorkspaceDomainState {
   });
 }
 
+/** Cross instructional days through 10 Sep 2026 so the Year lens looks lived-in. */
+export function markSampleYearCrosses(
+  calendar: WorkspaceDomainState['calendar'],
+  through: string = '2026-09-10',
+) {
+  if (!calendar.crossedDates) calendar.crossedDates = {};
+  let cursor = calendar.startDate;
+  while (cursor <= through) {
+    if (isInstructionalDay(calendar, cursor)) {
+      calendar.crossedDates[cursor] = true;
+    }
+    cursor = addCalendarDays(cursor, 1);
+  }
+}
+
 export { CURRENT_SCHEMA_VERSION };
+

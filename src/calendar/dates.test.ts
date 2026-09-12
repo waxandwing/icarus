@@ -1,5 +1,18 @@
 import { describe, expect, it } from 'vitest';
-import { addSchoolDays, getMonthGrid, getWeekDays } from './dates';
+import {
+  addSchoolDays,
+  formatWeekRange,
+  fromISODate,
+  getMonthGrid,
+  getWeekDays,
+  monthsInInclusiveRange,
+  rangeOverlapColumns,
+  schoolQuarter,
+  schoolWeekNumber,
+  schoolYearWindow,
+  countSchoolDaysLeft,
+  yearShiftStaysLoaded,
+} from './dates';
 import type { SchoolCalendar } from '../domain/types';
 
 const calendar: SchoolCalendar = {
@@ -8,6 +21,7 @@ const calendar: SchoolCalendar = {
   days: {
     '2026-09-14': { date: '2026-09-14', kind: 'no-school', label: 'Staff development', confidence: 'confirmed' },
   },
+  crossedDates: {},
   showWeekends: false,
   weekStartsOn: 'monday',
   source: 'test',
@@ -36,10 +50,83 @@ describe('Year Map / Month Monday alignment (Desktop Interaction Blueprint \u00a
       expect(week.length).toBeLessThanOrEqual(5);
       const mondayIndices = week
         .map((cell, i) => ({ cell, i }))
-        .filter(({ cell }) => new Date(cell.date).getDay() === 1)
+        .filter(({ cell }) => fromISODate(cell.date).getDay() === 1)
         .map(({ i }) => i);
       expect(mondayIndices).toEqual([0]);
     }
+  });
+});
+
+describe('rangeOverlapColumns', () => {
+  const week = ['2026-09-07', '2026-09-08', '2026-09-09', '2026-09-10', '2026-09-11'];
+
+  it('spans a unit that starts before the week and ends inside it', () => {
+    expect(rangeOverlapColumns(week, '2026-09-01', '2026-09-09')).toEqual({ from: 0, to: 2 });
+  });
+
+  it('returns null when the range misses the week', () => {
+    expect(rangeOverlapColumns(week, '2026-09-14', '2026-09-18')).toBeNull();
+  });
+});
+
+describe('formatWeekRange', () => {
+  it('labels the visible Mon–Fri week, not anchor plus six calendar days', () => {
+    const days = getWeekDays('2026-09-11', 'monday', false);
+    expect(formatWeekRange(days)).toBe('Sep 7 \u2013 Sep 11');
+  });
+});
+
+describe('school year lens helpers', () => {
+  it('counts week 3 from an Aug 24 Monday start to Sep 11', () => {
+    expect(schoolWeekNumber('2026-09-11', '2026-08-24', 'monday')).toBe(3);
+  });
+
+  it('lists months through the school-year end, including June', () => {
+    const months = monthsInInclusiveRange('2026-08-24', '2027-06-11');
+    expect(months[0]).toBe('2026-08-01');
+    expect(months.at(-1)).toBe('2027-06-01');
+    expect(months).toHaveLength(11);
+  });
+
+  it('keeps the sample school year around September 2026', () => {
+    expect(schoolYearWindow('2026-09-11', '2026-08-24', '2027-06-11')).toEqual({
+      start: '2026-08-24',
+      end: '2027-06-11',
+    });
+  });
+
+  it('colors year-lens days by school quarter without inventing a Quarter view', () => {
+    expect(schoolQuarter('2026-09-11')).toBe(1);
+    expect(schoolQuarter('2026-11-02')).toBe(2);
+    expect(schoolQuarter('2027-02-10')).toBe(3);
+    expect(schoolQuarter('2027-04-15')).toBe(4);
+  });
+
+  it('counts remaining school days after today through the last day', () => {
+    const shortYear: SchoolCalendar = {
+      startDate: '2026-09-10',
+      endDate: '2026-09-16',
+      days: {
+        '2026-09-14': { date: '2026-09-14', kind: 'no-school', label: 'Staff development', confidence: 'confirmed' },
+      },
+      crossedDates: {},
+      showWeekends: false,
+      weekStartsOn: 'monday',
+      source: 'test',
+    };
+    // After Friday the 11th: Monday 14 is no-school, so Tue 15 + Wed 16.
+    expect(countSchoolDaysLeft(shortYear, '2026-09-11')).toBe(2);
+    expect(countSchoolDaysLeft(shortYear, '2026-09-16')).toBe(0);
+  });
+
+  it('does not treat a neighboring school year as loaded', () => {
+    expect(yearShiftStaysLoaded('2026-09-12', -1, '2026-08-24', '2027-06-11')).toBe(false);
+    expect(yearShiftStaysLoaded('2026-09-12', 1, '2026-08-24', '2027-06-11')).toBe(false);
+  });
+
+  it('allows a year shift that still lands inside a longer loaded range', () => {
+    expect(yearShiftStaysLoaded('2026-09-12', -1, '2025-08-25', '2027-06-11')).toBe(true);
+    expect(yearShiftStaysLoaded('2026-09-12', 1, '2025-08-25', '2027-06-11')).toBe(false);
   });
 });
 

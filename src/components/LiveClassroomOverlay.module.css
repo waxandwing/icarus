@@ -1,68 +1,99 @@
-.overlay {
-  position: fixed;
-  inset: 0;
-  background: var(--arc-ink);
-  color: var(--arc-paper-white);
-  z-index: 80;
+.sheet {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: var(--arc-space-6);
-  text-align: center;
+  align-items: flex-start;
   gap: var(--arc-space-4);
+  min-height: 420px;
+  color: var(--arc-ink);
+  text-align: left;
+  padding: var(--arc-space-2) 4px var(--arc-space-8);
 }
 
 .eyebrow {
   text-transform: uppercase;
   letter-spacing: 0.08em;
   font-size: 12px;
-  color: var(--arc-mustard);
+  font-weight: 700;
+  color: var(--arc-charcoal);
 }
 
 .title {
   font-family: var(--arc-font-serif);
-  font-size: 32px;
-  max-width: 640px;
+  font-size: 28px;
+  max-width: 40rem;
+  margin: 0;
 }
 
 .body {
-  max-width: 560px;
-  color: rgba(251, 248, 241, 0.85);
+  max-width: 36rem;
+  font-size: 16px;
+  line-height: 1.45;
   white-space: pre-wrap;
+  margin: 0;
+}
+
+.resume {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: min(420px, 100%);
+}
+
+.resume label {
+  font-size: 16px;
+}
+
+.resume textarea {
+  min-height: 88px;
+  border: 1px solid var(--arc-line-strong);
+  border-radius: var(--arc-radius-sm);
+  padding: 10px;
+  font-size: 16px;
+  font-family: inherit;
+  background: var(--arc-paper-white);
+  color: var(--arc-ink);
 }
 
 .actions {
   display: flex;
   gap: var(--arc-space-3);
   flex-wrap: wrap;
-  justify-content: center;
 }
 
 .actionButton {
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--arc-paper-white);
-  padding: 10px 18px;
-  border-radius: var(--arc-radius);
+  border: none;
+  background: transparent;
+  color: var(--arc-ink);
+  padding: 4px 0;
+  border-radius: 0;
   cursor: pointer;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
+  min-height: 44px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 .actionButton:hover {
-  background: rgba(255, 255, 255, 0.18);
+  background: transparent;
 }
 .actionButton[data-tone='primary'] {
-  background: var(--arc-sage);
-  border-color: var(--arc-sage);
+  background: transparent;
+  border-color: transparent;
   color: var(--arc-ink);
+}
+.actionButton:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 .leaveButton {
   background: transparent;
   border: none;
-  color: rgba(251, 248, 241, 0.7);
+  color: var(--arc-charcoal);
   cursor: pointer;
   margin-top: var(--arc-space-2);
   text-decoration: underline;
+  text-underline-offset: 3px;
+  font-size: 16px;
+  min-height: 44px;
 }

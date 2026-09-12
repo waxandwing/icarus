@@ -1,0 +1,166 @@
+.ideaPad {
+  position: absolute;
+  left: 12px;
+  bottom: 28px;
+  width: 128px;
+  height: 128px;
+  z-index: 1;
+}
+
+.padSheet,
+.topSheet {
+  position: absolute;
+  inset: 0;
+  background: #f3e27a;
+  border: 1px solid color-mix(in srgb, var(--arc-ink) 12%, #f3e27a);
+  box-shadow: 0 2px 6px rgba(44, 46, 46, 0.12);
+}
+
+.padSheet[data-layer='2'] {
+  transform: rotate(-7deg);
+  top: 8px;
+}
+
+.padSheet[data-layer='1'] {
+  transform: rotate(4deg);
+  top: 4px;
+  background: #efe16b;
+}
+
+.topSheet {
+  display: flex;
+  padding: 12px 10px 10px;
+  transform: rotate(-1deg);
+  z-index: 1;
+}
+
+.topSheet textarea {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: transparent;
+  resize: none;
+  font-family: var(--arc-font-hand);
+  font-size: 18px;
+  line-height: 1.25;
+  color: var(--arc-ink);
+}
+
+.postIt {
+  position: absolute;
+  width: 108px;
+  min-height: 96px;
+  padding: 12px 10px;
+  background: #f3e27a;
+  border: 1px solid color-mix(in srgb, var(--arc-ink) 10%, #f3e27a);
+  box-shadow: 0 3px 8px rgba(44, 46, 46, 0.14);
+  font-family: var(--arc-font-hand);
+  font-size: 18px;
+  line-height: 1.25;
+  text-align: left;
+  color: var(--arc-ink);
+  cursor: pointer;
+  z-index: 1;
+}
+
+.postIt[data-side='left'] {
+  left: 8px;
+}
+
+.postIt[data-side='right'] {
+  right: 8px;
+  left: auto;
+}
+
+.magnetWell {
+  position: absolute;
+  right: 8px;
+  top: 252px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 16px;
+  z-index: 1;
+  max-width: 168px;
+}
+
+.blankRow {
+  display: flex;
+  gap: 8px;
+}
+
+.brandMagnet {
+  position: relative;
+  z-index: 2;
+  width: 96px;
+  min-height: 52px;
+  padding: 8px 10px 10px;
+  border: none;
+  border-radius: 6px;
+  background: var(--token-color);
+  color: var(--arc-ink);
+  cursor: grab;
+  text-align: left;
+  box-shadow:
+    0 1px 0 color-mix(in srgb, var(--token-color) 45%, #1c1c1c),
+    0 4px 8px rgba(44, 46, 46, 0.14);
+}
+
+.blankMagnet {
+  width: 32px;
+  min-height: 24px;
+  padding: 0;
+}
+
+.magnetTitle {
+  display: block;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.unitCluster {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.lessonHang {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 88px;
+  margin-top: -12px;
+  padding-top: 14px;
+}
+
+.lessonSlip {
+  width: 100%;
+  margin-top: -8px;
+  padding: 10px 8px 8px;
+  border: none;
+  background: #f6e9a8;
+  font-family: var(--arc-font-hand);
+  font-size: 14px;
+  line-height: 1.2;
+  text-align: left;
+  color: var(--arc-ink);
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(44, 46, 46, 0.14);
+  transform: rotate(calc((var(--n) - 1) * 1.6deg));
+}
+
+.lessonHang .lessonSlip:first-child {
+  margin-top: 0;
+}
+
+@media (max-width: 900px) {
+  .ideaPad,
+  .magnetWell,
+  .postIt {
+    display: none;
+  }
+}

@@ -17,7 +17,9 @@ export function SampleDataBanner() {
 
   return (
     <div className={styles.banner} role="status">
-      <span>This is an example plan so you can explore Arc \u2014 it isn&apos;t your real schedule.</span>
+      <span>
+        This is an example plan so you can explore Arc {'\u2014'} it isn&apos;t your real schedule.
+      </span>
       <div className={styles.actions}>
         <button
           type="button"
@@ -30,7 +32,7 @@ export function SampleDataBanner() {
           Clear sample data
         </button>
         <button type="button" className={styles.button} onClick={() => updateSettings({ sampleBannerDismissed: true })}>
-          Keep exploring
+          Keep this example
         </button>
       </div>
     </div>

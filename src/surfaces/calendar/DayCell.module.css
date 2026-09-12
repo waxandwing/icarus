@@ -2,33 +2,37 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
   min-height: 108px;
-  padding: 6px;
-  background: var(--arc-paper-white);
+  padding: 6px 8px 8px;
+  background: transparent;
   border: 1px solid var(--arc-line);
-  border-radius: var(--arc-radius-sm);
   text-align: left;
+}
+
+.cell[data-compact='true'] {
+  min-height: 96px;
 }
 
 .cell[data-kind='weekend'],
 .cell[data-kind='no-school'] {
   background: repeating-linear-gradient(
     135deg,
-    var(--arc-paper) 0px,
-    var(--arc-paper) 8px,
-    rgba(44, 46, 46, 0.035) 8px,
-    rgba(44, 46, 46, 0.035) 16px
+    transparent 0 8px,
+    rgba(44, 46, 46, 0.04) 8px 16px
   );
 }
 
-.cell[data-focused='true'] {
+.cell[data-today='true'] .dateNumber {
+  color: var(--arc-terracotta);
+}
+
+.cell[data-dragover='true'] {
   box-shadow: inset 0 0 0 2px var(--arc-blue);
 }
 
-.cell[data-today='true'] {
-  border-color: var(--arc-terracotta);
-  border-width: 2px;
+.cell[data-dimmed='true'] {
+  opacity: 0.42;
 }
 
 .dateRow {
@@ -40,36 +44,21 @@
 
 .dateNumber {
   font-weight: 700;
-  font-size: 13px;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.cell[data-today='true'] .dateNumber::before {
-  content: '';
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--arc-terracotta);
-  display: inline-block;
+  font-size: 14px;
 }
 
 .dayKindLabel {
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  font-size: 12px;
   color: var(--arc-charcoal);
-  opacity: 0.75;
 }
 
 .addButton {
   background: transparent;
   border: none;
   cursor: pointer;
-  border-radius: 50%;
+  border-radius: var(--arc-radius-sm);
   padding: 1px;
-  opacity: 0;
+  opacity: 0.65;
   transition: opacity var(--arc-motion-fast) var(--arc-ease);
 }
 .cell:hover .addButton,
@@ -80,26 +69,31 @@
   opacity: 1;
 }
 
+.unitTrack {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0 -8px;
+}
+
+.unitNest {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.unitTrack :global(.unitBar),
+.unitTrack button {
+  min-height: 18px;
+  border-radius: 0;
+  font-size: 11px;
+  padding: 1px 8px;
+}
+
 .chips {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 2px;
   flex: 1;
   overflow: hidden;
-}
-
-.dropTarget {
-  outline: 2px dashed var(--arc-blue);
-  outline-offset: -2px;
-}
-
-.continuityStrip {
-  font-size: 10px;
-  color: var(--arc-charcoal);
-  background: var(--arc-paper);
-  border-radius: 3px;
-  padding: 1px 4px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }

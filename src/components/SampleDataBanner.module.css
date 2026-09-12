@@ -3,34 +3,45 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--arc-space-3);
-  background: var(--arc-mustard);
-  color: var(--arc-ink);
-  border-radius: var(--arc-radius);
-  padding: 10px 14px;
-  margin: 0 var(--arc-space-4) var(--arc-space-3);
-  font-size: 13px;
+  background: transparent;
+  color: var(--arc-charcoal);
+  border-radius: 0;
+  border-bottom: 1px solid var(--arc-line);
+  padding: 0 20px 6px;
+  margin: 0;
+  font-size: 14px;
   flex-wrap: wrap;
+  position: relative;
+  z-index: 3;
 }
 
 .actions {
   display: flex;
-  gap: 8px;
+  gap: 12px;
   flex-shrink: 0;
 }
 
 .button {
-  border: 1px solid var(--arc-ink);
+  border: none;
   background: transparent;
   color: var(--arc-ink);
-  border-radius: 6px;
-  padding: 4px 10px;
-  font-size: 12px;
-  font-weight: 700;
+  border-radius: 0;
+  padding: 4px 0;
+  font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .button[data-tone='primary'] {
-  background: var(--arc-ink);
-  color: var(--arc-paper-white);
+  background: transparent;
+  color: var(--arc-ink);
+}
+
+@media (max-width: 720px) {
+  .banner {
+    padding: 0 16px 10px;
+  }
 }

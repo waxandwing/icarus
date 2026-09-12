@@ -14,10 +14,11 @@ import type {
   Visibility,
   WorkspaceDomainState,
 } from '../domain/types';
+import { todayISO } from '../calendar/dates';
 import { loadPersisted, savePersisted } from '../persistence/db';
 
 export type FurniturePanel = 'settings' | 'fridge' | 'taskbar' | 'drawer' | null;
-export type CalendarViewMode = 'day' | 'week' | 'month';
+export type CalendarViewMode = 'day' | 'week' | 'month' | 'year';
 
 export interface SelectionRef {
   objectType: PlaceableType | 'note';
@@ -66,6 +67,7 @@ interface WorkspaceStore {
   select: (ref: SelectionRef | null) => void;
   openFurniture: (panel: FurniturePanel) => void;
   toggleFurniture: (panel: Exclude<FurniturePanel, null>) => void;
+  cleanUp: () => void;
   dismissToast: () => void;
 
   createCourse: (name: string, colorToken: PaletteToken) => ActionResult;
@@ -88,6 +90,10 @@ interface WorkspaceStore {
     visibility?: Visibility;
     allowCollision?: boolean;
   }) => ActionResult;
+  createUnitFromMagnet: (colorToken: PaletteToken, date: ISODate) => ActionResult;
+  placeUnitOnDate: (unitId: string, date: ISODate) => ActionResult;
+  stowUnitInDrawer: (unitId: string) => ActionResult;
+  createUnitInDrawer: (colorToken: PaletteToken) => ActionResult;
   createNote: (payload: {
     title: string;
     body?: string;
@@ -117,6 +123,7 @@ interface WorkspaceStore {
     important: boolean,
   ) => ActionResult;
   crossOut: (objectType: 'lesson' | 'note', objectId: string, crossedOut: boolean) => ActionResult;
+  toggleYearCross: (date: ISODate) => ActionResult;
 
   moveNoteToFridge: (noteId: string) => ActionResult;
   moveNoteToDrawer: (noteId: string) => ActionResult;
@@ -165,7 +172,7 @@ function schedulePersist(get: () => WorkspaceStore) {
 const initialUi: UiState = {
   ready: false,
   view: 'week',
-  anchorDate: new Date().toISOString().slice(0, 10),
+  anchorDate: todayISO(),
   selection: null,
   openPanel: null,
   shiftDialog: { open: false, sectionId: null, fromDate: null, schoolDays: 1, reason: '' },
@@ -232,6 +239,11 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
         set((state) => {
           state.ui.openPanel = state.ui.openPanel === panel ? null : panel;
         }),
+      cleanUp: () =>
+        set((state) => {
+          state.ui.openPanel = null;
+          state.ui.selection = null;
+        }),
       dismissToast: () =>
         set((state) => {
           state.ui.toast = null;
@@ -248,6 +260,22 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
       createUnit: (payload) =>
         run(`Create unit "${payload.title}"`, (d) => {
           cmd.createUnit(d, payload);
+        }),
+      createUnitFromMagnet: (colorToken, date) =>
+        run('Place unit magnet', (d) => {
+          cmd.createUnitFromMagnet(d, { colorToken, date });
+        }),
+      placeUnitOnDate: (unitId, date) =>
+        run('Move unit', (d) => {
+          cmd.placeUnitOnDate(d, { unitId, date });
+        }),
+      stowUnitInDrawer: (unitId) =>
+        run('Store unit in drawer', (d) => {
+          cmd.stowUnitInDrawer(d, { unitId });
+        }),
+      createUnitInDrawer: (colorToken) =>
+        run('Store unit in drawer', (d) => {
+          cmd.createUnitInDrawer(d, { colorToken });
         }),
       createLesson: (payload) =>
         run(`Create lesson "${payload.title}"`, (d) => {
@@ -308,6 +336,10 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
         run('Cross out', (d) => {
           cmd.crossOut(d, { objectType, objectId, crossedOut });
         }),
+      toggleYearCross: (date) =>
+        run('Cross out school day', (d) => {
+          cmd.toggleYearCross(d, { date });
+        }),
 
       moveNoteToFridge: (noteId) =>
         run('Move to fridge', (d) => {
@@ -340,7 +372,7 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
 
       setDelivery: (sectionId, lessonId, state_, resumeNote) =>
         run('Update delivery', (d) => {
-          const actualDate = state_ === 'completed' ? new Date().toISOString().slice(0, 10) : undefined;
+          const actualDate = state_ === 'completed' ? todayISO() : undefined;
           cmd.setDelivery(d, { sectionId, lessonId, state: state_, resumeNote, actualDate });
         }),
       openLiveClassroom: (sectionId, lessonId) =>

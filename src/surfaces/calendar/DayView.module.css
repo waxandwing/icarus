@@ -1,85 +1,265 @@
-.wrap {
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0;
+  min-height: 100%;
+  align-items: stretch;
+}
+
+.classes {
   display: flex;
   flex-direction: column;
-  gap: var(--arc-space-4);
+  gap: 0;
+  padding: 4px 28px 8px 4px;
 }
 
-.continuity {
-  background: var(--arc-paper);
-  border: 1px solid var(--arc-line);
-  border-radius: var(--arc-radius);
-  padding: var(--arc-space-3);
+.classCard {
+  position: relative;
+  padding: 16px 8px 18px 22px;
+  border: none;
+  border-bottom: 1px solid var(--arc-line);
+  border-radius: 0;
+  background: transparent;
 }
 
-.continuity h3 {
-  font-size: 13px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: var(--arc-space-2);
+.classCard::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 20px;
+  bottom: 18px;
+  width: 5px;
+  border-radius: 0;
+  background: var(--token-color);
+}
+
+.classHead h3 {
+  font-family: var(--arc-font-serif);
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.classHead p {
+  margin: 2px 0 0;
+  font-size: 14px;
   color: var(--arc-charcoal);
 }
 
-.dayKindBanner {
-  padding: var(--arc-space-2) var(--arc-space-3);
-  border-radius: var(--arc-radius);
-  background: var(--arc-kraft);
-  color: var(--arc-ink);
-  font-weight: 600;
-  font-size: 14px;
+.headline {
+  margin: 10px 0 0;
+  font-size: 16px;
+  font-weight: 700;
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+  color: inherit;
+  font-family: inherit;
 }
 
-.list {
+.hold {
+  margin: 8px 0 0;
+  font-size: 14px;
+  color: var(--arc-terracotta);
+}
+
+.unitNest {
+  margin: 12px 0 0;
+}
+
+.unitChildren {
   display: flex;
   flex-direction: column;
-  gap: var(--arc-space-2);
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.nestAdd {
+  align-self: stretch;
+  border: none;
+  border-bottom: 1px dashed var(--arc-line-strong);
+  background: transparent;
+  color: var(--arc-charcoal);
+  cursor: pointer;
+  font-size: 16px;
+  padding: 8px 0;
+  min-height: 36px;
+  text-align: left;
+}
+
+.dayKindBanner {
+  padding: var(--arc-space-2) 0;
+  font-weight: 600;
+  font-size: 15px;
 }
 
 .row {
   display: flex;
-  align-items: center;
-  gap: var(--arc-space-2);
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
 }
 
-.row > :first-child {
-  flex: 1;
-}
-
-.startClassButton {
-  border: 1px solid var(--arc-ink);
-  background: var(--arc-ink);
-  color: var(--arc-paper-white);
-  border-radius: var(--arc-radius);
-  padding: 5px 10px;
-  font-size: 13px;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.finalBadge {
-  font-size: 12px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+.lessonNote {
+  margin: 0;
+  font-size: 14px;
   color: var(--arc-charcoal);
-  padding: 5px 10px;
-  white-space: nowrap;
+}
+
+.writtenLine {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 10px;
+}
+
+.writtenSep {
+  color: var(--arc-charcoal);
+}
+
+.textAction {
+  border: none;
+  background: transparent;
+  color: var(--arc-ink);
+  padding: 4px 0;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  min-height: 36px;
+}
+
+.textAction:hover,
+.nestAdd:hover {
+  color: var(--arc-forest);
+}
+
+.textAction:focus-visible,
+.nestAdd:focus-visible {
+  outline: 2px solid var(--arc-ink);
+  outline-offset: 3px;
 }
 
 .addRow {
   display: flex;
-  justify-content: center;
-  padding: var(--arc-space-3);
-  border: 1px dashed var(--arc-line-strong);
-  border-radius: var(--arc-radius);
+  justify-content: flex-start;
+  padding: var(--arc-space-3) 0;
+  border: none;
+  border-bottom: 1px dashed var(--arc-line-strong);
   background: transparent;
   cursor: pointer;
   gap: var(--arc-space-2);
   align-items: center;
   color: var(--arc-charcoal);
+  font-size: 16px;
 }
 
 .empty {
   color: var(--arc-charcoal);
-  font-style: italic;
-  padding: var(--arc-space-2) 0;
+  margin: 8px 0 0;
+}
+
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  padding: 8px 4px 8px 32px;
+}
+
+.teacherNotes,
+.nextUp {
+  border-radius: 0;
+  padding: 0;
+  background: transparent;
+}
+
+.teacherNotes {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 240px;
+}
+
+.ruled {
+  flex: 1;
+  min-height: 196px;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 27px,
+    color-mix(in srgb, var(--arc-blue) 28%, transparent) 28px
+  );
+}
+
+.teacherNotes h3,
+.nextUp h3 {
+  font-family: var(--arc-font-serif);
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  text-transform: none;
+  margin: 0 0 8px;
+  color: var(--arc-forest);
+}
+
+.nextUp {
+  margin-top: auto;
+  padding-top: 12px;
+}
+
+.nextUp p,
+.teacherNotes p {
+  margin: 0;
+  font-size: 22px;
+  line-height: 28px;
+  font-family: var(--arc-font-hand);
+}
+
+.noteForm {
+  display: block;
+  margin: 0;
+}
+
+.noteForm textarea {
+  display: block;
+  width: 100%;
+  min-height: 84px;
+  resize: none;
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  font-family: var(--arc-font-hand);
+  font-size: 22px;
+  line-height: 28px;
+  color: var(--arc-ink);
+  caret-color: var(--arc-ink);
+}
+
+.noteForm textarea:focus {
+  outline: none;
+}
+
+.noteForm textarea:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--arc-ink) 45%, transparent);
+  outline-offset: 3px;
+}
+
+@media (max-width: 820px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .classes {
+    padding-right: 4px;
+  }
+
+  .side {
+    padding-left: 4px;
+    padding-top: 16px;
+    border-top: 1px solid var(--arc-line);
+  }
 }

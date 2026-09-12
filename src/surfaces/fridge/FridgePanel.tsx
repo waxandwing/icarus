@@ -1,163 +1,196 @@
-import { useState } from 'react';
-import type { MagnetKind } from '../../domain/types';
-import { getDrawerItems, getFridgeItems } from '../../projections/selectors';
+import { useState, type CSSProperties } from 'react';
+import type { Magnet, Note, Unit } from '../../domain/types';
+import { getDrawerItems, getFridgeItems, getLessonsForUnit } from '../../projections/selectors';
 import { useWorkspaceStore } from '../../state/store';
-import formStyles from '../../components/Form.module.css';
+import { applyFridgeDrop } from './fridgeDrop';
+import { useFridgeDrop } from './useFridgeDrop';
 import styles from './FridgePanel.module.css';
 
-const MAGNET_KINDS: { id: MagnetKind; label: string }[] = [
-  { id: 'idea', label: 'Idea' },
-  { id: 'voice', label: 'Voice' },
-  { id: 'resource', label: 'Resource' },
-  { id: 'reminder', label: 'Reminder' },
-];
+function itemKindLabel(item: Note | Magnet | Unit) {
+  if (item.kind === 'unit') return 'Unit';
+  return item.kind === 'note' ? 'Note' : 'Magnet';
+}
+
+function setMoveDrag(e: React.DragEvent, payload: { type: 'note' | 'magnet' | 'unit'; id: string }) {
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/arc-unplaced', JSON.stringify(payload));
+}
+
+function FridgeInterior() {
+  const domain = useWorkspaceStore((s) => s.domain);
+  const select = useWorkspaceStore((s) => s.select);
+  const moveNoteToFridge = useWorkspaceStore((s) => s.moveNoteToFridge);
+  const moveMagnetToFridge = useWorkspaceStore((s) => s.moveMagnetToFridge);
+  const moveNoteToDrawer = useWorkspaceStore((s) => s.moveNoteToDrawer);
+  const moveMagnetToDrawer = useWorkspaceStore((s) => s.moveMagnetToDrawer);
+  const stowUnitInDrawer = useWorkspaceStore((s) => s.stowUnitInDrawer);
+  const createUnitInDrawer = useWorkspaceStore((s) => s.createUnitInDrawer);
+  const [showDrawer, setShowDrawer] = useState(true);
+  const [drawerOver, setDrawerOver] = useState(false);
+
+  const fridgeItems = getFridgeItems(domain);
+  const drawerItems = getDrawerItems(domain);
+
+  const drawerDrop = {
+    domain,
+    stowUnitInDrawer,
+    createUnitInDrawer,
+    moveNoteToFridge,
+    moveMagnetToFridge,
+    moveNoteToDrawer,
+    moveMagnetToDrawer,
+    target: 'drawer' as const,
+  };
+
+  return (
+    <>
+      <section className={styles.block}>
+        <h3>On the door</h3>
+        <div className={styles.paperRow}>
+          {fridgeItems.length === 0 && <p className={styles.empty}>Nothing parked here.</p>}
+          {fridgeItems.map((item, index) =>
+            item.kind === 'note' ? (
+              <button
+                key={item.id}
+                type="button"
+                className={styles.scrap}
+                data-tilt={index % 2 === 0 ? 'left' : 'right'}
+                draggable
+                onDragStart={(e) => setMoveDrag(e, { type: 'note', id: item.id })}
+                onClick={() => select({ objectType: 'note', objectId: item.id })}
+              >
+                {item.title}
+              </button>
+            ) : (
+              <button
+                key={item.id}
+                type="button"
+                className={styles.magnet}
+                data-kind={item.magnetKind}
+                draggable
+                onDragStart={(e) => setMoveDrag(e, { type: 'magnet', id: item.id })}
+                onClick={() => select({ objectType: 'magnet', objectId: item.id })}
+              >
+                <span className={styles.magnetTitle}>{item.title}</span>
+              </button>
+            ),
+          )}
+        </div>
+      </section>
+
+      <section
+        className={styles.block}
+        data-drop={drawerOver}
+        onDragOver={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          e.dataTransfer.dropEffect = 'move';
+          setDrawerOver(true);
+        }}
+        onDragLeave={() => setDrawerOver(false)}
+        onDrop={(e) => {
+          e.stopPropagation();
+          setDrawerOver(false);
+          applyFridgeDrop(e, drawerDrop);
+        }}
+      >
+        <button
+          type="button"
+          className={styles.later}
+          aria-expanded={showDrawer}
+          onClick={() => setShowDrawer((open) => !open)}
+        >
+          <span>The drawer</span>
+          <span className={styles.laterMeta}>
+            <strong>
+              {drawerItems.length} {drawerItems.length === 1 ? 'item' : 'items'}
+            </strong>
+          </span>
+        </button>
+        {showDrawer && (
+          <div className={styles.drawerList}>
+            {drawerItems.length === 0 && <p className={styles.empty}>The drawer is empty.</p>}
+            {drawerItems.map((item) =>
+              item.kind === 'unit' ? (
+                <div
+                  key={item.id}
+                  className={styles.drawerUnit}
+                  draggable
+                  onDragStart={(e) => setMoveDrag(e, { type: 'unit', id: item.id })}
+                >
+                  <button
+                    type="button"
+                    className={`arc-token-${item.colorToken} ${styles.drawerMagnet}`}
+                    onClick={() => select({ objectType: 'unit', objectId: item.id })}
+                  >
+                    <span className={styles.kind}>Unit</span>
+                    {item.title.replace(/^Unit\s+\d+\s*[·.•\-\u2013]\s*/i, '')}
+                  </button>
+                  {getLessonsForUnit(domain, item.id).map((lesson, index) => (
+                    <button
+                      key={lesson.id}
+                      type="button"
+                      className={styles.drawerSlip}
+                      style={{ '--n': index } as CSSProperties}
+                      onClick={() => select({ objectType: 'lesson', objectId: lesson.id })}
+                    >
+                      {lesson.title}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <button
+                  key={item.id}
+                  type="button"
+                  className={styles.drawerItem}
+                  draggable
+                  onDragStart={(e) =>
+                    setMoveDrag(e, { type: item.kind === 'note' ? 'note' : 'magnet', id: item.id })
+                  }
+                  onClick={() => {
+                    if (item.kind === 'note') moveNoteToFridge(item.id);
+                    else moveMagnetToFridge(item.id);
+                  }}
+                >
+                  <span className={styles.kind}>{itemKindLabel(item)}</span>
+                  {item.title}
+                </button>
+              ),
+            )}
+          </div>
+        )}
+      </section>
+    </>
+  );
+}
 
 export function FridgePanel() {
   const openPanel = useWorkspaceStore((s) => s.ui.openPanel);
   const isOpen = openPanel === 'fridge';
-  const domain = useWorkspaceStore((s) => s.domain);
   const openFurniture = useWorkspaceStore((s) => s.openFurniture);
-  const select = useWorkspaceStore((s) => s.select);
-  const createMagnet = useWorkspaceStore((s) => s.createMagnet);
-  const moveNoteToFridge = useWorkspaceStore((s) => s.moveNoteToFridge);
-  const moveMagnetToFridge = useWorkspaceStore((s) => s.moveMagnetToFridge);
-
-  const [subTab, setSubTab] = useState<'fridge' | 'drawer'>('fridge');
-  const [kind, setKind] = useState<MagnetKind>('idea');
-  const [title, setTitle] = useState('');
-
-  const fridgeItems = getFridgeItems(domain);
-  const drawerItems = getDrawerItems(domain);
-  const slots: (typeof fridgeItems)[number][] = Array.from({ length: domain.fridge.capacity });
-  fridgeItems.forEach((item) => {
-    if (item.fridgeSlot != null) slots[item.fridgeSlot] = item;
-  });
+  const drop = useFridgeDrop();
 
   return (
     <aside
       id="arc-fridge-panel"
       className={styles.panel}
       data-open={isOpen}
+      data-drop={drop.over}
       aria-hidden={!isOpen}
       aria-label="Fridge"
+      onDragOver={drop.onDragOver}
+      onDragLeave={drop.onDragLeave}
+      onDrop={drop.onDrop}
     >
-      <button type="button" className={styles.closeButton} onClick={() => openFurniture(null)} aria-label="Close fridge">
-        {'\u2715'}
-      </button>
-      <h2 className={styles.heading}>Fridge</h2>
-
-      <div className={styles.tabs} role="tablist">
-        <button
-          type="button"
-          role="tab"
-          aria-pressed={subTab === 'fridge'}
-          className={styles.subTab}
-          onClick={() => setSubTab('fridge')}
-        >
-          Door ({fridgeItems.length}/{domain.fridge.capacity})
+      <div className={styles.folder}>
+        <button type="button" className={styles.closeButton} onClick={() => openFurniture(null)} aria-label="Close fridge">
+          {'\u2715'}
         </button>
-        <button
-          type="button"
-          role="tab"
-          aria-pressed={subTab === 'drawer'}
-          className={styles.subTab}
-          onClick={() => setSubTab('drawer')}
-        >
-          Drawer ({drawerItems.length})
-        </button>
-      </div>
-
-      {subTab === 'fridge' ? (
-        <>
-          <div className={styles.artworkRow}>
-            <span className="arc-visually-hidden">Pinned paper notes</span>
-          </div>
-          <div className={styles.grid}>
-            {slots.map((item, i) => (
-              <div key={item?.id ?? `empty-${i}`} className={styles.slot}>
-                {item ? (
-                  <button
-                    type="button"
-                    className={styles.item}
-                    draggable
-                    onDragStart={(e) =>
-                      e.dataTransfer.setData(
-                        'text/arc-unplaced',
-                        JSON.stringify({ type: item.kind === 'note' ? 'note' : 'magnet', id: item.id }),
-                      )
-                    }
-                    onClick={() =>
-                      select({ objectType: item.kind === 'note' ? 'note' : 'magnet', objectId: item.id })
-                    }
-                  >
-                    {item.title}
-                  </button>
-                ) : null}
-              </div>
-            ))}
-          </div>
-          <form
-            className={styles.quickAdd}
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (title.trim()) {
-                createMagnet({ magnetKind: kind, title: title.trim() });
-                setTitle('');
-              }
-            }}
-          >
-            <div className={formStyles.field}>
-              <label htmlFor="fridge-kind">Pin a new magnet</label>
-              <select id="fridge-kind" value={kind} onChange={(e) => setKind(e.target.value as MagnetKind)}>
-                {MAGNET_KINDS.map((k) => (
-                  <option key={k.id} value={k.id}>
-                    {k.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className={formStyles.field}>
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Quick thought\u2026"
-                aria-label="Magnet title"
-              />
-            </div>
-            <button type="submit" className={formStyles.primaryButton} style={{ width: '100%' }}>
-              Pin to fridge
-            </button>
-          </form>
-        </>
-      ) : (
-        <div className={styles.drawerList}>
-          {drawerItems.length === 0 && (
-            <p style={{ fontStyle: 'italic', color: 'var(--arc-charcoal)' }}>The drawer is empty.</p>
-          )}
-          {drawerItems.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              className={styles.drawerItem}
-              draggable
-              onDragStart={(e) =>
-                e.dataTransfer.setData(
-                  'text/arc-unplaced',
-                  JSON.stringify({ type: item.kind === 'note' ? 'note' : 'magnet', id: item.id }),
-                )
-              }
-              onClick={() => {
-                if (item.kind === 'note') moveNoteToFridge(item.id);
-                else moveMagnetToFridge(item.id);
-              }}
-            >
-              {item.title}
-              <div style={{ fontSize: 11, opacity: 0.7 }}>Tap to bring back to the fridge door</div>
-            </button>
-          ))}
+        <div className={styles.paper}>
+          <h2 className={styles.heading}>Fridge</h2>
+          <FridgeInterior key={isOpen ? 'open' : 'shut'} />
         </div>
-      )}
+      </div>
     </aside>
   );
 }

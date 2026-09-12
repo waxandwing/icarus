@@ -1,5 +1,5 @@
 import { type IDBPDatabase, openDB } from 'idb';
-import { CURRENT_SCHEMA_VERSION } from '../domain/seed';
+import { CURRENT_SCHEMA_VERSION, markSampleYearCrosses } from '../domain/seed';
 import type { WorkspaceDomainState } from '../domain/types';
 
 const DB_NAME = 'arc-workspace';
@@ -33,12 +33,41 @@ function getDb() {
  * add a branch here whenever the persisted shape changes, so existing local
  * workspaces upgrade in place instead of silently losing data.
  */
+export function shouldSeedSampleYearCrosses(domain: {
+  isSampleWorkspace?: boolean;
+  calendar?: object;
+}): boolean {
+  if (!domain.isSampleWorkspace || !domain.calendar) return false;
+  return (
+    !('crossedDates' in domain.calendar) ||
+    (domain.calendar as { crossedDates?: unknown }).crossedDates == null
+  );
+}
+
 function migrate(raw: PersistedWorkspace): PersistedWorkspace {
   const domain = { ...raw.domain };
   if (domain.isSampleWorkspace === undefined) domain.isSampleWorkspace = false;
   if (!domain.schemaVersion || domain.schemaVersion < CURRENT_SCHEMA_VERSION) {
     domain.schemaVersion = CURRENT_SCHEMA_VERSION;
   }
+  const seedMarks = shouldSeedSampleYearCrosses(domain);
+  domain.calendar = {
+    ...domain.calendar,
+    crossedDates: domain.calendar?.crossedDates ?? {},
+  };
+  if (seedMarks) {
+    markSampleYearCrosses(domain.calendar);
+  }
+  const units = { ...domain.units };
+  for (const [id, unit] of Object.entries(units)) {
+    if (!('location' in unit) || !(unit as { location?: string }).location) {
+      const parked = Object.values(domain.placements ?? {}).some(
+        (p) => p.objectType === 'unit' && p.objectId === id && p.storage === 'drawer',
+      );
+      units[id] = { ...unit, location: parked ? 'drawer' : 'calendar' };
+    }
+  }
+  domain.units = units;
   return { ...raw, domain };
 }
 

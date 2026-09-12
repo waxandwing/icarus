@@ -1,34 +1,42 @@
-import { addCalendarDays, formatFriendly, formatShort, fromISODate } from '../../calendar/dates';
+import {
+  addCalendarDays,
+  addCalendarYears,
+  fromISODate,
+  toISODate,
+  todayISO,
+  yearShiftStaysLoaded,
+} from '../../calendar/dates';
 import { ChevronGlyph } from '../../assets/Icons';
 import { useWorkspaceStore } from '../../state/store';
+import type { CalendarViewMode } from '../../state/store';
 import styles from './CalendarNav.module.css';
 
-function stepAmount(view: 'day' | 'week' | 'month'): number {
+function stepAmount(view: CalendarViewMode): number {
   if (view === 'day') return 1;
   if (view === 'week') return 7;
-  return 30; // month stepping is re-anchored below, this is just a nudge
-}
-
-function label(view: 'day' | 'week' | 'month', anchor: string): string {
-  if (view === 'day') return formatFriendly(anchor);
-  if (view === 'week') {
-    const start = anchor;
-    const end = addCalendarDays(anchor, 6);
-    return `${formatShort(start)} \u2013 ${formatShort(end)}`;
-  }
-  return fromISODate(anchor).toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+  return 30;
 }
 
 export function CalendarNav() {
   const view = useWorkspaceStore((s) => s.ui.view);
   const anchor = useWorkspaceStore((s) => s.ui.anchorDate);
   const setAnchor = useWorkspaceStore((s) => s.setAnchorDate);
+  const calendarStart = useWorkspaceStore((s) => s.domain.calendar.startDate);
+  const calendarEnd = useWorkspaceStore((s) => s.domain.calendar.endDate);
+
+  const canPrevYear = view !== 'year' || yearShiftStaysLoaded(anchor, -1, calendarStart, calendarEnd);
+  const canNextYear = view !== 'year' || yearShiftStaysLoaded(anchor, 1, calendarStart, calendarEnd);
 
   function go(direction: -1 | 1) {
     if (view === 'month') {
       const d = fromISODate(anchor);
       d.setMonth(d.getMonth() + direction);
-      setAnchor(d.toISOString().slice(0, 10));
+      setAnchor(toISODate(d));
+      return;
+    }
+    if (view === 'year') {
+      if (!yearShiftStaysLoaded(anchor, direction, calendarStart, calendarEnd)) return;
+      setAnchor(addCalendarYears(anchor, direction));
       return;
     }
     setAnchor(addCalendarDays(anchor, direction * stepAmount(view)));
@@ -40,27 +48,24 @@ export function CalendarNav() {
         type="button"
         className={styles.iconButton}
         onClick={() => go(-1)}
+        disabled={!canPrevYear}
+        aria-disabled={!canPrevYear}
         aria-label={`Previous ${view}`}
       >
         <ChevronGlyph direction="left" />
       </button>
-      <span className={styles.label} aria-live="polite">
-        {label(view, anchor)}
-      </span>
+      <button type="button" className={styles.todayButton} onClick={() => setAnchor(todayISO())}>
+        Today
+      </button>
       <button
         type="button"
         className={styles.iconButton}
         onClick={() => go(1)}
+        disabled={!canNextYear}
+        aria-disabled={!canNextYear}
         aria-label={`Next ${view}`}
       >
         <ChevronGlyph direction="right" />
-      </button>
-      <button
-        type="button"
-        className={styles.todayButton}
-        onClick={() => setAnchor(new Date().toISOString().slice(0, 10))}
-      >
-        Today
       </button>
     </nav>
   );

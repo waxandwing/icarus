@@ -1,5 +1,5 @@
 import type { Draft } from 'immer';
-import { addSchoolDays, compareISO, isInstructionalDay } from '../calendar/dates';
+import { addCalendarDays, addSchoolDays, compareISO, fromISODate, isInstructionalDay } from '../calendar/dates';
 import { DomainError } from './errors';
 import { createId } from './ids';
 import type {
@@ -14,6 +14,7 @@ import type {
   PaletteToken,
   PlaceableType,
   Placement,
+  PlacementStorage,
   Section,
   TaskColumn,
   Unit,
@@ -99,6 +100,7 @@ export function createUnit(
     notes: payload.notes,
     important: false,
     createdAt: Date.now(),
+    location: 'calendar',
   };
   draft.units[unit.id] = unit;
   place(draft, {
@@ -109,6 +111,108 @@ export function createUnit(
     fixed: false,
   });
   pushHistory(draft, 'createUnit', `Created unit "${unit.title}"`);
+  return unit as Unit;
+}
+
+/** A brand magnet dropped on a day becomes a Unit — never a task or a lesson. */
+export function createUnitFromMagnet(
+  draft: D,
+  payload: { colorToken: PaletteToken; date: ISODate },
+): Unit {
+  const course = Object.values(draft.courses).find((c) => !c.archived);
+  if (!course) throw new DomainError('Create a course in Settings first.');
+  const n = Object.keys(draft.units).length + 1;
+  return createUnit(draft, {
+    courseId: course.id,
+    title: `Unit ${n}`,
+    colorToken: payload.colorToken,
+    startDate: payload.date,
+    endDate: addCalendarDays(payload.date, 9),
+  });
+}
+
+function calendarDayDelta(from: ISODate, to: ISODate): number {
+  return Math.round((fromISODate(to).getTime() - fromISODate(from).getTime()) / 86400000);
+}
+
+function setNestedLessonStorage(draft: D, unitId: string, storage: PlacementStorage) {
+  for (const p of Object.values(draft.placements)) {
+    if (p.objectType !== 'lesson') continue;
+    const lesson = draft.lessons[p.objectId];
+    if (lesson?.unitId === unitId) p.storage = storage;
+  }
+}
+
+/** Same unit, new dates. Does not clone, does not flatten into a lesson or task. */
+export function placeUnitOnDate(draft: D, payload: { unitId: string; date: ISODate }): void {
+  const unit = draft.units[payload.unitId];
+  if (!unit) throw new DomainError('Unit not found.');
+  const existing = Object.values(draft.placements).find(
+    (p) => p.objectType === 'unit' && p.objectId === payload.unitId,
+  );
+  unit.location = 'calendar';
+  if (existing) {
+    const fromDrawer = existing.storage === 'drawer';
+    const oldStart = existing.date;
+    existing.storage = 'calendar';
+    if (fromDrawer) {
+      const delta = calendarDayDelta(oldStart, payload.date);
+      for (const p of Object.values(draft.placements)) {
+        if (p.objectType !== 'lesson') continue;
+        const lesson = draft.lessons[p.objectId];
+        if (lesson?.unitId !== payload.unitId) continue;
+        p.storage = 'calendar';
+        p.date = addCalendarDays(p.date, delta);
+        if (p.endDate) p.endDate = addCalendarDays(p.endDate, delta);
+      }
+    }
+    move(draft, { placementId: existing.id, date: payload.date });
+    return;
+  }
+  place(draft, {
+    objectType: 'unit',
+    objectId: payload.unitId,
+    date: payload.date,
+    endDate: addCalendarDays(payload.date, 9),
+    fixed: false,
+  });
+  pushHistory(draft, 'placeUnit', `Placed unit "${unit.title}"`);
+}
+
+/**
+ * A unit dragged to the Fridge goes in the drawer.
+ * Same unit, remembered dates — not a task, idea, or deleted object.
+ */
+export function stowUnitInDrawer(draft: D, payload: { unitId: string }): void {
+  const unit = draft.units[payload.unitId];
+  if (!unit) throw new DomainError('Unit not found.');
+  unit.location = 'drawer';
+  for (const p of Object.values(draft.placements)) {
+    if (p.objectType === 'unit' && p.objectId === payload.unitId) {
+      p.storage = 'drawer';
+    }
+  }
+  setNestedLessonStorage(draft, payload.unitId, 'drawer');
+  pushHistory(draft, 'stowUnit', `Stored unit "${unit.title}" in the drawer`);
+}
+
+/** Blank brand magnet dropped on the Fridge becomes a unit waiting in the drawer. */
+export function createUnitInDrawer(draft: D, payload: { colorToken: PaletteToken }): Unit {
+  const course = Object.values(draft.courses).find((c) => !c.archived);
+  if (!course) throw new DomainError('Create a course in Settings first.');
+  const n = Object.keys(draft.units).length + 1;
+  const unit: Unit = {
+    id: createId('unit'),
+    kind: 'unit',
+    courseId: course.id,
+    title: `Unit ${n}`,
+    colorToken: payload.colorToken,
+    important: false,
+    createdAt: Date.now(),
+    location: 'drawer',
+  };
+  draft.units[unit.id] = unit;
+  pushHistory(draft, 'stowUnit', `Stored unit "${unit.title}" in the drawer`);
   return unit as Unit;
 }
 
@@ -123,7 +227,9 @@ function unitHasScheduledChildren(draft: D, unitId: string): boolean {
   return Object.values(draft.lessons).some(
     (lesson) =>
       lesson.unitId === unitId &&
-      Object.values(draft.placements).some((p) => p.objectType === 'lesson' && p.objectId === lesson.id),
+      Object.values(draft.placements).some(
+        (p) => p.objectType === 'lesson' && p.objectId === lesson.id && p.storage !== 'drawer',
+      ),
   );
 }
 
@@ -230,8 +336,28 @@ export function createNote(
   if (payload.location === 'calendar' && payload.date) {
     place(draft, { objectType: 'note', objectId: note.id, date: payload.date, fixed: false });
   }
+  if (payload.location === 'desk') {
+    scatterDeskNote(note, draft);
+  }
   pushHistory(draft, 'createNote', `Created note "${note.title}"`);
   return note as Note;
+}
+
+const DESK_SPOTS = [
+  { x: 6, y: 48, r: -6 },
+  { x: 87, y: 64, r: 5 },
+  { x: 85, y: 78, r: -4 },
+  { x: 8, y: 72, r: 7 },
+  { x: 86, y: 42, r: -8 },
+];
+
+function scatterDeskNote(note: Note, draft: D) {
+  if (note.deskX != null && note.deskY != null) return;
+  const count = Object.values(draft.notes).filter((n) => n.location === 'desk' && n.id !== note.id).length;
+  const spot = DESK_SPOTS[count % DESK_SPOTS.length];
+  note.deskX = spot.x;
+  note.deskY = spot.y;
+  note.deskRotate = spot.r;
 }
 
 export function editNote(draft: D, payload: { id: string; patch: Partial<Note> }) {
@@ -308,7 +434,9 @@ export function place(
       'This section already has a lesson placed on that day. Confirm the replacement to continue.',
     );
   }
-  const order = Object.values(draft.placements).filter((p) => p.date === payload.date).length;
+  const order = Object.values(draft.placements).filter(
+    (p) => p.date === payload.date && p.storage !== 'drawer',
+  ).length;
   const placement: Placement = {
     id: createId('placement'),
     objectType: payload.objectType,
@@ -351,7 +479,8 @@ function hasCollision(
       p.id !== excludePlacementId &&
       p.objectType === 'lesson' &&
       p.sectionId === sectionId &&
-      p.date === date,
+      p.date === date &&
+      p.storage !== 'drawer',
   );
 }
 
@@ -374,8 +503,16 @@ export function move(
       'This section already has a lesson placed on that day. Confirm the replacement to continue.',
     );
   }
-  placement.date = payload.date;
-  if (payload.endDate !== undefined) placement.endDate = payload.endDate;
+  if (placement.objectType === 'unit' && placement.endDate && payload.endDate === undefined) {
+    const span = Math.round(
+      (fromISODate(placement.endDate).getTime() - fromISODate(placement.date).getTime()) / 86400000,
+    );
+    placement.date = payload.date;
+    placement.endDate = addCalendarDays(payload.date, Math.max(0, span));
+  } else {
+    placement.date = payload.date;
+    if (payload.endDate !== undefined) placement.endDate = payload.endDate;
+  }
   pushHistory(draft, 'move', `Moved an item to ${payload.date}`);
 }
 
@@ -405,10 +542,14 @@ export function unplace(draft: D, payload: { placementId: string }): void {
   if (placement.objectType === 'note') {
     const note = draft.notes[placement.objectId];
     if (note) {
-      const slot = nextFridgeSlot(draft);
-      note.location = slot >= 0 ? 'fridge' : 'drawer';
-      note.fridgeSlot = slot >= 0 ? slot : undefined;
+      note.location = 'desk';
+      note.fridgeSlot = undefined;
+      scatterDeskNote(note, draft);
     }
+  }
+  if (placement.objectType === 'unit') {
+    const unit = draft.units[placement.objectId];
+    if (unit) unit.location = 'desk';
   }
   pushHistory(draft, 'unplace', 'Unplaced an item');
 }
@@ -636,6 +777,24 @@ export function setCalendarDay(
   pushHistory(draft, 'setCalendarDay', `Set ${payload.date} as ${payload.kind}${payload.label ? ` (${payload.label})` : ''}`);
 }
 
+export function toggleYearCross(draft: D, payload: { date: ISODate }): void {
+  if (
+    !isInstructionalDay(draft.calendar, payload.date) ||
+    compareISO(payload.date, draft.calendar.startDate) < 0 ||
+    compareISO(payload.date, draft.calendar.endDate) > 0
+  ) {
+    throw new DomainError('Only a school day can be crossed out on the Year lens.');
+  }
+  if (!draft.calendar.crossedDates) draft.calendar.crossedDates = {};
+  if (draft.calendar.crossedDates[payload.date]) {
+    delete draft.calendar.crossedDates[payload.date];
+    pushHistory(draft, 'yearCross', `Restored ${payload.date} on the Year lens`);
+    return;
+  }
+  draft.calendar.crossedDates[payload.date] = true;
+  pushHistory(draft, 'yearCross', `Crossed out ${payload.date} on the Year lens`);
+}
+
 export function updateSettings(draft: D, patch: Partial<WorkspaceDomainState['settings']>): void {
   Object.assign(draft.settings, patch);
   // Weekend visibility and start-of-week are linked, not independently
@@ -667,6 +826,7 @@ export function previewShift(
 ): ShiftPreviewItem[] {
   const items: ShiftPreviewItem[] = [];
   for (const placement of Object.values(state.placements)) {
+    if (placement.storage === 'drawer') continue;
     if (placement.sectionId !== payload.sectionId) continue;
     if (placement.fixed) continue;
     if (compareISO(placement.date, payload.fromDate) < 0) continue;

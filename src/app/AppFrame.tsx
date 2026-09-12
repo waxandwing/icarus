@@ -1,10 +1,8 @@
 import { CalendarShell } from '../surfaces/calendar/CalendarShell';
 import { CreateItemDialog } from '../components/CreateItemDialog';
 import { EditDialog } from '../components/EditDialog';
-import { LiveClassroomOverlay } from '../components/LiveClassroomOverlay';
-import { SelectionToolbar } from '../components/SelectionToolbar';
 import { ShiftDialog } from '../components/ShiftDialog';
-import { Toast } from '../components/Toast';
+import { DeskField } from '../surfaces/desk/DeskField';
 import { FridgePanel } from '../surfaces/fridge/FridgePanel';
 import { FridgeTab } from '../surfaces/fridge/FridgeTab';
 import { SettingsPanel } from '../surfaces/settings/SettingsPanel';
@@ -22,17 +20,15 @@ const TAB_IDS: Record<string, string> = {
 };
 
 /**
- * Composition-only shell: lays out the environment, the centered calendar,
- * and the exterior-edge furniture. It owns no calendar domain state itself.
+ * Desk + bound planner. Furniture hangs off the cover into the wall.
+ * It must not overlay, dim, squeeze, or reflow the pages.
  */
 export function AppFrame() {
   const openPanel = useWorkspaceStore((s) => s.ui.openPanel);
+  const cleanUp = useWorkspaceStore((s) => s.cleanUp);
   const [editingId, setEditingId] = useState<{ type: string; id: string } | null>(null);
-  const [creatingFor, setCreatingFor] = useState<string | null>(null);
+  const [creatingFor, setCreatingFor] = useState<{ date: string; unitId?: string; sectionId?: string } | null>(null);
 
-  // Escape closes open edge furniture before clearing general object selection
-  // (Desktop Interaction Blueprint \u00a721), and focus returns to the pull-tab that
-  // opened the drawer rather than being lost.
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       if (e.key !== 'Escape') return;
@@ -51,37 +47,53 @@ export function AppFrame() {
 
   return (
     <div className={styles.environment}>
+      <div className={styles.pattern} aria-hidden="true" />
       <a href="#arc-calendar-shell" className={styles.skipLink}>
         Skip to calendar
       </a>
 
-      <SettingsTab />
-      <FridgeTab />
-      <TaskBarTab />
+      <div className={styles.desk}>
+        <DeskField />
+        <div className={styles.stage}>
+          <aside className={styles.edgeLeft}>
+            <SettingsPanel />
+            <TaskBarPanel />
+            <div className={styles.tabStack}>
+              <SettingsTab />
+              <TaskBarTab />
+            </div>
+          </aside>
 
-      <div
-        className={styles.scrim}
-        data-visible={openPanel !== null}
-        onClick={() => useWorkspaceStore.getState().openFurniture(null)}
-        aria-hidden="true"
-      />
+          <div className={styles.bookColumn}>
+            <CalendarShell
+              onEdit={(type, id) => setEditingId({ type, id })}
+              onCreate={(date, nest) => setCreatingFor({ date, ...nest })}
+            />
+          </div>
 
-      <SettingsPanel />
-      <FridgePanel />
-      <TaskBarPanel />
+          <aside className={styles.edgeRight} data-open={openPanel === 'fridge'}>
+            <FridgeTab />
+            <FridgePanel />
+          </aside>
+        </div>
 
-      <main className={styles.stage} id="arc-calendar-shell">
-        <CalendarShell onEdit={(type, id) => setEditingId({ type, id })} onCreate={(date) => setCreatingFor(date)} />
-      </main>
+        <button type="button" className={styles.cleanUp} onClick={() => cleanUp()}>
+          Clean up workspace
+        </button>
+      </div>
 
-      <SelectionToolbar onEdit={(type, id) => setEditingId({ type, id })} />
-      {creatingFor && <CreateItemDialog date={creatingFor} onClose={() => setCreatingFor(null)} />}
+      {creatingFor && (
+        <CreateItemDialog
+          date={creatingFor.date}
+          unitId={creatingFor.unitId}
+          sectionId={creatingFor.sectionId}
+          onClose={() => setCreatingFor(null)}
+        />
+      )}
       {editingId && (
         <EditDialog objectType={editingId.type} objectId={editingId.id} onClose={() => setEditingId(null)} />
       )}
       <ShiftDialog />
-      <LiveClassroomOverlay />
-      <Toast />
     </div>
   );
 }
