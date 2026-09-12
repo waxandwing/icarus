@@ -48,9 +48,20 @@ a:focus-visible,
 [tabindex]:focus-visible,
 input:focus-visible,
 textarea:focus-visible,
-select:focus-visible {
+select:focus-visible,
+summary:focus-visible {
   outline: 3px solid var(--arc-blue);
   outline-offset: 2px;
+}
+
+[data-high-contrast='true'] button:focus-visible,
+[data-high-contrast='true'] a:focus-visible,
+[data-high-contrast='true'] [tabindex]:focus-visible,
+[data-high-contrast='true'] input:focus-visible,
+[data-high-contrast='true'] textarea:focus-visible,
+[data-high-contrast='true'] select:focus-visible,
+[data-high-contrast='true'] summary:focus-visible {
+  outline-color: #000000;
 }
 
 .arc-visually-hidden {

@@ -102,7 +102,9 @@ export function TaskBarPanel() {
       id="arc-taskbar-panel"
       className={styles.panel}
       data-open={isOpen}
+      data-placement="bottom"
       aria-hidden={!isOpen}
+      inert={!isOpen}
       aria-label="Tasks"
     >
       <div className={styles.folder}>

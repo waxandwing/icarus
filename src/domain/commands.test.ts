@@ -13,6 +13,7 @@ function emptyState(): WorkspaceDomainState {
       endDate: '2027-06-15',
       days: {},
       crossedDates: {},
+      teacherOutDates: {},
       showWeekends: false,
       weekStartsOn: 'monday',
       source: 'test-fixture',
@@ -398,5 +399,17 @@ describe('Unit magnets stay units', () => {
     expect(state.calendar.crossedDates['2026-09-11']).toBeUndefined();
     expect(() => apply(state, (d) => cmd.toggleYearCross(d, { date: '2026-09-12' }))).toThrow(DomainError);
     expect(() => apply(state, (d) => cmd.toggleYearCross(d, { date: '2026-07-31' }))).toThrow(DomainError);
+  });
+
+  it('marks a school day as out sick or sub-covered, and click-clear does not invent an X', () => {
+    let state = emptyState();
+    state = apply(state, (d) => cmd.markTeacherOut(d, { date: '2026-09-11', reason: 'sick' })).next;
+    expect(state.calendar.teacherOutDates['2026-09-11']).toBe('sick');
+    state = apply(state, (d) => cmd.markTeacherOut(d, { date: '2026-09-11', reason: 'sub' })).next;
+    expect(state.calendar.teacherOutDates['2026-09-11']).toBe('sub');
+    expect(state.calendar.crossedDates['2026-09-11']).toBeUndefined();
+    state = apply(state, (d) => cmd.toggleYearCross(d, { date: '2026-09-11' })).next;
+    expect(state.calendar.teacherOutDates['2026-09-11']).toBeUndefined();
+    expect(state.calendar.crossedDates['2026-09-11']).toBeUndefined();
   });
 });

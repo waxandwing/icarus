@@ -13,6 +13,14 @@
   color: var(--arc-ink);
 }
 
+.legend {
+  margin: -8px 0 0;
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--arc-charcoal);
+  max-width: 52ch;
+}
+
 .months {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -101,15 +109,58 @@ button.day {
 
 .xMark {
   position: absolute;
-  inset: -2px;
-  width: calc(100% + 4px);
-  height: calc(100% + 4px);
+  inset: -3px;
+  width: calc(100% + 6px);
+  height: calc(100% + 6px);
   object-fit: contain;
   pointer-events: none;
   mix-blend-mode: multiply;
 }
 
-.day[data-crossed='true'] {
+.xMark[data-ink='charcoal'] {
+  filter: grayscale(1) contrast(1.2) brightness(0.42);
+}
+
+.xMark[data-ink='forest'] {
+  filter: grayscale(1) sepia(0.7) hue-rotate(72deg) saturate(1.35) brightness(0.55);
+}
+
+.xMark[data-ink='terracotta'] {
+  filter: grayscale(1) sepia(0.9) hue-rotate(-18deg) saturate(1.45) brightness(0.62);
+}
+
+.xMark[data-ink='kraft'] {
+  filter: grayscale(1) sepia(1) hue-rotate(12deg) saturate(1.1) brightness(0.58);
+}
+
+.xMark[data-ink='navy'] {
+  filter: grayscale(1) sepia(0.45) hue-rotate(175deg) saturate(1.25) brightness(0.5);
+}
+
+.outMark {
+  position: absolute;
+  inset: -2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--arc-font-hand);
+  font-size: 13px;
+  line-height: 1;
+  pointer-events: none;
+  color: var(--arc-forest);
+}
+
+.outMark[data-kind='sick'] {
+  color: var(--arc-terracotta);
+}
+
+.outMark[data-kind='sub'] {
+  color: var(--arc-blue);
+}
+
+.day[data-crossed='true'],
+.day[data-out='sick'],
+.day[data-out='sub'] {
   color: color-mix(in srgb, var(--arc-ink) 55%, transparent);
 }
 

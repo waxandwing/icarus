@@ -17,6 +17,7 @@ import type {
   PlacementStorage,
   Section,
   TaskColumn,
+  TeacherOutReason,
   Unit,
   Visibility,
   WorkspaceDomainState,
@@ -777,15 +778,25 @@ export function setCalendarDay(
   pushHistory(draft, 'setCalendarDay', `Set ${payload.date} as ${payload.kind}${payload.label ? ` (${payload.label})` : ''}`);
 }
 
-export function toggleYearCross(draft: D, payload: { date: ISODate }): void {
+function assertYearInstructionalDay(draft: D, date: ISODate, action: string) {
   if (
-    !isInstructionalDay(draft.calendar, payload.date) ||
-    compareISO(payload.date, draft.calendar.startDate) < 0 ||
-    compareISO(payload.date, draft.calendar.endDate) > 0
+    !isInstructionalDay(draft.calendar, date) ||
+    compareISO(date, draft.calendar.startDate) < 0 ||
+    compareISO(date, draft.calendar.endDate) > 0
   ) {
-    throw new DomainError('Only a school day can be crossed out on the Year lens.');
+    throw new DomainError(`Only a school day can be ${action} on the Year lens.`);
   }
+}
+
+export function toggleYearCross(draft: D, payload: { date: ISODate }): void {
+  assertYearInstructionalDay(draft, payload.date, 'crossed out');
   if (!draft.calendar.crossedDates) draft.calendar.crossedDates = {};
+  if (!draft.calendar.teacherOutDates) draft.calendar.teacherOutDates = {};
+  if (draft.calendar.teacherOutDates[payload.date]) {
+    delete draft.calendar.teacherOutDates[payload.date];
+    pushHistory(draft, 'teacherOut', `Cleared out-of-school mark for ${payload.date}`);
+    return;
+  }
   if (draft.calendar.crossedDates[payload.date]) {
     delete draft.calendar.crossedDates[payload.date];
     pushHistory(draft, 'yearCross', `Restored ${payload.date} on the Year lens`);
@@ -793,6 +804,22 @@ export function toggleYearCross(draft: D, payload: { date: ISODate }): void {
   }
   draft.calendar.crossedDates[payload.date] = true;
   pushHistory(draft, 'yearCross', `Crossed out ${payload.date} on the Year lens`);
+}
+
+export function markTeacherOut(draft: D, payload: { date: ISODate; reason: TeacherOutReason | null }): void {
+  assertYearInstructionalDay(draft, payload.date, 'marked');
+  if (!draft.calendar.teacherOutDates) draft.calendar.teacherOutDates = {};
+  if (!draft.calendar.crossedDates) draft.calendar.crossedDates = {};
+  const current = draft.calendar.teacherOutDates[payload.date];
+  if (payload.reason === null || payload.reason === current) {
+    delete draft.calendar.teacherOutDates[payload.date];
+    pushHistory(draft, 'teacherOut', `Cleared out-of-school mark for ${payload.date}`);
+    return;
+  }
+  delete draft.calendar.crossedDates[payload.date];
+  draft.calendar.teacherOutDates[payload.date] = payload.reason;
+  const label = payload.reason === 'sick' ? 'out sick' : 'sub covered';
+  pushHistory(draft, 'teacherOut', `Marked ${payload.date} as ${label}`);
 }
 
 export function updateSettings(draft: D, patch: Partial<WorkspaceDomainState['settings']>): void {

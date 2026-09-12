@@ -1,3 +1,4 @@
+import type { MouseEvent } from 'react';
 import {
   countSchoolDaysLeft,
   dayKind,
@@ -11,8 +12,9 @@ import {
   schoolYearWindow,
   todayISO,
 } from '../../calendar/dates';
+import type { TeacherOutReason } from '../../domain/types';
 import { useWorkspaceStore } from '../../state/store';
-import { yearXSrc } from './yearMarks';
+import { yearOutRotate, yearXLook } from './yearMarks';
 import styles from './YearView.module.css';
 
 const DOW = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
@@ -25,6 +27,14 @@ function countdownCopy(remaining: number, lastDay: string, today: string) {
   return `${remaining} school days until ${lastLabel}`;
 }
 
+function dayAria(date: string, crossed: boolean, out: TeacherOutReason | undefined) {
+  const label = formatFriendly(date, 'MMMM d');
+  if (out === 'sick') return `${label}, you were out sick`;
+  if (out === 'sub') return `${label}, a sub covered`;
+  if (crossed) return `${label}, crossed out`;
+  return `Cross out ${label}`;
+}
+
 /**
  * Year lens: mini months inside the planner chrome.
  * No left rail, no Caught up, no Quarter product view.
@@ -35,21 +45,47 @@ export function YearView() {
   const setView = useWorkspaceStore((s) => s.setView);
   const setAnchor = useWorkspaceStore((s) => s.setAnchorDate);
   const toggleYearCross = useWorkspaceStore((s) => s.toggleYearCross);
+  const markTeacherOut = useWorkspaceStore((s) => s.markTeacherOut);
 
   const window = schoolYearWindow(anchor, domain.calendar.startDate, domain.calendar.endDate);
   const months = monthsInInclusiveRange(window.start, window.end);
   const today = todayISO();
   const remaining = countSchoolDaysLeft(domain.calendar, today);
   const crossed = domain.calendar.crossedDates ?? {};
+  const outs = domain.calendar.teacherOutDates ?? {};
 
   function openMonth(date: string) {
     setAnchor(date);
     setView('month');
   }
 
+  function onDayClick(e: MouseEvent<HTMLButtonElement>, date: string) {
+    if (e.shiftKey) {
+      markTeacherOut(date, 'sick');
+      return;
+    }
+    if (e.altKey) {
+      markTeacherOut(date, 'sub');
+      return;
+    }
+    toggleYearCross(date);
+  }
+
+  function onDayContext(e: MouseEvent<HTMLButtonElement>, date: string) {
+    e.preventDefault();
+    const current = outs[date];
+    if (!current) markTeacherOut(date, 'sick');
+    else if (current === 'sick') markTeacherOut(date, 'sub');
+    else markTeacherOut(date, null);
+  }
+
   return (
     <div className={styles.wrap}>
       <p className={styles.countdown}>{countdownCopy(remaining, domain.calendar.endDate, today)}</p>
+      <p className={styles.legend}>
+        Click to cross out a day you taught. Shift-click if you were out sick. Option-click if a sub
+        covered. Right-click cycles sick and sub.
+      </p>
       <div className={styles.months}>
         {months.map((monthDate) => {
           const weeks = getMonthGrid(monthDate, 'sunday', true);
@@ -77,11 +113,12 @@ export function YearView() {
                     const quarter = schoolQuarter(cell.date);
                     const inYear =
                       cell.date >= domain.calendar.startDate && cell.date <= domain.calendar.endDate;
-                    const canCross =
+                    const canMark =
                       cell.inCurrentMonth && inYear && isInstructionalDay(domain.calendar, cell.date);
                     const isCrossed = Boolean(crossed[cell.date]);
+                    const out = outs[cell.date];
                     const dayNum = cell.inCurrentMonth ? Number(cell.date.slice(-2)) : '';
-                    if (!canCross) {
+                    if (!canMark) {
                       return (
                         <span
                           key={cell.date}
@@ -94,6 +131,7 @@ export function YearView() {
                         </span>
                       );
                     }
+                    const look = isCrossed ? yearXLook(cell.date) : null;
                     return (
                       <button
                         key={cell.date}
@@ -103,22 +141,31 @@ export function YearView() {
                         data-kind={kind}
                         data-quarter={quarter}
                         data-crossed={isCrossed}
-                        aria-pressed={isCrossed}
-                        aria-label={
-                          isCrossed
-                            ? `${formatFriendly(cell.date, 'MMMM d')}, crossed out`
-                            : `Cross out ${formatFriendly(cell.date, 'MMMM d')}`
-                        }
-                        onClick={() => toggleYearCross(cell.date)}
+                        data-out={out ?? ''}
+                        aria-pressed={isCrossed || Boolean(out)}
+                        aria-label={dayAria(cell.date, isCrossed, out)}
+                        onClick={(e) => onDayClick(e, cell.date)}
+                        onContextMenu={(e) => onDayContext(e, cell.date)}
                       >
                         {dayNum}
-                        {isCrossed && (
+                        {look && (
                           <img
-                            src={yearXSrc(cell.date)}
+                            src={look.src}
                             alt=""
                             className={styles.xMark}
+                            data-ink={look.ink}
                             draggable={false}
+                            style={{ transform: `rotate(${look.rotate}deg) scale(${look.scale})` }}
                           />
+                        )}
+                        {out && (
+                          <span
+                            className={styles.outMark}
+                            data-kind={out}
+                            style={{ transform: `rotate(${yearOutRotate(cell.date)}deg)` }}
+                          >
+                            {out === 'sick' ? 'out' : 'sub'}
+                          </span>
                         )}
                       </button>
                     );

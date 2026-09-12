@@ -43,9 +43,16 @@ function migrate(raw: PersistedWorkspace): PersistedWorkspace {
   domain.calendar = {
     ...domain.calendar,
     crossedDates: domain.calendar?.crossedDates ?? {},
+    teacherOutDates: domain.calendar?.teacherOutDates ?? {},
   };
   if (!hadYearMarks && domain.isSampleWorkspace) {
     markSampleYearCrosses(domain.calendar);
+  } else if (domain.isSampleWorkspace && Object.keys(domain.calendar.teacherOutDates).length === 0) {
+    const outs = { ...domain.calendar.teacherOutDates, '2026-09-04': 'sick' as const, '2026-09-08': 'sub' as const };
+    const crossed = { ...domain.calendar.crossedDates };
+    delete crossed['2026-09-04'];
+    delete crossed['2026-09-08'];
+    domain.calendar = { ...domain.calendar, teacherOutDates: outs, crossedDates: crossed };
   }
   const units = { ...domain.units };
   for (const [id, unit] of Object.entries(units)) {

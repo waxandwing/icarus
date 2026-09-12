@@ -37,7 +37,7 @@
   border-radius: 18px 0 16px 16px;
   padding: 10px 10px 10px 12px;
   box-shadow: var(--arc-shadow-soft);
-  max-height: min(720px, 78vh);
+  max-height: min(620px, calc(100vh - 120px));
   overflow: hidden;
 }
 
@@ -47,7 +47,7 @@
   background: var(--arc-paper);
   border-radius: 12px;
   padding: 22px 16px 16px;
-  max-height: min(700px, 74vh);
+  max-height: min(600px, calc(100vh - 136px));
   overflow-x: hidden;
   overflow-y: auto;
 }
@@ -74,6 +74,11 @@
   text-transform: uppercase;
   color: var(--arc-ink);
   list-style: none;
+}
+
+.fold > summary:focus-visible {
+  outline: 3px solid var(--arc-blue);
+  outline-offset: 3px;
 }
 
 .fold > summary::-webkit-details-marker {
@@ -205,14 +210,70 @@
   outline-offset: 3px;
 }
 
+.toggleBlock {
+  padding: 4px 0 8px;
+  border-bottom: 1px solid var(--arc-line);
+}
+
+.toggleBlock:last-child {
+  border-bottom: 0;
+}
+
 .toggleRow {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
   padding: 8px 0;
-  border-bottom: 1px solid var(--arc-line);
   font-size: 16px;
   min-height: 44px;
+  cursor: pointer;
+}
+
+.toggleRow:has(input:disabled) {
+  cursor: not-allowed;
+  color: var(--arc-charcoal);
+}
+
+.toggleRow:has(:focus-visible) .mark {
+  outline: 3px solid var(--arc-blue);
+  outline-offset: 2px;
+}
+
+:global([data-high-contrast='true']) .toggleRow:has(:focus-visible) .mark {
+  outline-color: #000;
+}
+
+.mark {
+  appearance: none;
+  -webkit-appearance: none;
+  box-sizing: border-box;
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  flex-shrink: 0;
+  border: 1.5px solid var(--arc-ink);
+  border-radius: 3px;
+  background: var(--arc-paper-white);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.mark:checked::after {
+  content: '';
+  width: 11px;
+  height: 6px;
+  margin-top: -2px;
+  border-left: 2px solid var(--arc-ink);
+  border-bottom: 2px solid var(--arc-ink);
+  transform: rotate(-45deg);
+}
+
+.mark:disabled {
+  background: var(--arc-fold);
+  cursor: not-allowed;
 }
 
 .closeButton {
@@ -222,13 +283,19 @@
   z-index: 2;
   border: none;
   background: transparent;
-  font-size: 18px;
+  font-size: 22px;
+  line-height: 1;
   cursor: pointer;
   min-width: 44px;
   min-height: 44px;
 }
 
-@media (max-width: 900px) {
+.closeButton:focus-visible {
+  outline: 3px solid var(--arc-blue);
+  outline-offset: 2px;
+}
+
+@media (max-width: 720px) {
   .panel {
     width: 100%;
     max-width: 100%;

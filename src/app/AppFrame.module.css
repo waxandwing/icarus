@@ -2,21 +2,25 @@
   position: relative;
   min-height: 100vh;
   width: 100%;
-  overflow-x: auto;
+  overflow-x: hidden;
   background: var(--arc-desk);
 }
 
 .pattern {
   position: absolute;
-  left: 4px;
+  left: 0;
   top: 0;
   bottom: 0;
-  width: 32px;
+  width: 72px;
   background-image: url('/assets/arc/pattern-arc-geometric.png');
   background-size: cover;
   background-position: left center;
   pointer-events: none;
   z-index: 0;
+}
+
+.environment[data-desk-focus='true'] .pattern {
+  display: none;
 }
 
 .skipLink {
@@ -37,42 +41,48 @@
   position: relative;
   min-height: 100vh;
   box-sizing: border-box;
-  padding: 16px 96px 28px 88px;
+  padding: 10px 10px 16px 80px;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
+}
+
+.environment[data-desk-focus='true'] .desk {
+  padding: 6px;
 }
 
 .stage {
   position: relative;
-  width: min(1280px, 100%);
+  z-index: 2;
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+}
+
+.environment[data-desk-focus='true'] .stage {
+  max-width: none;
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .bookColumn {
   position: relative;
   z-index: 2;
-  width: 100%;
   min-width: 0;
 }
 
 .edgeLeft,
 .edgeRight {
-  position: absolute;
-  top: 108px;
+  position: relative;
+  top: 72px;
   z-index: 4;
   display: flex;
   align-items: flex-start;
-  pointer-events: none;
-}
-
-.edgeLeft > *,
-.edgeRight > *,
-.tabStack > * {
-  pointer-events: auto;
 }
 
 .edgeLeft {
-  right: calc(100% - 12px);
   flex-direction: row;
   justify-content: flex-end;
 }
@@ -80,44 +90,58 @@
 .tabStack {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   flex-shrink: 0;
 }
 
 .edgeRight {
-  left: calc(100% - 12px);
   flex-direction: row;
   justify-content: flex-start;
 }
 
+.taskDock {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 3;
+}
+
 .cleanUp {
-  align-self: flex-end;
-  margin-top: var(--arc-space-3);
+  align-self: center;
+  margin-top: 4px;
   border: none;
   background: transparent;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--arc-charcoal);
-  min-height: 44px;
-  padding: 0 4px;
+  min-height: 40px;
+  padding: 0 8px;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 720px) {
   .desk {
-    padding: var(--arc-space-3);
+    padding: 10px 10px 16px;
+  }
+
+  .pattern {
+    width: 36px;
+  }
+
+  .stage {
+    grid-template-columns: 1fr;
   }
 
   .edgeLeft,
   .edgeRight {
-    position: relative;
-    top: auto;
-    left: auto;
-    right: auto;
+    top: 0;
     width: 100%;
-    margin-bottom: var(--arc-space-2);
+    margin-bottom: 6px;
   }
 
   .edgeLeft {
@@ -131,10 +155,5 @@
 
   .tabStack {
     flex-direction: row;
-  }
-
-  .stage {
-    display: flex;
-    flex-direction: column;
   }
 }

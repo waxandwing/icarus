@@ -1,5 +1,6 @@
 import { PaperGrain } from '../../assets/PaperTexture';
 import { ArcMark } from '../../assets/ArcMark';
+import { CompressGlyph, ExpandGlyph } from '../../assets/Icons';
 import { SampleDataBanner } from '../../components/SampleDataBanner';
 import { LiveClassroomOverlay } from '../../components/LiveClassroomOverlay';
 import { SelectionToolbar } from '../../components/SelectionToolbar';
@@ -22,6 +23,7 @@ import { ViewSwitcher } from './ViewSwitcher';
 import { WeekView } from './WeekView';
 import { YearView } from './YearView';
 import { Toast } from '../../components/Toast';
+import { startMyDay } from '../../table/launch';
 import styles from './CalendarShell.module.css';
 
 export interface CreateNest {
@@ -64,6 +66,8 @@ export function CalendarShell({ onEdit, onCreate }: ViewProps) {
   const live = useWorkspaceStore((s) => s.ui.liveClassroom);
   const setView = useWorkspaceStore((s) => s.setView);
   const cleanUp = useWorkspaceStore((s) => s.cleanUp);
+  const deskFocus = useWorkspaceStore((s) => s.ui.deskFocus);
+  const toggleDeskFocus = useWorkspaceStore((s) => s.toggleDeskFocus);
   const showWeekends = useWorkspaceStore((s) => s.domain.settings.showWeekends);
   const weekStartsOn = useWorkspaceStore((s) => s.domain.settings.weekStartsOn);
   const calendarStart = useWorkspaceStore((s) => s.domain.calendar.startDate);
@@ -91,7 +95,7 @@ export function CalendarShell({ onEdit, onCreate }: ViewProps) {
               }}
               aria-label="Back to the teaching week"
             >
-              <ArcMark size={40} />
+              <ArcMark size={32} />
               <span className={styles.titles}>
                 <span className={styles.monthName}>{title}</span>
                 {!liveOpen && (
@@ -104,7 +108,26 @@ export function CalendarShell({ onEdit, onCreate }: ViewProps) {
             {!liveOpen && (
               <div className={styles.headerTools}>
                 <ViewSwitcher />
-                <CalendarNav />
+                <div className={styles.navRow}>
+                  <CalendarNav />
+                  <button
+                    type="button"
+                    className={styles.startDayButton}
+                    onClick={() => startMyDay()}
+                  >
+                    Start my day
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.focusButton}
+                    onClick={() => toggleDeskFocus()}
+                    aria-pressed={deskFocus}
+                    aria-label={deskFocus ? 'Show the desk around the planner' : 'Fill the screen with the planner'}
+                  >
+                    {deskFocus ? <CompressGlyph /> : <ExpandGlyph />}
+                    <span>{deskFocus ? 'Desk' : 'Fill'}</span>
+                  </button>
+                </div>
               </div>
             )}
           </header>

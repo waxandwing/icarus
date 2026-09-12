@@ -10,6 +10,9 @@ export type ISODate = string; // "YYYY-MM-DD"
 
 export type DayKind = 'instructional' | 'no-school' | 'early-release' | 'weekend';
 
+/** Teacher was not in the room on an instructional day. Sub covered vs out sick. */
+export type TeacherOutReason = 'sick' | 'sub';
+
 export type Confidence = 'confirmed' | 'tentative';
 
 export interface SchoolCalendarDay {
@@ -29,6 +32,8 @@ export interface SchoolCalendar {
   source: string;
   /** Teacher-crossed instructional days on the Year lens (hand-drawn X marks). */
   crossedDates: Record<ISODate, true>;
+  /** Instructional days the teacher was not in school (sick or a sub covered). */
+  teacherOutDates: Record<ISODate, TeacherOutReason>;
 }
 
 export interface Course {

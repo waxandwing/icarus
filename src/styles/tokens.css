@@ -66,7 +66,7 @@
   --arc-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
 
   /* Furniture */
-  --arc-furniture-width: min(320px, 86vw);
+  --arc-furniture-width: min(260px, 36vw);
   --arc-taskbar-height: min(320px, 62vh);
 }
 
@@ -84,16 +84,44 @@
   --arc-motion-slow: 0ms;
 }
 
+@media (prefers-contrast: more) {
+  :root {
+    --arc-line: #000000;
+    --arc-line-strong: #000000;
+    --arc-ink: #000000;
+    --arc-charcoal: #111111;
+    --arc-paper: #ffffff;
+    --arc-paper-white: #ffffff;
+    --arc-page: #ffffff;
+    --arc-desk: #ffffff;
+    --arc-env-bg: #ffffff;
+    --arc-env-bg-deep: #eeeeee;
+    --arc-cover: #000000;
+    --arc-forest: #000000;
+    --arc-fold: #dddddd;
+    --arc-today-wash: #f0f0f0;
+    --arc-weekend-wash: #e4e4e4;
+    --arc-shadow-soft: none;
+    --arc-shadow-lifted: none;
+  }
+}
+
 [data-high-contrast='true'] {
-  --arc-line: #111111;
+  --arc-line: #000000;
   --arc-line-strong: #000000;
   --arc-ink: #000000;
   --arc-charcoal: #111111;
   --arc-paper: #ffffff;
   --arc-paper-white: #ffffff;
   --arc-page: #ffffff;
-  --arc-today-wash: #f3f3f3;
-  --arc-weekend-wash: #e8e8e8;
+  --arc-desk: #ffffff;
+  --arc-env-bg: #ffffff;
+  --arc-env-bg-deep: #eeeeee;
+  --arc-cover: #000000;
+  --arc-forest: #000000;
+  --arc-fold: #dddddd;
+  --arc-today-wash: #f0f0f0;
+  --arc-weekend-wash: #e4e4e4;
   --arc-shadow-soft: none;
   --arc-shadow-lifted: none;
 }

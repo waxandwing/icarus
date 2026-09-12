@@ -11,6 +11,7 @@ import type {
   PaletteToken,
   PlaceableType,
   TaskColumn,
+  TeacherOutReason,
   Visibility,
   WorkspaceDomainState,
 } from '../domain/types';
@@ -48,6 +49,8 @@ interface UiState {
   shiftDialog: ShiftDialogState;
   liveClassroom: LiveClassroomState;
   toast: { message: string; tone: 'error' | 'info' } | null;
+  /** Book fills the desk; furniture and loose desk objects step aside. */
+  deskFocus: boolean;
 }
 
 export interface ActionResult {
@@ -68,6 +71,7 @@ interface WorkspaceStore {
   openFurniture: (panel: FurniturePanel) => void;
   toggleFurniture: (panel: Exclude<FurniturePanel, null>) => void;
   cleanUp: () => void;
+  toggleDeskFocus: () => void;
   dismissToast: () => void;
 
   createCourse: (name: string, colorToken: PaletteToken) => ActionResult;
@@ -124,6 +128,7 @@ interface WorkspaceStore {
   ) => ActionResult;
   crossOut: (objectType: 'lesson' | 'note', objectId: string, crossedOut: boolean) => ActionResult;
   toggleYearCross: (date: ISODate) => ActionResult;
+  markTeacherOut: (date: ISODate, reason: TeacherOutReason | null) => ActionResult;
 
   moveNoteToFridge: (noteId: string) => ActionResult;
   moveNoteToDrawer: (noteId: string) => ActionResult;
@@ -178,6 +183,7 @@ const initialUi: UiState = {
   shiftDialog: { open: false, sectionId: null, fromDate: null, schoolDays: 1, reason: '' },
   liveClassroom: { open: false, sectionId: null, lessonId: null },
   toast: null,
+  deskFocus: typeof localStorage !== 'undefined' && localStorage.getItem('arc-desk-focus') === '1',
 };
 
 export const useWorkspaceStore = create<WorkspaceStore>()(
@@ -243,6 +249,16 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
         set((state) => {
           state.ui.openPanel = null;
           state.ui.selection = null;
+        }),
+      toggleDeskFocus: () =>
+        set((state) => {
+          state.ui.deskFocus = !state.ui.deskFocus;
+          if (state.ui.deskFocus) state.ui.openPanel = null;
+          try {
+            localStorage.setItem('arc-desk-focus', state.ui.deskFocus ? '1' : '0');
+          } catch {
+            /* private mode */
+          }
         }),
       dismissToast: () =>
         set((state) => {
@@ -339,6 +355,10 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
       toggleYearCross: (date) =>
         run('Cross out school day', (d) => {
           cmd.toggleYearCross(d, { date });
+        }),
+      markTeacherOut: (date, reason) =>
+        run('Mark teacher out', (d) => {
+          cmd.markTeacherOut(d, { date, reason });
         }),
 
       moveNoteToFridge: (noteId) =>

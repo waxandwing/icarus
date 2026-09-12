@@ -11,10 +11,15 @@
   gap: 8px;
   cursor: pointer;
   color: var(--arc-ink);
-  min-width: 36px;
+  min-width: 44px;
   min-height: 44px;
   flex-shrink: 0;
   z-index: 5;
+}
+
+:global([data-high-contrast='true']) .tab {
+  border: 2px solid #000;
+  border-right: none;
 }
 
 .tab[data-open='true'] {
@@ -44,13 +49,34 @@
   padding: 0 4px;
 }
 
-@media (max-width: 900px) {
-  .tab {
+.tab[data-placement='bottom'] {
+  writing-mode: horizontal-tb;
+  flex-direction: row;
+  border-radius: 0 0 10px 10px;
+  border-right: 1px solid color-mix(in srgb, var(--arc-ink) 16%, var(--arc-blue));
+  border-top: none;
+  padding: 8px 14px;
+  min-width: 96px;
+  align-self: center;
+}
+
+.tab[data-placement='bottom'] .label {
+  writing-mode: horizontal-tb;
+  transform: none;
+  letter-spacing: 0.12em;
+}
+
+:global([data-high-contrast='true']) .tab[data-placement='bottom'] {
+  border: 2px solid #000;
+}
+
+@media (max-width: 720px) {
+  .tab:not([data-placement='bottom']) {
     border-right: 1px solid var(--arc-line-strong);
     border-radius: var(--arc-radius);
     flex-direction: row;
   }
-  .label {
+  .tab:not([data-placement='bottom']) .label {
     writing-mode: horizontal-tb;
     transform: none;
   }

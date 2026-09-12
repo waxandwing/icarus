@@ -1,7 +1,7 @@
 .switcher {
   display: inline-flex;
   align-items: baseline;
-  gap: var(--arc-space-4);
+  gap: 10px;
   background: transparent;
   border: none;
   border-radius: 0;

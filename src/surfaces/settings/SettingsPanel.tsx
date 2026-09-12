@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import type { PaletteToken } from '../../domain/types';
 import { addCalendarDays, formatFriendly, formatYearSpan } from '../../calendar/dates';
 import { getSectionsForCourse } from '../../projections/selectors';
+import { useOsDisplayPrefs } from '../../app/useOsDisplayPrefs';
 import { useWorkspaceStore } from '../../state/store';
 import formStyles from '../../components/Form.module.css';
 import styles from './SettingsPanel.module.css';
@@ -21,6 +22,42 @@ function groupedExceptions(days: Record<string, { date: string; kind: string; la
     }
   }
   return groups;
+}
+
+function PaperToggle({
+  checked,
+  onChange,
+  label,
+  description,
+  locked,
+}: {
+  checked: boolean;
+  onChange: (next: boolean) => void;
+  label: string;
+  description: string;
+  locked?: boolean;
+}) {
+  const id = useId();
+  const descId = `${id}-desc`;
+  return (
+    <div className={styles.toggleBlock}>
+      <label className={styles.toggleRow} htmlFor={id}>
+        <span>{label}</span>
+        <input
+          id={id}
+          className={styles.mark}
+          type="checkbox"
+          checked={checked}
+          disabled={locked}
+          onChange={(e) => onChange(e.target.checked)}
+          aria-describedby={descId}
+        />
+      </label>
+      <p id={descId} className={styles.help}>
+        {description}
+      </p>
+    </div>
+  );
 }
 
 function kindLabel(kind: string) {
@@ -49,6 +86,9 @@ export function SettingsPanel() {
   const { settings } = domain;
   const courses = Object.values(domain.courses);
   const exceptions = groupedExceptions(domain.calendar.days);
+  const { osHighContrast, osReducedMotion } = useOsDisplayPrefs();
+  const contrastOn = settings.highContrast || osHighContrast;
+  const motionOn = settings.reducedMotion || osReducedMotion;
 
   return (
     <aside
@@ -56,11 +96,12 @@ export function SettingsPanel() {
       className={styles.panel}
       data-open={isOpen}
       aria-hidden={!isOpen}
+      inert={!isOpen}
       aria-label="Settings"
     >
       <div className={styles.folder}>
         <button type="button" className={styles.closeButton} onClick={() => openFurniture(null)} aria-label="Close settings">
-          {'\u2715'}
+          ×
         </button>
         <div className={styles.paper}>
           <h2 className={styles.heading}>Settings</h2>
@@ -72,9 +113,9 @@ export function SettingsPanel() {
                 <summary>School year</summary>
                 <p className={styles.help}>
                   {formatFriendly(domain.calendar.startDate, 'MMMM d, yyyy')}
-                  {' \u2013 '}
+                  {' – '}
                   {formatFriendly(domain.calendar.endDate, 'MMMM d, yyyy')}
-                  {' \u00b7 '}
+                  {' · '}
                   {formatYearSpan(domain.calendar.startDate, domain.calendar.endDate)}
                 </p>
               </details>
@@ -82,18 +123,12 @@ export function SettingsPanel() {
               <details className={styles.fold} open>
                 <summary>Week</summary>
                 <div className={styles.nest}>
-                  <label className={styles.toggleRow}>
-                    Show weekends
-                    <input
-                      type="checkbox"
-                      checked={settings.showWeekends}
-                      onChange={(e) => updateSettings({ showWeekends: e.target.checked })}
-                    />
-                  </label>
-                  <p className={styles.help}>
-                    Week defaults to Monday{'\u2013'}Friday. Turning on weekends shows Sunday through Saturday,
-                    Sunday first.
-                  </p>
+                  <PaperToggle
+                    label="Show weekends"
+                    checked={settings.showWeekends}
+                    onChange={(next) => updateSettings({ showWeekends: next })}
+                    description="Week defaults to Monday–Friday. Weekends show Sunday through Saturday, Sunday first."
+                  />
                 </div>
               </details>
 
@@ -107,8 +142,8 @@ export function SettingsPanel() {
                         <span className={styles.exceptionName}>{group.label || kindLabel(group.kind)}</span>
                         <span className={styles.exceptionMeta}>
                           {formatFriendly(group.start)}
-                          {group.end !== group.start ? ` ${'\u2013'} ${formatFriendly(group.end)}` : ''}
-                          {' \u00b7 '}
+                          {group.end !== group.start ? ` – ${formatFriendly(group.end)}` : ''}
+                          {' · '}
                           {kindLabel(group.kind)}
                         </span>
                       </li>
@@ -189,7 +224,7 @@ export function SettingsPanel() {
                     >
                       <input
                         type="text"
-                        placeholder={'Add a section\u2026'}
+                        placeholder="Add a section…"
                         value={newSectionName[course.id] ?? ''}
                         onChange={(e) => setNewSectionName((s) => ({ ...s, [course.id]: e.target.value }))}
                         aria-label={`Add a section to ${course.name}`}
@@ -213,7 +248,7 @@ export function SettingsPanel() {
               >
                 <input
                   type="text"
-                  placeholder={'New course name\u2026'}
+                  placeholder="New course name…"
                   value={newCourseName}
                   onChange={(e) => setNewCourseName(e.target.value)}
                   aria-label="New course name"
@@ -225,25 +260,34 @@ export function SettingsPanel() {
             </div>
           </details>
 
-          <details className={styles.fold}>
+          <details className={styles.fold} open>
             <summary>View options</summary>
             <div className={styles.nest}>
-              <label className={styles.toggleRow}>
-                High contrast
-                <input
-                  type="checkbox"
-                  checked={settings.highContrast}
-                  onChange={(e) => updateSettings({ highContrast: e.target.checked })}
-                />
-              </label>
-              <label className={styles.toggleRow}>
-                Reduce motion
-                <input
-                  type="checkbox"
-                  checked={settings.reducedMotion}
-                  onChange={(e) => updateSettings({ reducedMotion: e.target.checked })}
-                />
-              </label>
+              <p className={styles.help}>
+                Keyboard, zoom, and touch stay available either way. These only change how Arc looks and moves.
+              </p>
+              <PaperToggle
+                label="High contrast"
+                checked={contrastOn}
+                locked={osHighContrast}
+                onChange={(next) => updateSettings({ highContrast: next })}
+                description={
+                  osHighContrast
+                    ? 'Your system already asks for more contrast. Arc follows that and cannot turn it off here.'
+                    : 'Stronger ink and edges on paper, tabs, and marks. Color is never the only cue.'
+                }
+              />
+              <PaperToggle
+                label="Reduce motion"
+                checked={motionOn}
+                locked={osReducedMotion}
+                onChange={(next) => updateSettings({ reducedMotion: next })}
+                description={
+                  osReducedMotion
+                    ? 'Your system already asks to reduce motion. Arc follows that and cannot turn it off here.'
+                    : 'Furniture opens without a slide. Timers and page moves stay instant.'
+                }
+              />
             </div>
           </details>
 

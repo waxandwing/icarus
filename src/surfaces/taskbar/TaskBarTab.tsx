@@ -18,6 +18,7 @@ export function TaskBarTab() {
       id="arc-taskbar-tab"
       className={styles.tab}
       data-open={isOpen}
+      data-placement="bottom"
       onClick={() => toggleFurniture('taskbar')}
       aria-expanded={isOpen}
       aria-controls="arc-taskbar-panel"

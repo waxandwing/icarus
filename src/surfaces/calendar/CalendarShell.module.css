@@ -16,7 +16,8 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  min-height: 680px;
+  min-height: min(560px, calc(100vh - 132px));
+  max-height: calc(100vh - 108px);
   background: var(--arc-page);
   border-radius: 16px;
   overflow: hidden;
@@ -57,10 +58,10 @@
   position: relative;
   z-index: 3;
   display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: var(--arc-space-4);
   align-items: end;
-  padding: 12px 20px 6px;
+  padding: 8px 16px 4px;
 }
 
 .brand {
@@ -85,7 +86,7 @@
 
 .monthName {
   font-family: var(--arc-font-serif);
-  font-size: 34px;
+  font-size: clamp(22px, 2.4vw, 30px);
   font-weight: 500;
   letter-spacing: -0.03em;
   line-height: 0.95;
@@ -108,13 +109,61 @@
   gap: 6px;
 }
 
+.navRow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.startDayButton {
+  display: inline-flex;
+  align-items: center;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  min-height: 32px;
+  padding: 0 8px;
+  color: var(--arc-forest);
+  font-family: var(--arc-font-hand);
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.startDayButton:hover,
+.startDayButton:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.focusButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  min-height: 32px;
+  padding: 0 6px;
+  color: var(--arc-charcoal);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.focusButton:hover,
+.focusButton[aria-pressed='true'] {
+  color: var(--arc-ink);
+}
+
 .page {
   position: relative;
   z-index: 1;
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 2px 18px 16px;
+  padding: 2px 14px 12px;
+  overflow: auto;
 }
 
 .page > * {
@@ -169,4 +218,9 @@
   .page {
     padding: var(--arc-space-3);
   }
+}
+
+:global([data-desk-focus='true']) .pages {
+  min-height: calc(100vh - 24px);
+  max-height: calc(100vh - 16px);
 }

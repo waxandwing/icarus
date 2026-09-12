@@ -11,6 +11,7 @@ import {
   nestLessonsInUnits,
 } from '../../projections/selectors';
 import { useWorkspaceStore } from '../../state/store';
+import { startMyDay } from '../../table/launch';
 import type { ViewProps } from './CalendarShell';
 import styles from './DayView.module.css';
 
@@ -65,6 +66,14 @@ export function DayView({ onCreate }: ViewProps) {
 
   return (
     <div className={styles.layout}>
+      {instructional && (
+        <div className={styles.startDayRow}>
+          <button type="button" className={styles.startDay} onClick={() => startMyDay()}>
+            Start my day
+          </button>
+          <p className={styles.startDayHint}>Opens the teacher table. A second window is the student board.</p>
+        </div>
+      )}
       <div className={styles.classes}>
         {kind !== 'instructional' && (
           <div className={styles.dayKindBanner}>
@@ -118,9 +127,7 @@ export function DayView({ onCreate }: ViewProps) {
               {groups.map(({ unit, lessons: kids }) => (
                 <div key={unit.placementId} className={styles.unitNest}>
                   <div className={styles.unitChildren}>
-                    {kids.length === 0 ? (
-                      <p className={styles.empty}>Nothing placed in this unit today.</p>
-                    ) : (
+                    {kids.length === 0 ? null : (
                       kids.map((lesson) => {
                         const delivery =
                           deliveryForSection(domain, section.id, lesson.objectId) ?? lesson.deliveryState;

@@ -19,12 +19,10 @@ const TAB_IDS: Record<string, string> = {
   taskbar: 'arc-taskbar-tab',
 };
 
-/**
- * Desk + bound planner. Furniture hangs off the cover into the wall.
- * It must not overlay, dim, squeeze, or reflow the pages.
- */
+/** Desk + bound planner. Tabs stay on-screen; open furniture shares the row with the book. */
 export function AppFrame() {
   const openPanel = useWorkspaceStore((s) => s.ui.openPanel);
+  const deskFocus = useWorkspaceStore((s) => s.ui.deskFocus);
   const cleanUp = useWorkspaceStore((s) => s.cleanUp);
   const [editingId, setEditingId] = useState<{ type: string; id: string } | null>(null);
   const [creatingFor, setCreatingFor] = useState<{ date: string; unitId?: string; sectionId?: string } | null>(null);
@@ -39,6 +37,8 @@ export function AppFrame() {
         if (tabId) requestAnimationFrame(() => document.getElementById(tabId)?.focus());
       } else if (state.ui.selection) {
         state.select(null);
+      } else if (state.ui.deskFocus) {
+        state.toggleDeskFocus();
       }
     }
     document.addEventListener('keydown', onKeyDown);
@@ -46,23 +46,23 @@ export function AppFrame() {
   }, []);
 
   return (
-    <div className={styles.environment}>
+    <div className={styles.environment} data-desk-focus={deskFocus ? 'true' : 'false'}>
       <div className={styles.pattern} aria-hidden="true" />
       <a href="#arc-calendar-shell" className={styles.skipLink}>
         Skip to calendar
       </a>
 
       <div className={styles.desk}>
-        <DeskField />
+        {!deskFocus && <DeskField />}
         <div className={styles.stage}>
-          <aside className={styles.edgeLeft}>
-            <SettingsPanel />
-            <TaskBarPanel />
-            <div className={styles.tabStack}>
-              <SettingsTab />
-              <TaskBarTab />
-            </div>
-          </aside>
+          {!deskFocus && (
+            <aside className={styles.edgeLeft}>
+              <SettingsPanel />
+              <div className={styles.tabStack}>
+                <SettingsTab />
+              </div>
+            </aside>
+          )}
 
           <div className={styles.bookColumn}>
             <CalendarShell
@@ -71,15 +71,26 @@ export function AppFrame() {
             />
           </div>
 
-          <aside className={styles.edgeRight} data-open={openPanel === 'fridge'}>
-            <FridgeTab />
-            <FridgePanel />
-          </aside>
+          {!deskFocus && (
+            <aside className={styles.edgeRight} data-open={openPanel === 'fridge'}>
+              <FridgeTab />
+              <FridgePanel />
+            </aside>
+          )}
         </div>
 
-        <button type="button" className={styles.cleanUp} onClick={() => cleanUp()}>
-          Clean up workspace
-        </button>
+        {!deskFocus && (
+          <>
+            <div className={styles.taskDock}>
+              <TaskBarTab />
+              <TaskBarPanel />
+            </div>
+
+            <button type="button" className={styles.cleanUp} onClick={() => cleanUp()}>
+              Clean up workspace
+            </button>
+          </>
+        )}
       </div>
 
       {creatingFor && (

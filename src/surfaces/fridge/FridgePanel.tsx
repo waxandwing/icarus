@@ -132,6 +132,7 @@ export function FridgePanel() {
       data-open={isOpen}
       data-drop={drop.over}
       aria-hidden={!isOpen}
+      inert={!isOpen}
       aria-label="Fridge"
       onDragOver={drop.onDragOver}
       onDragLeave={drop.onDragLeave}

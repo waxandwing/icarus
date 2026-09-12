@@ -14,6 +14,7 @@ function emptyState(): WorkspaceDomainState {
       endDate: '2027-06-11',
       days: {},
       crossedDates: {},
+      teacherOutDates: {},
       showWeekends: false,
       weekStartsOn: 'monday',
       source: 'manual',
@@ -150,9 +151,12 @@ export function markSampleYearCrosses(
   through: string = '2026-09-10',
 ) {
   if (!calendar.crossedDates) calendar.crossedDates = {};
+  if (!calendar.teacherOutDates) calendar.teacherOutDates = {};
+  calendar.teacherOutDates['2026-09-04'] = 'sick';
+  calendar.teacherOutDates['2026-09-08'] = 'sub';
   let cursor = calendar.startDate;
   while (cursor <= through) {
-    if (isInstructionalDay(calendar, cursor)) {
+    if (isInstructionalDay(calendar, cursor) && !calendar.teacherOutDates[cursor]) {
       calendar.crossedDates[cursor] = true;
     }
     cursor = addCalendarDays(cursor, 1);
