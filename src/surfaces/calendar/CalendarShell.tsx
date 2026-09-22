@@ -6,6 +6,7 @@ import { DayView } from './DayView';
 import { MonthView } from './MonthView';
 import { ViewSwitcher } from './ViewSwitcher';
 import { WeekView } from './WeekView';
+import { YearMap } from './YearMap';
 import styles from './CalendarShell.module.css';
 
 export interface ViewProps {
@@ -31,6 +32,7 @@ export function CalendarShell({ onEdit, onCreate }: ViewProps) {
         {view === 'day' && <DayView onEdit={onEdit} onCreate={onCreate} />}
         {view === 'week' && <WeekView onEdit={onEdit} onCreate={onCreate} />}
         {view === 'month' && <MonthView onEdit={onEdit} onCreate={onCreate} />}
+        {view === 'year' && <YearMap onEdit={onEdit} onCreate={onCreate} />}
       </div>
     </section>
   );
