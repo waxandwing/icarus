@@ -6,6 +6,7 @@ const VIEWS: { id: CalendarViewMode; label: string }[] = [
   { id: 'day', label: 'Day' },
   { id: 'week', label: 'Week' },
   { id: 'month', label: 'Month' },
+  { id: 'year', label: 'Year' },
 ];
 
 export function ViewSwitcher() {
