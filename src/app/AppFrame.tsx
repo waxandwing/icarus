@@ -27,6 +27,8 @@ const TAB_IDS: Record<string, string> = {
  */
 export function AppFrame() {
   const openPanel = useWorkspaceStore((s) => s.ui.openPanel);
+  const view = useWorkspaceStore((s) => s.ui.view);
+  const isWorkingDesk = view === 'day' || view === 'week';
   const [editingId, setEditingId] = useState<{ type: string; id: string } | null>(null);
   const [creatingFor, setCreatingFor] = useState<string | null>(null);
 
@@ -56,8 +58,8 @@ export function AppFrame() {
       </a>
 
       <SettingsTab />
-      <FridgeTab />
-      <TaskBarTab />
+      {isWorkingDesk && <FridgeTab />}
+      {isWorkingDesk && <TaskBarTab />}
 
       <div
         className={styles.scrim}
@@ -67,8 +69,8 @@ export function AppFrame() {
       />
 
       <SettingsPanel />
-      <FridgePanel />
-      <TaskBarPanel />
+      {isWorkingDesk && <FridgePanel />}
+      {isWorkingDesk && <TaskBarPanel />}
 
       <main className={styles.stage} id="arc-calendar-shell">
         <CalendarShell onEdit={(type, id) => setEditingId({ type, id })} onCreate={(date) => setCreatingFor(date)} />
