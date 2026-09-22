@@ -1,12 +1,13 @@
 .grid {
   display: grid;
-  gap: 8px;
+  gap: 5px;
 }
 
 .weekdayHeader {
-  font-size: 11px;
+  font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--arc-charcoal);
-  padding: 0 2px 4px;
+  padding: 0 4px 7px;
+  font-weight: 800;
 }
