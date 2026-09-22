@@ -5,9 +5,12 @@
   padding: clamp(72px, 8vw, 104px) clamp(72px, 12vw, 172px)
     clamp(54px, 7vw, 88px);
   background:
-    url('/assets/arc/calendar-open-planner.webp') center / 100% 100% no-repeat,
-    transparent;
-  filter: drop-shadow(0 16px 24px rgba(44, 46, 46, 0.18));
+    linear-gradient(90deg, transparent 49.55%, rgba(44,46,46,.12) 49.8%, rgba(255,255,255,.32) 50%, rgba(44,46,46,.08) 50.2%, transparent 50.45%),
+    linear-gradient(90deg, rgba(44,46,46,.025), transparent 12%, transparent 88%, rgba(44,46,46,.025)),
+    var(--arc-paper-white);
+  border-radius: 3px 7px 7px 3px;
+  box-shadow: 0 1px 0 rgba(255,255,255,.7) inset, 0 18px 34px rgba(44,46,46,.18);
+  transform: rotate(-.08deg);
 }
 
 .header {
