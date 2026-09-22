@@ -3,14 +3,16 @@ import { ChevronGlyph } from '../../assets/Icons';
 import { useWorkspaceStore } from '../../state/store';
 import styles from './CalendarNav.module.css';
 
-function stepAmount(view: 'day' | 'week' | 'month'): number {
+function stepAmount(view: 'day' | 'week' | 'month' | 'year'): number {
   if (view === 'day') return 1;
   if (view === 'week') return 7;
+  if (view === 'year') return 365;
   return 30; // month stepping is re-anchored below, this is just a nudge
 }
 
-function label(view: 'day' | 'week' | 'month', anchor: string): string {
+function label(view: 'day' | 'week' | 'month' | 'year', anchor: string): string {
   if (view === 'day') return formatFriendly(anchor);
+  if (view === 'year') return `School year · ${fromISODate(anchor).getFullYear()}`;
   if (view === 'week') {
     const start = anchor;
     const end = addCalendarDays(anchor, 6);
@@ -25,6 +27,12 @@ export function CalendarNav() {
   const setAnchor = useWorkspaceStore((s) => s.setAnchorDate);
 
   function go(direction: -1 | 1) {
+    if (view === 'year') {
+      const d = fromISODate(anchor);
+      d.setFullYear(d.getFullYear() + direction);
+      setAnchor(d.toISOString().slice(0, 10));
+      return;
+    }
     if (view === 'month') {
       const d = fromISODate(anchor);
       d.setMonth(d.getMonth() + direction);
