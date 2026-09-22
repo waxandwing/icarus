@@ -1,18 +1,37 @@
 .grid {
   display: grid;
-  gap: 6px;
+  gap: 2px;
+  border-bottom: 1px solid var(--arc-line);
 }
 
 .weekdayHeader {
-  font-size: 11px;
+  font-size: 10px;
+  font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.12em;
   color: var(--arc-charcoal);
-  padding: 0 2px 4px;
+  padding: 0 8px 8px;
 }
 
 .week {
   display: grid;
-  gap: 6px;
-  margin-bottom: 6px;
+  gap: 2px;
+  margin-bottom: 2px;
+}
+
+/* Month is a pacing map, not the working desk. Keep the paper broad and quiet. */
+.week :global([role='gridcell']) {
+  min-height: 118px;
+  border-radius: 0;
+  border-color: rgba(44,46,46,.1);
+  background: rgba(255,255,255,.28);
+}
+
+.week :global([role='gridcell'][data-kind='weekend']),
+.week :global([role='gridcell'][data-kind='no-school']) {
+  background: rgba(44,46,46,.045);
+}
+
+@media (max-width: 900px) {
+  .week :global([role='gridcell']) { min-height: 96px; }
 }
