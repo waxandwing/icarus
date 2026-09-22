@@ -62,3 +62,17 @@
     padding-right: var(--arc-space-3);
   }
 }
+
+.shell[data-view='month'],
+.shell[data-view='year'] {
+  width: min(1420px, 100%);
+  padding-left: clamp(56px, 8vw, 116px);
+  padding-right: clamp(56px, 8vw, 116px);
+}
+.shell[data-view='year'] .header,
+.shell[data-view='month'] .header {
+  border-bottom-color: rgba(44,46,46,.1);
+}
+.shell[data-view='year'] .body {
+  padding-top: var(--arc-space-6);
+}
