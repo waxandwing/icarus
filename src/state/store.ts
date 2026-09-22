@@ -17,7 +17,7 @@ import type {
 import { loadPersisted, savePersisted } from '../persistence/db';
 
 export type FurniturePanel = 'settings' | 'fridge' | 'taskbar' | 'drawer' | null;
-export type CalendarViewMode = 'day' | 'week' | 'month';
+export type CalendarViewMode = 'day' | 'week' | 'month' | 'year';
 
 export interface SelectionRef {
   objectType: PlaceableType | 'note';
