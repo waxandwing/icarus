@@ -18,7 +18,7 @@ export function CalendarShell({ onEdit, onCreate }: ViewProps) {
   const view = useWorkspaceStore((s) => s.ui.view);
 
   return (
-    <section className={styles.shell} aria-label="Calendar">
+    <section className={styles.shell} data-view={view} aria-label="Calendar">
       <header className={styles.header}>
         <div className={styles.brand}>
           <ArcMark size={30} />
