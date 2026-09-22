@@ -1,0 +1,40 @@
+.placeholder {
+  display: block;
+  pointer-events: none;
+  user-select: none;
+}
+
+.paper {
+  background:
+    linear-gradient(90deg, rgba(44,46,46,.025), transparent 18%, transparent 82%, rgba(44,46,46,.025)),
+    #fbf8f1;
+}
+
+.binding {
+  background:
+    repeating-linear-gradient(180deg, rgba(44,46,46,.38) 0 2px, transparent 2px 12px),
+    linear-gradient(90deg, rgba(44,46,46,.12), rgba(255,255,255,.28), rgba(44,46,46,.12));
+}
+
+.fridge {
+  background:
+    linear-gradient(115deg, rgba(255,255,255,.25), transparent 36%),
+    #879e94;
+}
+
+.settings {
+  background:
+    linear-gradient(rgba(255,255,255,.12), rgba(44,46,46,.04)),
+    #d6ad45;
+}
+
+.taskbar {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.22), transparent 40%),
+    #b7926d;
+}
+
+.accent {
+  border: 2px solid rgba(181,69,62,.82);
+  border-radius: 48% 52% 46% 54%;
+}
